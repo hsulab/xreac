@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "xreac"
+version = "0.1.0"
+description = "Autograd ReaxFF for isolated Zn/O clusters"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "GPL-2.0-or-later"}
+dependencies = ["numpy>=1.24,<3", "autograd>=1.9.1,<2"]
+
+[project.optional-dependencies]
+relax = ["scipy>=1.10"]
+test = ["pytest>=8", "scipy>=1.10"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+xreac = ["data/*"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+markers = ["reference: requires the lmp_mpi reference executable"]

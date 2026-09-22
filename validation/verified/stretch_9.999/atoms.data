@@ -1,0 +1,18 @@
+xreac reference
+
+2 atoms
+2 atom types
+
+-15 24.999000000000002 xlo xhi
+-15 15 ylo yhi
+-15 15 zlo zhi
+
+Masses
+
+1 65.390000000000001
+2 15.999000000000001
+
+Atoms # charge
+
+1 1 0 0 0 0
+2 2 0 9.9990000000000006 0 0

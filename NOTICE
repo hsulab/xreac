@@ -1,0 +1,30 @@
+xreac is distributed under GPL-2.0-or-later. See LICENSE.
+
+The ReaxFF equations, parameter mappings, and numerical conventions in
+src/xreac/energy.py and src/xreac/forcefield.py are adapted from LAMMPS
+stable_22Jul2025_update4, src/REAXFF, including the PuReMD implementation.
+
+PuReMD copyright (2010) Purdue University.
+Authors: Hasan Metin Aktulga, Joseph Fogarty, Sagar Pandit, Ananth Y. Grama.
+LAMMPS copyright (2003) Sandia Corporation and subsequent contributors.
+These sources are distributed under the GNU GPL, version 2 or later.
+https://github.com/lammps/lammps/tree/stable_22Jul2025_update4/src/REAXFF
+
+Reference methodology:
+H. M. Aktulga, J. C. Fogarty, S. A. Pandit, A. Y. Grama,
+Parallel Reactive Molecular Dynamics: Numerical Methods and Algorithmic
+Techniques, Parallel Computing 38 (4-5), 245-259 (2012).
+
+Bundled parameter data:
+src/xreac/data/ffield.reax.ZnOH is an unmodified copy of potentials/ffield.reax.ZnOH
+from LAMMPS stable_22Jul2025_update4, distributed with LAMMPS under its GPL
+license. Its original citation and contributor header are preserved.
+https://github.com/lammps/lammps/blob/stable_22Jul2025_update4/potentials/ffield.reax.ZnOH
+SHA256: b5af5a65573ce60f32405a973e33f7cc89a90bc69e624a8ca89811eb67b1a07b
+
+D. Raymand, A. C. T. van Duin, D. Spangberg, W. A. Goddard, K. Hermansson,
+Surface Science 604 (9-10), 741-752 (2010), as cited in the parameter file.
+Contributor: Aidan Thompson, athomps@sandia.gov. File date: 2011-02-18.
+This is the 2010 ZnOH set, not the earlier 2008 ZnO parameterization.
+Only Zn and O are enabled in this package; H and X entries remain in the
+unmodified source data for provenance and compatibility.
