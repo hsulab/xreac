@@ -16,7 +16,7 @@ Parallel Reactive Molecular Dynamics: Numerical Methods and Algorithmic
 Techniques, Parallel Computing 38 (4-5), 245-259 (2012).
 
 Bundled parameter data:
-src/xreac/data/ffield.reax.ZnOH is an unmodified copy of potentials/ffield.reax.ZnOH
+data/ffield.reax.ZnOH is an unmodified copy of potentials/ffield.reax.ZnOH
 from LAMMPS stable_22Jul2025_update4, distributed with LAMMPS under its GPL
 license. Its original citation and contributor header are preserved.
 https://github.com/lammps/lammps/blob/stable_22Jul2025_update4/potentials/ffield.reax.ZnOH

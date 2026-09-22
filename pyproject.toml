@@ -15,11 +15,15 @@ dependencies = ["numpy>=1.24,<3", "autograd>=1.9.1,<2"]
 relax = ["scipy>=1.10"]
 test = ["pytest>=8", "scipy>=1.10"]
 
-[tool.setuptools.packages.find]
-where = ["src"]
+[tool.setuptools]
+packages = ["xreac", "xreac.data"]
+
+[tool.setuptools.package-dir]
+xreac = "src/xreac"
+"xreac.data" = "data"
 
 [tool.setuptools.package-data]
-xreac = ["data/*"]
+"xreac.data" = ["ffield.reax.ZnOH"]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]

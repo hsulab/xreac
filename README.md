@@ -15,13 +15,17 @@ python -m pip install '.[relax]'  # optional geometry optimization
 Python 3.10 or newer is required. The core dependencies are NumPy and HIPS
 Autograd; SciPy is only imported when relaxation is requested.
 
+The source parameter file lives in `data/ffield.reax.ZnOH` at the repository
+root. Distributions bundle it as package data so `ForceField.zno()` also works
+outside a source checkout.
+
 ## Calculate
 
 ```python
 from xreac import Calculator, ForceField
 
 ff = ForceField.zno()  # bundled Raymand 2010 ZnOH parameters
-# Alternatively: ff = ForceField.from_file("ffield.reax.ZnOH")
+# In a source checkout: ff = ForceField.from_file("data/ffield.reax.ZnOH")
 calc = Calculator(ff)
 symbols = ["Zn", "O"]
 positions = [[0.0, 0.0, 0.0], [2.1, 0.0, 0.0]]

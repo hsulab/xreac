@@ -36,7 +36,13 @@ class ForceField:
     @classmethod
     def zno(cls):
         """Load the bundled Raymand 2010 ZnOH set (Zn/O calculations only)."""
-        return cls.from_file(Path(__file__).with_name("data") / "ffield.reax.ZnOH")
+        # Wheels bundle the top-level data directory as xreac.data. Source
+        # checkouts (including editable installs) read it directly from the repo.
+        module = Path(__file__).resolve()
+        bundled = module.with_name("data") / "ffield.reax.ZnOH"
+        if bundled.is_file():
+            return cls.from_file(bundled)
+        return cls.from_file(module.parents[2] / "data" / "ffield.reax.ZnOH")
 
     @classmethod
     def from_file(cls, path):
