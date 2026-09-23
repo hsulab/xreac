@@ -10,7 +10,8 @@ from small_cells import small_cell_cases
 from water_cluster import comparison, water_cases
 from xreac import Calculator, ForceField
 from xreac.ase import ReaxFFCalculator
-from xreac.periodic import make_model
+from xreac.energy import EnergyModel
+from xreac.neighbors import replicated_neighbors
 from xreac.reference import evaluate_lammps
 
 CASES = small_cell_cases()
@@ -114,7 +115,8 @@ def test_small_cell_derivatives_and_reduced_qeq(name, full_derivative, monkeypat
     monkeypatch.setattr(energy.np.linalg, "solve", counted)
     result = Calculator(ff).evaluate(symbols, x, cell=cell, pbc=pbc, full_derivative=full_derivative)
     assert any(solves) is full_derivative
-    model, _ = make_model(ff, symbols, cell, pbc)
+    neighbors, _ = replicated_neighbors(x, ff.general[12], cell, pbc)
+    model = EnergyModel(ff, symbols, neighbors, cell, pbc)
     direction = np.random.default_rng(130).normal(size=x.shape)
     direction /= np.linalg.norm(direction)
     h = 1e-5

@@ -1,5 +1,9 @@
 # ASE neighbor-list verification
 
+These are the retained results from before energy-model consolidation. They
+remain an independent numerical regression target. See the
+[single-model results](../unified-energy/README.md) for the current architecture.
+
 The ASE calculator now defaults to `neighbor_backend="ase"`, using ASE's
 image-resolved neighbor list on the input cell. `neighbor_backend="replicated"`
 retains the native dense image search and small-cell replication. The core

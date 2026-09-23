@@ -115,6 +115,8 @@ image/replication method. `evaluation.neighbor_backend` records the choice.
 The core `Calculator.evaluate()` accepts `neighbors=(i, j, S)` from any builder.
 The ASE adapter calls `neighbor_list("ijS", atoms, cutoff)` first and passes those
 arrays explicitly. Without `neighbors`, the core uses native replication.
+Both methods feed one `EnergyModel` in `src/xreac/energy.py`; replication is
+used only to construct the native neighbor list.
 
 ```python
 from ase.neighborlist import neighbor_list
@@ -191,12 +193,12 @@ In the core API, supplying `cell` enables all three periodic directions by
 default. `pbc=False` retains an isolated calculation even with a display cell.
 Cells must be finite, nonsingular, and right-handed. **Both neighbor backends
 support small cells**. The native `"replicated"` backend repeats periodic directions
-until each internal face height exceeds the nonbonded cutoff and twice the
-bond cutoff (10 Å for bundled files). Nonperiodic directions are not repeated.
-Positions and charges of equivalent copies remain tied to the input atoms;
-QEq solves for only the input-cell charges, including nonzero self-image
-contributions. Energies are normalized per input cell, and derivatives fold
-image forces back onto the input coordinates.
+until each search-cell face height exceeds the nonbonded cutoff (10 Å for
+bundled files). Nonperiodic directions are not repeated. Each selected image
+is mapped back to an input atom index and lattice shift. A single energy model
+then evaluates the input-cell atoms and edges, including self-image QEq
+couplings. There is no expanded-cell energy calculation or division by the
+number of copies. `cell_repetitions` describes the neighbor search only.
 
 ```python
 small = calc.evaluate(symbols, positions, cell=[4.0]*3)
@@ -206,13 +208,13 @@ print(small.cell_repetitions)   # (3, 3, 3) with bundled parameter files
 ```
 
 The native backend's default replication limit is **512 internal atoms**. A calculation that
-would exceed it fails before allocating the expanded pair arrays. Set
+would exceed it fails before allocating the expanded neighbor-search arrays. Set
 `Calculator(ff, max_expanded_atoms=...)` or
 `ReaxFFCalculator(ff, neighbor_backend="replicated", max_expanded_atoms=...)` to change the limit. This is a
 memory limit on automatic expansion, not on an already-large input cell.
-Native pair/bond work scales with the expanded system and requires no ASE dependency.
-The ASE backend instead stores neighbor edges `(i, j, lattice_shift)` directly
-on the input cell. It reports `cell_repetitions=(1, 1, 1)` and does not use the
+Native search work scales with the copied coordinates and requires no ASE dependency.
+Both paths store neighbor edges `(i, j, lattice_shift)` on the input cell.
+ASE builds them directly, reports `cell_repetitions=(1, 1, 1)`, and does not use the
 replication limit. Lists are rebuilt at each evaluated geometry, with no skin;
 their topology is held fixed during autodiff. The QEq solve and returned
 bond-order matrix remain dense in the input atom count.
@@ -221,7 +223,7 @@ Bonded interactions cross cell boundaries using local image vectors. vdW,
 Coulomb, QEq, and hydrogen bonds include **all images within their cutoffs**,
 so a box may be smaller than twice the nonbonded cutoff. Electrostatics use
 ReaxFF's shielded, tapered finite-cutoff model, with no Ewald/PME summation.
-The internal cell also respects the
+The expanded LAMMPS reference cell respects the
 [LAMMPS QEq periodic-box limitation](https://docs.lammps.org/fix_qeq_reaxff.html).
 
 Positions may be wrapped or unwrapped; energies, forces, charges, and bond
@@ -257,10 +259,11 @@ The [small-cell implementation results](validation/small-cell-support/summary.js
 verify nine cases against larger LAMMPS supercells.
 Run `mamba run -n catorch3 python scripts/audit_small_cells.py` to reproduce.
 
-The [neighbor-backend verification](validation/ase-neighbors/README.md) compares
-45 geometries using both methods and fresh LAMMPS single points. The maximum
-force difference between ASE neighbors and native replication is
-2.0e-12 kcal/mol/Å; all energy, charge, and bond-property comparisons pass.
+The [single-model verification](validation/unified-energy/README.md) compares
+45 geometries using both neighbor builders and fresh LAMMPS single points.
+The builders produce identical `(i, j, S)` arrays and exactly identical energies,
+forces, charges, and bond properties in this run. The tests also compare against
+the [pre-refactor results](validation/ase-neighbors/README.md).
 
 ## Force derivative option
 
@@ -405,9 +408,10 @@ a successfully parsed arbitrary parameter set still needs its own validation.
   denominators are guarded; singular geometries should not be used to assess
   derivative agreement. Even weak intermolecular bonds can activate torsions.
 - Dense charge equilibration takes cubic time in the input atom count.
-  Native pair arrays use quadratic memory in the internal expanded atom count
-  and include up to 27 image offsets. ASE pair storage scales with the number
-  of neighbor edges; its QEq and returned bond-order matrices remain quadratic.
+  Native neighbor-search memory scales as input atom count times copied atom
+  count, examining up to 27 expanded-cell offsets one at a time. Both methods
+  feed the same model with pair storage proportional to the number of edges;
+  QEq and returned bond-order matrices remain quadratic in input atom count.
   Angle/torsion lists contain local interactions.
   Highly compressed or densely connected systems may be expensive or unstable.
 - Global QEq permits charge transfer between separated fragments. This is a

@@ -59,18 +59,22 @@ The 0.6 implementation passed **163 tests** in the recorded `catorch3` run.
 This is a historical validation count, not a dynamically executed docs build.
 LAMMPS tests are not run while building documentation.
 
-## Neighbor-backend equivalence
+## Single energy model and neighbor equivalence
 
 The ASE calculator defaults to ASE's image-resolved neighbor list. Native
-replication remains selectable with `neighbor_backend="replicated"`. Across
-45 retained geometries, the maximum difference between the methods is
-**3.23e-13 kcal/mol/atom** in total energy and **1.97e-12 kcal/mol/Å** in forces.
-Charges, dipoles, full bond-order matrices, lone pairs, and bond counts also agree.
+replication remains selectable with `neighbor_backend="replicated"`. Both supply
+`(i, j, S)` to one `EnergyModel`; all energy equations and derivatives are shared.
+Across 45 retained geometries, the builders produce identical neighbor arrays
+and **exactly identical** energies, forces, charges, dipoles, bond-order matrices,
+lone pairs, and bond counts in this run.
 All cases pass fresh LAMMPS checks, with a maximum force difference of
 **2.48e-8 kcal/mol/Å**. The complete suite passes **240 tests** in this run.
-The core receives explicit `(i, j, S)` arrays. Tests verify that the builder
-runs before evaluation, no neighbor search occurs inside the core, and supplied
-lists can be used without importing ASE.
+Tests also compare against archived results from before consolidation, so
+sharing equations cannot hide a regression in those equations. The prior
+{download}`two-model summary <../validation/ase-neighbors/summary.json>` and
+{download}`numerical baseline <../validation/ase-neighbors/results.json.gz>` remain available.
+Tests verify that supplied lists trigger no neighbor search or ASE import in
+the core and that the ASE builder runs before evaluation.
 
 Coverage includes all three bundled force fields, molecules and clusters up
 to 200 atoms, 192-atom bulk water, small/triclinic/partially periodic cells,
@@ -78,9 +82,9 @@ self-image bonds, hydrogen bonds, image-spanning torsions, and cutoff crossings.
 Derivative tests check both force conventions; LAMMPS comparisons use only
 fixed-charge forces. Small-cell references keep the supercell convention below.
 
-Download the {download}`comparison summary <../validation/ase-neighbors/summary.json>`,
-{download}`structures <../validation/ase-neighbors/structures.json>`, and
-{download}`full numerical results (gzipped JSON) <../validation/ase-neighbors/results.json.gz>`.
+Download the {download}`comparison summary <../validation/unified-energy/summary.json>`,
+{download}`structures <../validation/unified-energy/structures.json>`, and
+{download}`full numerical results (gzipped JSON) <../validation/unified-energy/results.json.gz>`.
 The numerical results are keyed by case and then `ase`, `replicated`, or
 `reference` and can be read with `json.load(gzip.open(path, "rt"))`.
 

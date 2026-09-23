@@ -21,11 +21,13 @@ and variable-cell optimization are not implemented.
 
 ## Neighbor backends
 
-The two backends evaluate the same image-resolved interactions:
+Both neighbor builders supply `(i, j, S)` to the **same `EnergyModel`** in
+`xreac.energy`. They differ only in how they find neighbors. All energy equations,
+QEq, bond properties, and coordinate derivatives are shared.
 
 | Backend | Default for | Neighbor construction |
 | --- | --- | --- |
-| Native replication | Core `Calculator.evaluate()` without `neighbors` and native FIRE | Dense image search, with tied copies for small cells |
+| Native replication | Core `Calculator.evaluate()` without `neighbors` and native FIRE | Search periodic copies and map them to input atom indices and shifts |
 | Supplied `(i, j, S)` | `ReaxFFCalculator` and ASE FIRE build these with ASE | Directed neighbor arrays on the input cell, retaining integer image shifts |
 
 ```{testcode} supplied-neighbors
@@ -83,7 +85,7 @@ matrix and returned bond-order matrix remain dense in the input atom count.
 
 Without supplied arrays (or with `neighbor_backend="replicated"` on the ASE adapter),
 small cells are replicated internally until every periodic face height exceeds
-both the nonbonded cutoff and twice the bond cutoff—10 Å for the bundled files.
+the nonbonded cutoff—10 Å for the bundled files.
 Nonperiodic directions are not repeated. For tilted cells, face heights rather
 than lattice-vector lengths determine replication.
 
@@ -98,38 +100,40 @@ assert result.forces.shape == (3, 3)
 assert result.components["hydrogen_bond"] < -0.3
 ```
 
-This calculation has three input atoms and 81 internal atoms. Translated
-copies have distinct interaction identities but share the input coordinates
-and charges. QEq solves only for the input atoms. The energy is divided by the
-number of copies before differentiation, folding all image forces back onto
-the input coordinates. Returned energies and properties refer to the input cell.
+This calculation searches 81 copied atom positions around three input atoms.
+Every selected image is mapped back to an input atom index and an integer shift
+in the original lattice. The energy model receives only the three input atoms
+and this neighbor list. QEq and all energy terms are evaluated directly per input
+cell. No expanded-cell energy, averaging over copies, or separate replicated
+energy model is needed. `cell_repetitions` records the neighbor-search expansion.
 
 The default limit is **512 internal atoms** for automatic replication. Exceeding
-it raises an error before expanded pair arrays are allocated. Set
+it raises an error before expanded neighbor-search arrays are allocated. Set
 `Calculator(ff, max_expanded_atoms=...)` or the same option with
 `ReaxFFCalculator(ff, neighbor_backend="replicated")` to change it.
 This is a replication limit, not a limit on an already-large input
-cell. Pair work and memory still grow with the expanded system.
+cell. Search work and memory grow with the expanded search coordinates; energy
+work uses the resulting input-cell neighbor edges.
 
 ## Native neighbor representation
 
-The retained native backend uses dense pair arrays. At every geometry it:
+The native builder uses NumPy only. At every geometry it:
 
-1. Computes displacements between all internal atom pairs.
+1. Computes displacements from input atoms to the copied neighbor positions.
 2. Examines shifts `-1`, `0`, and `+1` in each periodic direction, up to 27 image
-   offsets after centering fractional displacements.
-3. Uses the nearest bonded image with bond-order screening for bonded terms.
-4. Sums all images within the nonbonded and hydrogen-bond cutoffs.
+   offsets of the expanded cell after centering fractional displacements.
+3. Selects neighbors within the nonbonded cutoff and records each input index
+   and its shift in the original lattice.
+4. Supplies these arrays to the same energy model used with ASE lists.
 
-The internal cell-height condition guarantees a unique bonded image per pair
-and sufficient image coverage. Distinct copies represent multiple neighbors
-of the same primitive atom. Arrays are rebuilt for each evaluated geometry;
-there is no neighbor skin or reuse between changed geometries. ASE caches a
-result when its input has not changed.
+The expanded search cell's height ensures sufficient image coverage. The energy
+model screens the full list for bonds, angles, torsions, hydrogen bonds, and
+nonbonded terms. Arrays are built before differentiation and rebuilt for each
+new evaluated geometry. ASE caches a result when its input has not changed.
 
-Pair storage scales quadratically in the internal atom count, multiplied by
-the number of image offsets. QEq's dense solve scales cubically in the input
-atom count. The ASE backend avoids these expanded pair arrays.
+Native search memory scales as the input atom count times the copied atom count;
+image offsets are processed one at a time. Both paths then store pair data per
+edge, with a dense QEq solve and returned bond-order matrix on the input atoms.
 
 ## Reference convention
 

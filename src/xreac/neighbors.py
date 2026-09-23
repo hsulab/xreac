@@ -1,14 +1,54 @@
-"""Builder-independent neighbor arrays and differentiable edge reductions.
+"""Native neighbor construction, array validation, and differentiable reductions.
 
 An edge (i, j, S) points from i to the image of j at x[j] + S @ cell.
-The caller supplies both directions, including nonzero-shift self images.
-No neighbor search or ASE import takes place in this module.
+The native builder and external builders supply the same directed arrays.
+The Neighbors class only consumes those arrays. No ASE dependency is required.
 """
+from itertools import product
+
 import autograd.numpy as np
 from autograd.extend import primitive, defvjp
 import numpy as onp
 
 from .geometry import Boundary
+
+
+def replicated_neighbors(positions, cutoff, cell=None, pbc=None, *, max_expanded_atoms=512):
+    """Return ``((i, j, S), repetitions)`` using explicit periodic copies.
+
+    Replicate the search cell until its periodic heights exceed the cutoff.
+    Search around each input atom, then map every image to an input atom index
+    and an integer shift in the original cell. Only neighbor construction uses
+    the expanded coordinates; the energy model always uses input-cell atoms.
+    This function runs on ordinary NumPy arrays, before differentiation.
+    """
+    x = onp.asarray(positions, dtype=float)
+    boundary = Boundary(cell, pbc)
+    repetitions, translations, expanded_cell = boundary.supercell(
+        cutoff, 0., len(x), max_expanded_atoms)
+    # Copy indices and primitive shifts use the same product order as supercell().
+    copy_shifts = onp.array(list(product(*(range(n) for n in repetitions))), dtype=int)
+    shifts = onp.repeat(copy_shifts, len(x), axis=0)
+    images = (x[None, :, :]+translations[:, None, :]).reshape(-1, 3)
+    atoms = onp.tile(onp.arange(len(x)), len(translations))
+    delta = images[None, :, :]-x[:, None, :]
+    if boundary.periodic:
+        centered = -onp.rint(delta @ onp.linalg.inv(expanded_cell)).astype(onp.int64)*boundary.pbc
+    else:
+        centered = onp.zeros(delta.shape, dtype=onp.int64)
+    lattice = boundary.cell if boundary.periodic else onp.eye(3)
+    rows, columns, image_shifts = [], [], []
+    for offset in product(*[(-1, 0, 1) if flag else (0,) for flag in boundary.pbc]):
+        # Express expanded-cell shifts in the original input lattice.
+        S = shifts[None, :, :]+(centered+offset)*repetitions
+        vectors = x[atoms][None, :, :]-x[:, None, :]+S @ lattice
+        mask = onp.sum(vectors*vectors, axis=-1) <= cutoff*cutoff
+        mask &= ~((onp.arange(len(x))[:, None] == atoms[None, :]) & onp.all(S == 0, axis=-1))
+        i, image = onp.nonzero(mask)
+        rows.append(i)
+        columns.append(atoms[image])
+        image_shifts.append(S[i, image])
+    return (onp.concatenate(rows), onp.concatenate(columns), onp.concatenate(image_shifts)), tuple(map(int, repetitions))
 
 
 @primitive

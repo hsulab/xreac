@@ -18,6 +18,7 @@ sys.path.insert(0, str(ROOT / "examples"))
 from water_cluster import water_cases
 from xreac import Calculator, ForceField
 from xreac.energy import EnergyModel, QEQ_COULOMB, SELF_CONVERSION, C_ELE
+from xreac.neighbors import replicated_neighbors
 from xreac.reference import evaluate_lammps
 
 
@@ -69,9 +70,11 @@ def main():
         fixed = calc.evaluate(symbols, x)
         ref = evaluate_lammps(ff, symbols, x, directory=directory / "baseline")
         index = np.unravel_index(np.argmax(abs(actual.forces-ref.forces)), x.shape)
-        model = EnergyModel(ff, symbols)
-        _, distances = model.geometry(x)
+        neighbors, _ = replicated_neighbors(x, ff.general[12])
+        model = EnergyModel(ff, symbols, neighbors)
+        _, distances = model.edges.geometry(x)
         _, _, shield = model.electrostatics(distances)
+        shield = model.edges.pair_sum(shield)
         hessian = QEQ_COULOMB*shield + np.diag(model.a["eta"])
         chemical_potential = hessian @ ref.charges + model.a["chi"]
         # Equilibration requires equal chemical potentials, not zero individually.

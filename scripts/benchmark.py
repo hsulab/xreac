@@ -20,13 +20,15 @@ from importlib.metadata import version
 from cases import cluster
 from xreac import Calculator, ForceField
 from xreac.energy import EnergyModel
+from xreac.neighbors import replicated_neighbors
 
 
 def worker(n, relax_iterations=0):
     ff = ForceField.zno()
     calc = Calculator(ff)
     symbols, x = cluster(n)
-    model = EnergyModel(ff, symbols)
+    neighbors, _ = replicated_neighbors(x, ff.general[12])
+    model = EnergyModel(ff, symbols, neighbors)
     # Benchmark only fixed-charge forces, matching the LAMMPS convention.
     start = time.perf_counter()
     calc.evaluate(symbols, x, full_derivative=False)

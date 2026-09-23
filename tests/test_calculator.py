@@ -126,11 +126,13 @@ def test_default_does_not_differentiate_qeq(calc, monkeypatch, operation):
 
 def test_fixed_charge_derivative(calc):
     from xreac.energy import EnergyModel
+    from xreac.neighbors import replicated_neighbors
 
     symbols, positions = CASES["zno"]
     x = np.array(positions, dtype=float)
     result = calc.evaluate(symbols, x)
-    model = EnergyModel(calc.force_field, symbols)
+    neighbors, _ = replicated_neighbors(x, calc.force_field.general[12])
+    model = EnergyModel(calc.force_field, symbols, neighbors)
     direction = np.random.default_rng(21).normal(size=x.shape)
     direction /= np.linalg.norm(direction)
     h = 1e-5

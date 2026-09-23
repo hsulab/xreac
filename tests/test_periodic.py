@@ -9,6 +9,7 @@ from xreac import Calculator, ForceField
 from xreac.ase import ReaxFFCalculator
 from xreac.energy import EnergyModel
 from xreac.geometry import Boundary
+from xreac.neighbors import replicated_neighbors
 from xreac.reference import evaluate_lammps
 
 CASES = periodic_cases()
@@ -81,7 +82,8 @@ def test_supercell_extensivity(calc):
 def test_periodic_derivative(calc, name, full_derivative):
     symbols, x, cell, pbc = CASES[name]
     result = calc.evaluate(symbols, x, cell=cell, pbc=pbc, full_derivative=full_derivative)
-    model = EnergyModel(calc.force_field, symbols, cell, pbc)
+    neighbors, _ = replicated_neighbors(x, calc.force_field.general[12], cell, pbc)
+    model = EnergyModel(calc.force_field, symbols, neighbors, cell, pbc)
     charges = None if full_derivative else result.charges
     direction = np.random.default_rng(581).normal(size=x.shape)
     direction /= np.linalg.norm(direction)

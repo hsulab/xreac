@@ -1,5 +1,9 @@
+import gzip
+import json
+from pathlib import Path
 import subprocess
 import sys
+from types import SimpleNamespace
 
 import numpy as np
 import pytest
@@ -10,10 +14,18 @@ from autograd import grad
 from validate_neighbors import neighbor_cases, backend_differences
 from xreac import Calculator, ForceField
 from xreac.ase import ReaxFFCalculator
-from xreac.neighbors import Neighbors, scatter_sum
-from xreac.neighbor_energy import NeighborEnergyModel
+from xreac.neighbors import Neighbors, scatter_sum, replicated_neighbors
+from xreac.energy import EnergyModel
 
 CASES = neighbor_cases()
+
+
+@pytest.fixture(scope="module")
+def archived_results():
+    # Preserve an independent regression target from before model unification.
+    path = Path(__file__).resolve().parents[1]/"validation/ase-neighbors/results.json.gz"
+    with gzip.open(path, "rt") as stream:
+        return json.load(stream)
 
 
 def build_neighbors(symbols, x, cell, pbc, cutoff):
@@ -21,9 +33,15 @@ def build_neighbors(symbols, x, cell, pbc, cutoff):
 
 
 @pytest.mark.parametrize("name", CASES)
-def test_neighbor_backends(name):
+def test_neighbor_backends(name, archived_results):
     filename, symbols, x, cell, pbc = CASES[name]
     ff = ForceField.bundled(filename)
+    native_list, _ = replicated_neighbors(x, ff.general[12], cell, pbc)
+    ase_list = build_neighbors(symbols, x, cell, pbc, ff.general[12])
+    native_edges = Neighbors(native_list, len(x), cell, pbc)
+    ase_edges = Neighbors(ase_list, len(x), cell, pbc)
+    for key in ("i", "j", "shifts"):
+        np.testing.assert_array_equal(getattr(native_edges, key), getattr(ase_edges, key))
     expected = Calculator(ff).evaluate(symbols, x, cell=cell, pbc=pbc)
     atoms = Atoms(symbols, positions=x, cell=cell, pbc=pbc, calculator=ReaxFFCalculator(ff))
     atoms.get_forces()
@@ -31,6 +49,10 @@ def test_neighbor_backends(name):
     assert actual.neighbor_backend == "ase"
     assert actual.cell_repetitions == (1, 1, 1)
     report = backend_differences(actual, expected, len(x))
+    assert report["passed"], report
+    archived = SimpleNamespace(**{key: np.asarray(value) if isinstance(value, list) else value
+                                 for key, value in archived_results[name]["replicated"].items()})
+    report = backend_differences(expected, archived, len(x))
     assert report["passed"], report
     supplied = Calculator(ff).evaluate(symbols, x, cell=cell, pbc=pbc,
         neighbors=build_neighbors(symbols, x, cell, pbc, ff.general[12]))
@@ -49,18 +71,18 @@ def test_neighbor_backends(name):
 @pytest.mark.parametrize("full_derivative", [False, True])
 def test_neighbor_derivatives(name, full_derivative, monkeypatch):
     from autograd.tracer import Box
-    from xreac import neighbor_energy
+    from xreac import energy
 
     filename, symbols, x, cell, pbc = CASES[name]
     ff = ForceField.bundled(filename)
-    solve, solves = neighbor_energy.np.linalg.solve, []
+    solve, solves = energy.np.linalg.solve, []
 
     def checked(matrix, rhs):
         assert matrix.shape == (len(x)+1, len(x)+1)
         solves.append(isinstance(matrix, Box))
         return solve(matrix, rhs)
 
-    monkeypatch.setattr(neighbor_energy.np.linalg, "solve", checked)
+    monkeypatch.setattr(energy.np.linalg, "solve", checked)
     calc = Calculator(ff)
     actual = calc.evaluate(symbols, x, cell=cell, pbc=pbc,
                            full_derivative=full_derivative,
@@ -75,7 +97,7 @@ def test_neighbor_derivatives(name, full_derivative, monkeypatch):
 
     def energy(y):
         neighbors = build_neighbors(symbols, y, cell, pbc, ff.general[12])
-        model = NeighborEnergyModel(ff, symbols, neighbors, cell, pbc)
+        model = EnergyModel(ff, symbols, neighbors, cell, pbc)
         return model.components(y, fixed)[0].sum()
 
     derivative = (energy(x+h*direction)-energy(x-h*direction))/(2*h)

@@ -29,6 +29,7 @@ periodic image shifts and work directly on small input cells without replication
 The adapter builds `i, j, S = neighbor_list("ijS", atoms, cutoff)` and passes
 `neighbors=(i, j, S)` into the core evaluator. Neighbor construction is outside
 the differentiated calculation; only vectors and distances depend on positions.
+Both neighbor options feed the same energy model.
 To select the retained native method:
 
 ```python

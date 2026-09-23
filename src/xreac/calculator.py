@@ -5,9 +5,9 @@ import autograd.numpy as anp
 from autograd import grad
 import numpy as np
 
-from .energy import COMPONENTS
+from .energy import COMPONENTS, EnergyModel
 from .geometry import Boundary, validate_expansion_limit
-from .periodic import make_model
+from .neighbors import replicated_neighbors
 
 
 @dataclass(frozen=True)
@@ -83,21 +83,22 @@ class Calculator:
         i, j, S as constants and differentiates the vectors through x only.
         Without neighbors, use native dense image search and small-cell replication.
         Energies and properties refer to the input cell. cell_repetitions records
-        actual replication. bond_orders sums over images; bond_counts counts each image.
+        neighbor-search replication. Both paths use the same input-cell energy
+        model. bond_orders sums over images; bond_counts counts each image.
         Dipoles use the supplied coordinate branch and change upon wrapping.
         """
         if not isinstance(full_derivative, bool):
             raise ValueError("full_derivative must be a boolean")
         symbols, x = validate_input(symbols, positions, total_charge, cell, pbc)
+        self.force_field.validate_model(symbols)
         if neighbors is not None:
-            from .neighbor_energy import NeighborEnergyModel
-
-            model = NeighborEnergyModel(self.force_field, symbols, neighbors, cell, pbc)
             repetitions = (1, 1, 1)
             neighbor_backend = "provided"
         else:
-            model, repetitions = make_model(self.force_field, symbols, cell, pbc, self.max_expanded_atoms)
+            neighbors, repetitions = replicated_neighbors(x, self.force_field.general[12],
+                cell, pbc, max_expanded_atoms=self.max_expanded_atoms)
             neighbor_backend = "replicated"
+        model = EnergyModel(self.force_field, symbols, neighbors, cell, pbc)
         try:
             components, charges = model.components(x)
             fixed_charges = None if full_derivative else charges

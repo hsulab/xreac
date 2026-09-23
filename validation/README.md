@@ -4,7 +4,22 @@ Verified locally on September 22, 2026 with LAMMPS 22 Jul 2025, Update 4,
 invoked through `/opt/homebrew/bin/lmp_mpi`. The force-field checksums and
 original citations are recorded in [NOTICE](../NOTICE).
 
-## ASE neighbor lists
+## Single energy model
+
+Both native replication and ASE now supply `(i, j, S)` to one `EnergyModel`.
+The duplicated energy equations and the separate replicated-energy wrapper
+have been removed. Native replication is used only to find neighbors, then
+mapped back to input indices and lattice shifts. QEq, energy, and properties
+are evaluated directly on the input atoms for both paths.
+
+**240 tests pass**. All [45 retained comparisons](unified-energy/README.md)
+give identical arrays and exactly identical numerical results between neighbor
+builders. Fresh `lmp_mpi` checks also pass, with a maximum force discrepancy
+of 2.48e-8 kcal/mol/Å. Regression tests compare with the pre-refactor numerical
+archive below as well as testing neighbor-set equality. The QEq audit and native
+FIRE benchmark script also run with the shared model.
+
+## ASE neighbor lists (before model consolidation)
 
 **240 tests pass** in `catorch3`. ASE calculators now default to direct,
 image-resolved ASE neighbors; native replication remains available explicitly

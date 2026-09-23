@@ -45,6 +45,7 @@ class Boundary:
         self.translations = onp.array(list(product(*[(-1, 0, 1) if p else (0,) for p in self.pbc]))) @ matrix
 
     def validate_cutoff(self, cutoff, bond_cutoff):
+        """Check the large-cell restriction used by the LAMMPS reference."""
         if self.periodic:
             minimum = max(cutoff, 2*bond_cutoff)
             if onp.any(self.heights[self.pbc] <= minimum*(1+1e-12)):
@@ -52,10 +53,10 @@ class Boundary:
                                  "(nonbonded cutoff and twice the bond cutoff); use a larger supercell")
 
     def supercell(self, cutoff, bond_cutoff, atoms, max_expanded_atoms=512):
-        """Return repetitions, translation vectors, and a safe internal cell.
+        """Return repetitions, translation vectors, and a search/reference cell.
 
-        Replication gives every interacting image a distinct atom identity.
-        The public coordinates remain the primitive degrees of freedom.
+        The native neighbor builder maps copies back to input indices/shifts;
+        the LAMMPS reference harness evaluates the expanded cell explicitly.
         """
         validate_expansion_limit(max_expanded_atoms)
         repetitions = onp.ones(3, dtype=int)

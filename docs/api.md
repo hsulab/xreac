@@ -40,7 +40,7 @@ It always uses fixed-charge forces and returns a `Relaxation`.
 | `lone_pairs` | Per-atom lone-pair values |
 | `bond_counts` | Per-atom counts of image bonds with order greater than 0.3 |
 | `dipole` | `(3,)` vector in e Å on the supplied coordinate branch |
-| `cell_repetitions` | Three internal replication factors; `(1, 1, 1)` when unexpanded |
+| `cell_repetitions` | Three native neighbor-search replication factors; `(1, 1, 1)` for supplied lists |
 | `neighbor_backend` | `"replicated"`, `"provided"` for explicit arrays, or `"ase"` when the adapter supplies them |
 
 ## Relaxation result
