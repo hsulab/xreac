@@ -12,7 +12,7 @@ hydrogen-bond block are accepted.
 ```python
 from xreac import ForceField
 
-ff = ForceField.bundled("qeq_ff.water")
+ff = ForceField.bundled("ffield.reax.HO.2015")
 print(ff.elements)
 print(ff.checksum)
 # ff = ForceField.from_file("my_force_field.ff")
@@ -20,12 +20,14 @@ print(ff.checksum)
 
 | Bundled file | Example coverage |
 | --- | --- |
-| `qeq_ff.water` | Achtyl QEq water; H/O and dummy X type |
-| `ffield.reax.cho` | Chenoweth C/H/O |
-| `ffield.reax.ZnOH` | Raymand 2010 Zn/O/H |
+| `ffield.reax.HO.2015` | Achtyl QEq water; H/O and dummy X type |
+| `ffield.reax.CHO.2008` | Chenoweth C/H/O |
+| `ffield.reax.ZnOH.2010` | Raymand 2010 Zn/O/H |
 
 Source files live under the repository's `data/` directory. Wheels include
 them as `xreac.data`. Their original contents and citation headers are retained.
+Bundled filenames follow `ffield.reax.[elements].[year]`, using chemical
+symbols and the citation's publication year rather than the file revision date.
 Dummy labels such as `X` are parameter metadata, not additional chemical
 elements. The ASE adapter requires labels compatible with ASE chemical symbols.
 

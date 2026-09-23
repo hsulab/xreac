@@ -33,7 +33,7 @@ QEq, bond properties, and coordinate derivatives are shared.
 from ase import Atoms
 from ase.neighborlist import neighbor_list
 
-ff = ForceField.bundled("qeq_ff.water")
+ff = ForceField.bundled("ffield.reax.HO.2015")
 calc = Calculator(ff)
 atoms = Atoms("OH2", positions=[[0, 0, 0], [0.97, 0, 0], [-0.243, 0.94, 0]],
               cell=[4.0]*3, pbc=True)
@@ -89,7 +89,7 @@ Nonperiodic directions are not repeated. For tilted cells, face heights rather
 than lattice-vector lengths determine replication.
 
 ```{testcode} small-cell
-ff = ForceField.bundled("qeq_ff.water")
+ff = ForceField.bundled("ffield.reax.HO.2015")
 calc = Calculator(ff)
 symbols = ["O", "H", "H"]
 positions = [[0, 0, 0], [0.97, 0, 0], [-0.243, 0.94, 0]]

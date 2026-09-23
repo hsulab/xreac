@@ -18,7 +18,7 @@ CARBON = {
 
 
 def test_parameter_driven_elements():
-    ff = ForceField.bundled("qeq_ff.water")
+    ff = ForceField.bundled("ffield.reax.HO.2015")
     assert ff.elements == ("H", "O", "X")
     assert "Zn" not in ff.atoms
     Calculator(ff).evaluate(*WATER["monomer"])
@@ -30,7 +30,7 @@ def test_parameter_driven_elements():
 
 
 def test_wildcard_torsions_and_precedence(tmp_path):
-    ff = ForceField.bundled("qeq_ff.water")
+    ff = ForceField.bundled("ffield.reax.HO.2015")
     np.testing.assert_array_equal(ff.torsions["H", "O", "O", "H"], [2.5, -4.0, 0.9, -2.5, -1.0])
     np.testing.assert_array_equal(ff.torsions["X", "O", "O", "X"], [0.5511, 25.415, 1.133, -5.1903, -1.0])
     np.testing.assert_array_equal(ff.torsions["O", "H", "O", "H"], [0, 0.1, 0.02, -2.5415, 0])
@@ -47,7 +47,7 @@ def test_wildcard_torsions_and_precedence(tmp_path):
 
 
 def test_standard_format_variants(tmp_path):
-    ff = ForceField.bundled("qeq_ff.water")
+    ff = ForceField.bundled("ffield.reax.HO.2015")
     text = ff.path.read_text().replace("50.0000", "5.00000D+1", 1)
     text = text[: text.index("  1    ! Nr of hydrogen bonds")]
     file = tmp_path / "without_hb.ff"
@@ -64,7 +64,7 @@ def test_standard_format_variants(tmp_path):
 
 
 def test_atom_labels_preserved(tmp_path):
-    original = ForceField.bundled("ffield.reax.cho")
+    original = ForceField.bundled("ffield.reax.CHO.2008")
     lines = original.path.read_text().splitlines()
     row = next(i for i, line in enumerate(lines) if line.split() and line.split()[0] == "C")
     lines[row] = lines[row].replace("C", "c", 1)
@@ -81,7 +81,7 @@ def test_atom_labels_preserved(tmp_path):
 
 @pytest.mark.parametrize("name", WATER)
 def test_water_gradients_and_properties(name):
-    calc = Calculator(ForceField.bundled("qeq_ff.water"))
+    calc = Calculator(ForceField.bundled("ffield.reax.HO.2015"))
     symbols, x = WATER[name]
     result = calc.evaluate(symbols, x, full_derivative=True)
     h = 1e-5
@@ -102,7 +102,7 @@ def test_water_gradients_and_properties(name):
 
 
 def test_water_symmetries():
-    calc = Calculator(ForceField.bundled("qeq_ff.water"))
+    calc = Calculator(ForceField.bundled("ffield.reax.HO.2015"))
     symbols, x = WATER["distorted_dimer"]
     result = calc.evaluate(symbols, x)
     rotation, _ = np.linalg.qr(np.random.default_rng(42).normal(size=(3, 3)))
@@ -120,7 +120,7 @@ def test_water_symmetries():
 @pytest.mark.reference
 @pytest.mark.parametrize("name", WATER)
 def test_water_reference(name, tmp_path):
-    ff = ForceField.bundled("qeq_ff.water")
+    ff = ForceField.bundled("ffield.reax.HO.2015")
     symbols, x = WATER[name]
     actual = Calculator(ff).evaluate(symbols, x)
     reference = evaluate_lammps(ff, symbols, x, directory=tmp_path / name)
@@ -131,7 +131,7 @@ def test_water_reference(name, tmp_path):
 @pytest.mark.reference
 @pytest.mark.parametrize("name", CARBON)
 def test_carbon_reference(name, tmp_path):
-    ff = ForceField.bundled("ffield.reax.cho")
+    ff = ForceField.bundled("ffield.reax.CHO.2008")
     symbols, x = CARBON[name]
     actual = Calculator(ff).evaluate(symbols, x)
     reference = evaluate_lammps(ff, symbols, x, directory=tmp_path / name)
@@ -147,7 +147,7 @@ def test_carbon_reference(name, tmp_path):
 def test_carbon_gradients(name):
     symbols, x = CARBON[name]
     x = np.array(x, dtype=float)
-    calc = Calculator(ForceField.bundled("ffield.reax.cho"))
+    calc = Calculator(ForceField.bundled("ffield.reax.CHO.2008"))
     result = calc.evaluate(symbols, x, full_derivative=True)
     direction = np.random.default_rng(508).normal(size=x.shape)
     direction /= np.linalg.norm(direction)
@@ -159,13 +159,13 @@ def test_carbon_gradients(name):
 
 
 def test_collinear_active_torsion_rejected():
-    calc = Calculator(ForceField.bundled("ffield.reax.cho"))
+    calc = Calculator(ForceField.bundled("ffield.reax.CHO.2008"))
     with pytest.raises(ValueError, match="Collinear atoms in an active torsion"):
         calc.evaluate(["C"] * 4, [[0, 0, 0], [1.5, 0, 0], [3, 0, 0], [4.5, 0.3, 0]])
 
 
 def altered_water_file(path, parameters):
-    lines = ForceField.bundled("qeq_ff.water").path.read_text().splitlines()
+    lines = ForceField.bundled("ffield.reax.HO.2015").path.read_text().splitlines()
     for symbol in ("H", "O", "X"):
         start = next(i for i, line in enumerate(lines) if line.split() and line.split()[0] == symbol)
         for index, value in parameters.items():
@@ -199,7 +199,7 @@ def test_inner_wall_variants(shield, neighbor_backend, tmp_path):
 
 @pytest.mark.reference
 def test_water_relaxation(tmp_path):
-    ff = ForceField.bundled("qeq_ff.water")
+    ff = ForceField.bundled("ffield.reax.HO.2015")
     calc = Calculator(ff)
     symbols, x = WATER["monomer"]
     relaxed = calc.relax(symbols, x, force_tolerance=1e-5)

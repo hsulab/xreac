@@ -19,14 +19,14 @@ from xreac.reference import evaluate_lammps
 def atoms():
     symbols, positions = water_cases()["monomer"]
     result = Atoms(symbols, positions=positions)
-    result.calc = ReaxFFCalculator(ForceField.bundled("qeq_ff.water"))
+    result.calc = ReaxFFCalculator(ForceField.bundled("ffield.reax.HO.2015"))
     return result
 
 
 @pytest.mark.parametrize("full_derivative", [False, True])
 def test_units_and_properties(atoms, full_derivative):
     atoms.calc.set(full_derivative=full_derivative)
-    core = Calculator(ForceField.bundled("qeq_ff.water"))
+    core = Calculator(ForceField.bundled("ffield.reax.HO.2015"))
     expected = core.evaluate(atoms.get_chemical_symbols(), atoms.positions, full_derivative=full_derivative)
     assert atoms.get_potential_energy() == pytest.approx(expected.energy * kcal / mol, abs=1e-12)
     np.testing.assert_allclose(atoms.get_forces(), expected.forces * kcal / mol, atol=1e-12)
@@ -99,7 +99,7 @@ def test_charge_validation(atoms):
 )
 def test_invalid_parameters(kwargs):
     with pytest.raises(ValueError):
-        ReaxFFCalculator(ForceField.bundled("qeq_ff.water"), **kwargs)
+        ReaxFFCalculator(ForceField.bundled("ffield.reax.HO.2015"), **kwargs)
 
 
 @pytest.mark.parametrize("optimizer_class", [FIRE, BFGS])
@@ -125,7 +125,7 @@ def test_ase_optimizers_and_constraints(atoms, optimizer_class, monkeypatch):
 
 @pytest.mark.reference
 def test_ase_lammps_reference(tmp_path):
-    ff = ForceField.bundled("qeq_ff.water")
+    ff = ForceField.bundled("ffield.reax.HO.2015")
     symbols, positions = water_cases()["dimer"]
     atoms = Atoms(symbols, positions=positions, calculator=ReaxFFCalculator(ff))
     reference = evaluate_lammps(ff, symbols, positions, directory=tmp_path / "lammps")
@@ -140,7 +140,7 @@ def test_native_backend_does_not_import_ase():
 import sys
 from xreac import Calculator, ForceField
 assert 'ase' not in sys.modules
-result = Calculator(ForceField.bundled("ffield.reax.ZnOH")).relax(['Zn'], [[0, 0, 0]], backend='native')
+result = Calculator(ForceField.bundled("ffield.reax.ZnOH.2010")).relax(['Zn'], [[0, 0, 0]], backend='native')
 assert result.converged
 assert 'ase' not in sys.modules
 """

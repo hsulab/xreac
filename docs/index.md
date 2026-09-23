@@ -12,7 +12,7 @@ verification and is not required to use the calculator or build these docs.
 ```python
 from xreac import Calculator, ForceField
 
-calc = Calculator(ForceField.bundled("qeq_ff.water"))
+calc = Calculator(ForceField.bundled("ffield.reax.HO.2015"))
 symbols = ["O", "H", "H"]
 positions = [[0, 0, 0], [0.97, 0, 0], [-0.243, 0.94, 0]]
 result = calc.evaluate(symbols, positions)

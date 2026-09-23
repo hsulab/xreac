@@ -26,11 +26,11 @@ from xreac.reference import evaluate_lammps
 
 def neighbor_cases():
     cases = {
-        "zno_" + name: ("ffield.reax.ZnOH", s, np.asarray(x, dtype=float), None, False)
+        "zno_" + name: ("ffield.reax.ZnOH.2010", s, np.asarray(x, dtype=float), None, False)
         for name, (s, x) in CASES.items()
     }
     cases.update(
-        {"cluster_water_" + name: ("qeq_ff.water", s, x, None, False) for name, (s, x) in water_cases().items()}
+        {"cluster_water_" + name: ("ffield.reax.HO.2015", s, x, None, False) for name, (s, x) in water_cases().items()}
     )
     carbon = {
         "methane": (
@@ -42,12 +42,12 @@ def neighbor_cases():
         "carbon_torsion": (["C"] * 4, [[0, 0, 0], [1.5, 0.1, 0], [2.3, 1.2, 0.2], [3.7, 0.9, 0.8]]),
     }
     cases.update(
-        {name: ("ffield.reax.cho", s, np.asarray(x, dtype=float), None, False) for name, (s, x) in carbon.items()}
+        {name: ("ffield.reax.CHO.2008", s, np.asarray(x, dtype=float), None, False) for name, (s, x) in carbon.items()}
     )
-    cases.update({"periodic_" + name: ("qeq_ff.water", *values) for name, values in periodic_cases().items()})
+    cases.update({"periodic_" + name: ("ffield.reax.HO.2015", *values) for name, values in periodic_cases().items()})
     cases.update({"small_" + name: values for name, values in small_cell_cases().items()})
     cases["periodic_carbon_chain"] = (
-        "ffield.reax.cho",
+        "ffield.reax.CHO.2008",
         ["C"] * 3,
         np.array([[0.0, 0, 0], [1.5, 0.4, 0.2], [3.0, -0.2, 0.8]]),
         np.diag([4.5, 12.0, 12.0]),
@@ -55,7 +55,7 @@ def neighbor_cases():
     )
     for distance in (4.9999, 5.0, 5.0001, 9.9999, 10.0, 10.0001):
         cases[f"cutoff_{distance:g}"] = (
-            "ffield.reax.ZnOH",
+            "ffield.reax.ZnOH.2010",
             ["Zn", "O"],
             np.array([[0.0, 0, 0], [distance, 0, 0]]),
             None,

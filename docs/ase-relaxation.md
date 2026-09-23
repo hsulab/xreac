@@ -13,7 +13,7 @@ from xreac.ase import ReaxFFCalculator
 
 atoms = Atoms("OH2", positions=[[0, 0, 0], [0.97, 0, 0], [-0.243, 0.94, 0]],
               cell=[4.0]*3, pbc=True)
-atoms.calc = ReaxFFCalculator(ForceField.bundled("qeq_ff.water"))
+atoms.calc = ReaxFFCalculator(ForceField.bundled("ffield.reax.HO.2015"))
 energy_ev = atoms.get_potential_energy()
 forces_ev = atoms.get_forces()
 assert forces_ev.shape == (3, 3)

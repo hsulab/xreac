@@ -21,7 +21,7 @@ tests, and documentation.
 ```python
 from xreac import Calculator, ForceField
 
-calc = Calculator(ForceField.bundled("qeq_ff.water"))
+calc = Calculator(ForceField.bundled("ffield.reax.HO.2015"))
 result = calc.evaluate(
     ["O", "H", "H"],
     [[0.0, 0.0, 0.0], [0.97, 0.0, 0.0], [-0.243, 0.94, 0.0]],

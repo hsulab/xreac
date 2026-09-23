@@ -1,5 +1,5 @@
 {
-  "force_field": "qeq_ff.water",
+  "force_field": "ffield.reax.HO.2015",
   "sha256": "526dea2d55d748caed94734139dda66064e194f74f46eee9b0f511eead38b7d1",
   "full_derivative": false,
   "force_convention": "fixed_charge",

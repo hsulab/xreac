@@ -238,7 +238,7 @@ systems, inner-wall vdW variants, water properties, and relaxation checks.
 Synthetic inner-wall parameter modifications test mathematical compatibility;
 they are not proposed physical force fields.
 
-The dedicated water example uses LAMMPS's `qeq_ff.water` (Achtyl et al.,
+The dedicated water example uses LAMMPS's `ffield.reax.HO.2015` (Achtyl et al.,
 2015), containing H/O and a dummy X type, with no Zn parameters. All five
 retained cases pass: monomer, dimer, distorted dimer, trimer, and hexamer.
 See [water/summary.json](water/summary.json) for tolerances and full results.

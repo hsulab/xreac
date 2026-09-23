@@ -17,7 +17,7 @@
         2,
         2
       ],
-      "force_field": "qeq_ff.water",
+      "force_field": "ffield.reax.HO.2015",
       "force_field_sha256": "526dea2d55d748caed94734139dda66064e194f74f46eee9b0f511eead38b7d1",
       "energy": -248.5056930948109,
       "hydrogen_bond_energy": 0.0,
@@ -53,7 +53,7 @@
         2,
         2
       ],
-      "force_field": "qeq_ff.water",
+      "force_field": "ffield.reax.HO.2015",
       "force_field_sha256": "526dea2d55d748caed94734139dda66064e194f74f46eee9b0f511eead38b7d1",
       "energy": -249.33938481787274,
       "hydrogen_bond_energy": -8.328202710250036e-07,
@@ -89,7 +89,7 @@
         3,
         3
       ],
-      "force_field": "qeq_ff.water",
+      "force_field": "ffield.reax.HO.2015",
       "force_field_sha256": "526dea2d55d748caed94734139dda66064e194f74f46eee9b0f511eead38b7d1",
       "energy": -251.22311472078985,
       "hydrogen_bond_energy": -0.3700520183114416,
@@ -125,7 +125,7 @@
         4,
         4
       ],
-      "force_field": "qeq_ff.water",
+      "force_field": "ffield.reax.HO.2015",
       "force_field_sha256": "526dea2d55d748caed94734139dda66064e194f74f46eee9b0f511eead38b7d1",
       "energy": -252.30956718736957,
       "hydrogen_bond_energy": -3.703507918115787,
@@ -161,7 +161,7 @@
         2,
         2
       ],
-      "force_field": "qeq_ff.water",
+      "force_field": "ffield.reax.HO.2015",
       "force_field_sha256": "526dea2d55d748caed94734139dda66064e194f74f46eee9b0f511eead38b7d1",
       "energy": -501.2217163064046,
       "hydrogen_bond_energy": -2.261281048608729,
@@ -197,7 +197,7 @@
         3,
         2
       ],
-      "force_field": "qeq_ff.water",
+      "force_field": "ffield.reax.HO.2015",
       "force_field_sha256": "526dea2d55d748caed94734139dda66064e194f74f46eee9b0f511eead38b7d1",
       "energy": -250.0597513891169,
       "hydrogen_bond_energy": -0.014530619070121677,
@@ -233,7 +233,7 @@
         3,
         1
       ],
-      "force_field": "qeq_ff.water",
+      "force_field": "ffield.reax.HO.2015",
       "force_field_sha256": "526dea2d55d748caed94734139dda66064e194f74f46eee9b0f511eead38b7d1",
       "energy": -249.96935024135647,
       "hydrogen_bond_energy": -0.014530614799612688,
@@ -269,7 +269,7 @@
         3,
         3
       ],
-      "force_field": "ffield.reax.ZnOH",
+      "force_field": "ffield.reax.ZnOH.2010",
       "force_field_sha256": "b5af5a65573ce60f32405a973e33f7cc89a90bc69e624a8ca89811eb67b1a07b",
       "energy": -120.37706961880644,
       "hydrogen_bond_energy": 0.0,
@@ -305,7 +305,7 @@
         1,
         1
       ],
-      "force_field": "ffield.reax.ZnOH",
+      "force_field": "ffield.reax.ZnOH.2010",
       "force_field_sha256": "b5af5a65573ce60f32405a973e33f7cc89a90bc69e624a8ca89811eb67b1a07b",
       "energy": -10.868673983099145,
       "hydrogen_bond_energy": 0.0,

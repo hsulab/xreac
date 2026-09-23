@@ -17,7 +17,7 @@ CASES = periodic_cases()
 
 @pytest.fixture
 def calc():
-    return Calculator(ForceField.bundled("qeq_ff.water"))
+    return Calculator(ForceField.bundled("ffield.reax.HO.2015"))
 
 
 @pytest.mark.reference
@@ -180,8 +180,8 @@ def test_periodic_relaxation(calc, backend, tmp_path, monkeypatch):
 @pytest.mark.parametrize(
     "ffield,symbols,x",
     [
-        ("ffield.reax.cho", ["C"] * 4, [[0, 0, 0], [1.5, 0.1, 0], [2.3, 1.2, 0.2], [3.7, 0.9, 0.8]]),
-        ("ffield.reax.ZnOH", ["Zn", "O"], [[0.0, 0, 0], [1.9, 0.1, 0.2]]),
+        ("ffield.reax.CHO.2008", ["C"] * 4, [[0, 0, 0], [1.5, 0.1, 0], [2.3, 1.2, 0.2], [3.7, 0.9, 0.8]]),
+        ("ffield.reax.ZnOH.2010", ["Zn", "O"], [[0.0, 0, 0], [1.9, 0.1, 0.2]]),
     ],
 )
 def test_other_force_fields(ffield, symbols, x, tmp_path):

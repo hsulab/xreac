@@ -35,7 +35,7 @@ def main():
     )
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=False)
-    ff = ForceField.bundled("qeq_ff.water")
+    ff = ForceField.bundled("ffield.reax.HO.2015")
     symbols, positions = water_cases()["monomer"]
     atoms = Atoms(symbols, positions=positions, calculator=ReaxFFCalculator(ff))
     write(args.output / "initial.xyz", atoms, format="xyz")

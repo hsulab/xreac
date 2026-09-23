@@ -18,7 +18,7 @@ CASES = small_cell_cases()
 
 
 def test_explicit_small_cell_qeq_matches_supported_supercell():
-    ff = ForceField.bundled("qeq_ff.water")
+    ff = ForceField.bundled("ffield.reax.HO.2015")
     symbols, x = water_cases()["monomer"]
     cell = np.diag([4.0] * 3)
     primitive = image_qeq(ff, symbols, x, cell)
@@ -32,7 +32,7 @@ def test_explicit_small_cell_qeq_matches_supported_supercell():
 
 
 def test_small_cell_memory_limit(tmp_path):
-    ff = ForceField.bundled("qeq_ff.water")
+    ff = ForceField.bundled("ffield.reax.HO.2015")
     symbols, x = water_cases()["monomer"]
     with pytest.raises(ValueError, match="max_expanded_atoms"):
         Calculator(ff, max_expanded_atoms=80).evaluate(symbols, x, cell=[4.0] * 3)
@@ -46,7 +46,7 @@ def test_small_cell_memory_limit(tmp_path):
 @pytest.mark.reference
 def test_lammps_small_cell_hydrogen_bond_exclusion(tmp_path):
     """Pinned LAMMPS excludes HB acceptors sharing the donor's original atom ID."""
-    ff = ForceField.bundled("qeq_ff.water")
+    ff = ForceField.bundled("ffield.reax.HO.2015")
     symbols, x = water_cases()["monomer"]
     cell = np.diag([4.0] * 3)
     primitive = evaluate_lammps(ff, symbols, x, cell=cell, allow_small_cell=True, directory=tmp_path / "primitive")
@@ -232,7 +232,7 @@ def test_ase_small_cell_limit_and_caching():
 
 @pytest.mark.parametrize("limit", [0, -1, True, 3.5])
 def test_invalid_expansion_limit(limit):
-    ff = ForceField.bundled("ffield.reax.ZnOH")
+    ff = ForceField.bundled("ffield.reax.ZnOH.2010")
     with pytest.raises(ValueError, match="max_expanded_atoms"):
         Calculator(ff, max_expanded_atoms=limit)
     with pytest.raises(ValueError, match="max_expanded_atoms"):

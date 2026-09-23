@@ -172,7 +172,7 @@ def test_ase_default_no_replication_and_backend_switch(monkeypatch):
 
 @pytest.mark.parametrize("bad", ["unknown", None, True])
 def test_invalid_neighbor_backend(bad):
-    ff = ForceField.bundled("ffield.reax.ZnOH")
+    ff = ForceField.bundled("ffield.reax.ZnOH.2010")
     with pytest.raises(ValueError, match="neighbor_backend"):
         ReaxFFCalculator(ff, neighbor_backend=bad)
 
@@ -210,7 +210,9 @@ def test_neighbor_symmetries(name):
 
 def test_neighbor_rebuild_crossing_cutoff():
     atoms = Atoms(
-        "ZnO", positions=[[0, 0, 0], [10.1, 0, 0]], calculator=ReaxFFCalculator(ForceField.bundled("ffield.reax.ZnOH"))
+        "ZnO",
+        positions=[[0, 0, 0], [10.1, 0, 0]],
+        calculator=ReaxFFCalculator(ForceField.bundled("ffield.reax.ZnOH.2010")),
     )
     atoms.get_forces()
     distant_energy = atoms.get_potential_energy()
@@ -226,7 +228,7 @@ def test_ase_builds_arrays_before_core_evaluation(monkeypatch):
     from autograd.tracer import Box
     from xreac import ase as adapter
 
-    ff = ForceField.bundled("qeq_ff.water")
+    ff = ForceField.bundled("ffield.reax.HO.2015")
     filename, symbols, x, cell, pbc = CASES["small_water_4A"]
     atoms = Atoms(symbols, positions=x, cell=cell, pbc=pbc, calculator=ReaxFFCalculator(ff))
     original_builder = adapter.neighbor_list
@@ -267,7 +269,7 @@ import sys
 import numpy as np
 from xreac import Calculator, ForceField
 assert 'ase' not in sys.modules
-calc = Calculator(ForceField.bundled("ffield.reax.ZnOH"))
+calc = Calculator(ForceField.bundled("ffield.reax.ZnOH.2010"))
 shifts = np.array([[s, 0, 0] for s in (-4, -3, -2, -1, 1, 2, 3, 4)])
 neighbors = (np.zeros(8, dtype=int), np.zeros(8, dtype=int), shifts)
 actual = calc.evaluate(['Zn'], [[0, 0, 0]], cell=[2.5, 12, 12], pbc=[True, False, False], neighbors=neighbors)
@@ -297,7 +299,7 @@ assert 'ase' not in sys.modules
 )
 def test_supplied_neighbor_validation(neighbors, message):
     with pytest.raises(ValueError, match=message):
-        Calculator(ForceField.bundled("ffield.reax.ZnOH")).evaluate(
+        Calculator(ForceField.bundled("ffield.reax.ZnOH.2010")).evaluate(
             ["Zn", "O"], [[0, 0, 0], [1.9, 0, 0]], neighbors=neighbors
         )
 

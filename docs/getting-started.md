@@ -23,7 +23,7 @@ PyPI release or a particular Git hosting URL.
 ```{testcode} quickstart
 from xreac import Calculator, ForceField
 
-ff = ForceField.bundled("qeq_ff.water")
+ff = ForceField.bundled("ffield.reax.HO.2015")
 calc = Calculator(ff)
 symbols = ["O", "H", "H"]
 positions = [[0.0, 0.0, 0.0], [0.97, 0.0, 0.0], [-0.243, 0.94, 0.0]]

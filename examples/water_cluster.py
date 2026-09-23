@@ -102,7 +102,7 @@ def main():
         default=ROOT / "validation" / "runs" / ("water-" + datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")),
     )
     args = parser.parse_args()
-    ff = ForceField.from_file(args.ffield) if args.ffield else ForceField.bundled("qeq_ff.water")
+    ff = ForceField.from_file(args.ffield) if args.ffield else ForceField.bundled("ffield.reax.HO.2015")
     calc = Calculator(ff)
     args.output.mkdir(parents=True, exist_ok=False)
     summary = {

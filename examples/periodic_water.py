@@ -73,7 +73,7 @@ def main():
         default=ROOT / "validation" / "runs" / ("periodic-" + datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")),
     )
     args = parser.parse_args()
-    ff = ForceField.bundled("qeq_ff.water")
+    ff = ForceField.bundled("ffield.reax.HO.2015")
     calc = Calculator(ff)
     args.output.mkdir(parents=True, exist_ok=False)
     summary = {

@@ -30,7 +30,7 @@ xreac = "src/xreac"
 "xreac.data" = "data"
 
 [tool.setuptools.package-data]
-"xreac.data" = ["ffield.reax.*", "qeq_ff.water"]
+"xreac.data" = ["ffield.reax.*"]
 
 [tool.pytest.ini_options]
 pythonpath = ["src", "examples", "scripts"]

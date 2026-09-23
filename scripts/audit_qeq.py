@@ -58,7 +58,7 @@ def main():
     parser.add_argument("--output", type=Path, default=ROOT / "validation/qeq-audit")
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=False)
-    ff = ForceField.bundled("qeq_ff.water")
+    ff = ForceField.bundled("ffield.reax.HO.2015")
     calc = Calculator(ff)
     report = {
         "force_field_sha256": ff.checksum,
