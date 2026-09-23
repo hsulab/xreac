@@ -4,6 +4,26 @@ Verified locally on September 22, 2026 with LAMMPS 22 Jul 2025, Update 4,
 invoked through `/opt/homebrew/bin/lmp_mpi`. The force-field checksums and
 original citations are recorded in [NOTICE](../NOTICE).
 
+## Force selection (0.3)
+
+The default `evaluate()` now returns fixed-charge forces, matching LAMMPS,
+in `result.forces`. `full_derivative=True` selects charge-response forces
+instead. Only one derivative is computed per evaluation. The separate
+`lammps_forces` field is retired; archived 0.1/0.2 JSON files retain their
+original field meanings.
+
+**79 tests pass**, including both force modes, default-path checks that QEq
+is not differentiated, and energy finite differences from fresh LAMMPS runs.
+The new [water results](water-fixed-charge/summary.json) verify all five
+cases with the default mode. The [updated report](water-fixed-charge/report.pdf)
+uses only fixed-charge forces; optional charge-response entries are marked
+as not evaluated. The archived report below includes both historical arrays.
+
+The [new benchmark](benchmark-fixed-charge.json) measures only fixed-charge
+evaluation and energy evaluation. It excludes relaxation and charge-response
+calculations. The original benchmark below includes both force modes and
+relaxation in peak RSS, so its memory figures are not directly comparable.
+
 ## General calculator and water validation (0.2)
 
 **73 tests pass**, retaining all Zn/O regressions and adding parameter-driven
@@ -31,6 +51,8 @@ Regenerate the report without rerunning calculations:
 ```sh
 python -m pip install '.[report]'
 python scripts/water_report.py
+# Archived two-force report:
+python scripts/water_report.py --input validation/water --output validation/water/report.pdf
 ```
 
 Matplotlib is optional and is not required by the calculator. To report a new
@@ -104,8 +126,9 @@ dependent, not a performance guarantee.
 
 ## Force comparison convention
 
-Reference agreement is measured using `lammps_forces`. The primary `forces`
-field passes independent energy finite-difference tests with charges
-re-equilibrated. The distinction is necessary because the reference QEq and
+Current reference agreement is measured using default fixed-charge `forces`.
+Charge-response forces (`full_derivative=True`) pass independent energy
+finite-difference tests with charges re-equilibrated. The distinction is
+necessary because the reference QEq and
 energy routines use inconsistent electrostatic conversion constants; see
-the [main README](../README.md#two-force-conventions).
+the [main README](../README.md#force-derivative-option).

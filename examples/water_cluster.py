@@ -56,21 +56,23 @@ def serialize(result):
     fields = ("energy", "forces", "charges", "components", "dipole",
               "total_bond_orders", "lone_pairs", "bond_counts")
     output = {name: getattr(result, name) for name in fields}
-    for name in ("lammps_forces", "bond_orders"):
+    for name in ("full_derivative", "force_convention", "bond_orders"):
         if hasattr(result, name):
             output[name] = getattr(result, name)
     return {key: value.tolist() if isinstance(value, np.ndarray) else value for key, value in output.items()}
 
 
 def comparison(actual, reference, n):
+    if actual.full_derivative:
+        raise ValueError("LAMMPS force verification requires full_derivative=False")
     errors = {
         "energy_per_atom": abs(actual.energy-reference.energy)/n,
         "components_per_atom": max(abs(actual.components[k]-reference.components[k]) for k in actual.components)/n,
-        "lammps_forces": float(np.max(abs(actual.lammps_forces-reference.forces))),
+        "forces": float(np.max(abs(actual.forces-reference.forces))),
     }
     for name in ("charges", "dipole", "total_bond_orders", "lone_pairs", "bond_counts"):
         errors[name] = float(np.max(abs(getattr(actual, name)-getattr(reference, name))))
-    limits = {"energy_per_atom": 1e-5, "components_per_atom": 1e-5, "lammps_forces": 1e-4,
+    limits = {"energy_per_atom": 1e-5, "components_per_atom": 1e-5, "forces": 1e-4,
               "charges": 1e-6, "dipole": 1e-6, "total_bond_orders": 1e-8,
               "lone_pairs": 1e-8, "bond_counts": 0}
     return {"maximum_absolute_errors": errors, "limits": limits,
@@ -90,7 +92,7 @@ def main():
     summary = {"force_field": ff.path.name, "sha256": ff.checksum, "citation": ff.citation,
                "units": {"energy": "kcal/mol", "forces": "kcal/mol/Angstrom", "charges": "e", "dipole": "e Angstrom"},
                "reference_verified": args.verify,
-               "force_convention": "Full QEq response in forces; fixed-charge derivative in lammps_forces",
+               "full_derivative": False, "force_convention": "fixed_charge",
                "cases": {}}
     for name, (symbols, positions) in water_cases().items():
         directory = args.output / name

@@ -14,7 +14,7 @@ def calc():
 def test_gradient(calc, name):
     symbols, positions = CASES[name]
     x = np.array(positions, dtype=float)
-    result = calc.evaluate(symbols, x)
+    result = calc.evaluate(symbols, x, full_derivative=True)
     # Directional derivatives exercise all atoms with QEq re-solved each time.
     direction = np.random.default_rng(64).normal(size=x.shape)
     direction /= np.linalg.norm(direction)
@@ -26,16 +26,17 @@ def test_gradient(calc, name):
     assert result.energy == pytest.approx(sum(result.components.values()), abs=1e-12)
 
 
-def test_symmetries(calc):
+@pytest.mark.parametrize("full_derivative", [False, True])
+def test_symmetries(calc, full_derivative):
     symbols, x = CASES["cube8"]
     x = np.array(x)
     rotation, _ = np.linalg.qr(np.random.default_rng(33).normal(size=(3, 3)))
-    r = calc.evaluate(symbols, x)
-    moved = calc.evaluate(symbols, x@rotation + [4.2, -3.1, 7])
+    r = calc.evaluate(symbols, x, full_derivative=full_derivative)
+    moved = calc.evaluate(symbols, x@rotation + [4.2, -3.1, 7], full_derivative=full_derivative)
     assert moved.energy == pytest.approx(r.energy, abs=1e-10)
     np.testing.assert_allclose(moved.forces, r.forces@rotation, atol=1e-9)
     order = [7, 3, 1, 6, 2, 5, 4, 0]
-    perm = calc.evaluate([symbols[i] for i in order], x[order])
+    perm = calc.evaluate([symbols[i] for i in order], x[order], full_derivative=full_derivative)
     assert perm.energy == pytest.approx(r.energy, abs=1e-10)
     np.testing.assert_allclose(perm.charges, r.charges[order], atol=1e-12)
     np.testing.assert_allclose(perm.forces, r.forces[order], atol=1e-9)
@@ -47,6 +48,7 @@ def test_symmetries(calc):
     (["Zn"], [[np.nan, 0, 0]], {}), (["Zn"], [[0, 0]], {}),
     (["Zn"], [[0, 0, 0]], {"total_charge": 1}),
     (["Zn"], [[0, 0, 0]], {"cell": np.eye(3)}),
+    (["Zn"], [[0, 0, 0]], {"full_derivative": "false"}),
 ])
 def test_invalid_input(calc, symbols, x, kwargs):
     with pytest.raises(ValueError):
@@ -65,8 +67,45 @@ def test_relaxation(calc):
 
 
 def test_charge_response_is_explicit(calc):
+    fixed = calc.evaluate(*CASES["zno"])
+    full = calc.evaluate(*CASES["zno"], full_derivative=True)
+    assert fixed.full_derivative is False
+    assert fixed.force_convention == "fixed_charge"
+    assert full.full_derivative is True
+    assert full.force_convention == "charge_response"
+    assert fixed.energy == full.energy
+    np.testing.assert_array_equal(fixed.charges, full.charges)
+    assert np.max(abs(full.forces-fixed.forces)) > .03
+
+
+def test_default_does_not_differentiate_qeq(calc, monkeypatch):
+    from autograd.tracer import Box
+    from xreac import energy
+
+    original = energy.np.linalg.solve
+
+    def solve_without_derivative(matrix, rhs):
+        assert not isinstance(matrix, Box), "Default mode must not differentiate QEq"
+        return original(matrix, rhs)
+
+    monkeypatch.setattr(energy.np.linalg, "solve", solve_without_derivative)
     result = calc.evaluate(*CASES["zno"])
-    assert np.max(abs(result.forces-result.lammps_forces)) > .03
+    assert np.isfinite(result.forces).all()
+
+
+def test_fixed_charge_derivative(calc):
+    from xreac.energy import EnergyModel
+
+    symbols, positions = CASES["zno"]
+    x = np.array(positions, dtype=float)
+    result = calc.evaluate(symbols, x)
+    model = EnergyModel(calc.force_field, symbols)
+    direction = np.random.default_rng(21).normal(size=x.shape)
+    direction /= np.linalg.norm(direction)
+    h = 1e-5
+    plus = model.components(x+h*direction, fixed_charges=result.charges)[0].sum()
+    minus = model.components(x-h*direction, fixed_charges=result.charges)[0].sum()
+    assert -(plus-minus)/(2*h) == pytest.approx(np.sum(result.forces*direction), abs=1e-5, rel=0)
 
 
 def test_parameter_reader(tmp_path):

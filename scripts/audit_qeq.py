@@ -65,7 +65,8 @@ def main():
     for name in ("monomer", "dimer"):
         symbols, x = water_cases()[name]
         directory = args.output / name
-        actual = calc.evaluate(symbols, x)
+        actual = calc.evaluate(symbols, x, full_derivative=True)
+        fixed = calc.evaluate(symbols, x)
         ref = evaluate_lammps(ff, symbols, x, directory=directory / "baseline")
         index = np.unravel_index(np.argmax(abs(actual.forces-ref.forces)), x.shape)
         model = EnergyModel(ff, symbols)
@@ -79,7 +80,7 @@ def main():
                "axis": "xyz"[index[1]], "charges": ref.charges.tolist(),
                "net_charge": float(ref.charges.sum()), "qeq_stationarity_residual": residual,
                "lammps_force": float(ref.forces[index]),
-               "python_matched_force": float(actual.lammps_forces[index]),
+               "python_matched_force": float(fixed.forces[index]),
                "python_full_gradient_force": float(actual.forces[index]),
                "repeated_qeq_control": control(ref, directory / "repeat", repeat=True),
                "different_initial_charges_control": control(ref, directory / "initial_charges"),

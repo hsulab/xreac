@@ -43,6 +43,11 @@ print(result.components)
 print(result.dipole)  # e Angstrom
 print(result.bond_orders)  # symmetric (N, N) corrected bond-order matrix
 
+# Optional: include the response of the equilibrated charges in the derivative.
+full = calc.evaluate(symbols, positions, full_derivative=True)
+print(full.forces)
+
+# Energy minimization uses charge-response forces, the full energy derivative.
 relaxed = calc.relax(symbols, positions, force_tolerance=1e-4, max_iterations=500)
 print(relaxed.converged, relaxed.message)
 print(relaxed.positions)
@@ -79,21 +84,37 @@ dipole vectors, per-atom bond-order sums, lone pairs, and bond counts against
 and a comparison summary. The output directory must not already exist.
 Use `--ffield path/to/file` to select another compatible parameter set.
 
-## Two force conventions
+## Force derivative option
 
-`result.forces` is **minus the derivative of the reported energy**, including
-the response of QEq charges. This is the force used for geometry relaxation
-and finite-difference checks.
+`evaluate(..., full_derivative=False)` is the default. It returns
+**fixed-charge forces**, matching the LAMMPS convention: QEq is solved at the
+input geometry, then those equilibrated charges are held constant while
+differentiating the energy. Charges are recalculated for every new geometry;
+"fixed-charge" describes only the derivative.
 
-`result.lammps_forces` differentiates with converged charges held fixed,
-matching the convention in the reference LAMMPS implementation. These are
-not exactly the same: LAMMPS uses `14.4` in the QEq coupling, `332.06371` in
+`evaluate(..., full_derivative=True)` returns **charge-response forces**, the
+full negative derivative of the reported energy through the QEq solve.
+
+Both modes return the selected array in `result.forces`, with
+`result.full_derivative` and `result.force_convention` (`"fixed_charge"` or
+`"charge_response"`) recording the choice. Only the selected derivative is
+computed. Energies, charges, and other properties are identical between modes.
+Both use automatic differentiation, not finite differences.
+
+**API change in 0.3:** the separate `result.lammps_forces` field was removed.
+Use default `result.forces` in its place. Code that previously used `forces`
+for the full energy derivative must now pass `full_derivative=True`.
+
+The two derivatives differ because LAMMPS uses `14.4` in the QEq coupling, `332.06371` in
 the Coulomb energy, and `23.02` in the self-energy conversion;
 `14.4 * 23.02 != 332.06371`. Thus its QEq solution is not precisely stationary
 for its reported energy. For a ZnO dimer at 1.9 Å, the force difference is
-approximately 0.038 kcal/mol/Å. This is recorded explicitly rather than
-absorbed into test tolerances. A geometry stationary under `forces` can have
-nonzero `lammps_forces`.
+approximately 0.038 kcal/mol/Å. A geometry stationary under charge-response
+forces can have nonzero fixed-charge forces.
+
+`relax()` remains an energy minimizer: it explicitly uses the full derivative
+and returns an evaluation with `full_derivative=True`. To compare forces at
+the relaxed geometry with LAMMPS, call `evaluate(symbols, relaxed.positions)`.
 
 The [single-point QEq audit](validation/qeq-audit/README.md) verifies that
 `run 0` equilibrates charges and compares LAMMPS forces against finite
@@ -137,9 +158,15 @@ python scripts/validate.py
 python scripts/benchmark.py
 ```
 
+Benchmarks compute only fixed-charge forces (`full_derivative=False`), without
+relaxation or charge-response evaluation. Results are written to
+`validation/benchmark-fixed-charge.json`; the previous benchmark is retained
+as a historical record with its original methodology.
+
 Acceptance targets are 1e-5 kcal/mol/atom for total/component energy,
-1e-6 e for charges, and 1e-4 kcal/mol/Å for `lammps_forces`. Independent
-finite-difference tests check `forces` with QEq re-solved on each displacement.
+1e-6 e for charges, and 1e-4 kcal/mol/Å for default fixed-charge `forces`.
+Independent finite-difference tests check charge-response forces with QEq
+re-solved on each displacement, and fixed-charge forces with charges held fixed.
 
 Property comparisons additionally require dipoles within 1e-6 e Å,
 bond-order sums and lone pairs within 1e-8, and identical bond counts.

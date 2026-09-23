@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "xreac"
-version = "0.2.0"
+version = "0.3.0"
 description = "Parameter-driven Autograd ReaxFF for isolated molecules and clusters"
 readme = "README.md"
 requires-python = ">=3.10"

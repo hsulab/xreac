@@ -15,7 +15,6 @@ sys.path.insert(0, str(ROOT / "src"))
 sys.path.insert(0, str(ROOT / "tests"))
 
 import numpy as np
-import autograd
 from importlib.metadata import version
 from cases import cluster
 from xreac import Calculator, ForceField
@@ -27,9 +26,9 @@ def worker(n):
     calc = Calculator(ff)
     symbols, x = cluster(n)
     model = EnergyModel(ff, symbols)
-    # First call is reported separately; subsequent medians include both force conventions.
+    # Benchmark only fixed-charge forces, matching the LAMMPS convention.
     start = time.perf_counter()
-    calc.evaluate(symbols, x)
+    calc.evaluate(symbols, x, full_derivative=False)
     first = time.perf_counter()-start
     energies, evaluations = [], []
     for _ in range(3):
@@ -37,33 +36,29 @@ def worker(n):
         model.components(x)
         energies.append(time.perf_counter()-start)
         start = time.perf_counter()
-        calc.evaluate(symbols, x)
+        calc.evaluate(symbols, x, full_derivative=False)
         evaluations.append(time.perf_counter()-start)
-    start = time.perf_counter()
-    relaxed = calc.relax(symbols, x, max_iterations=20)
-    relaxation_time = time.perf_counter()-start
     rss = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
     return {"atoms": n, "first_evaluation_seconds": first,
             "median_energy_seconds": statistics.median(energies),
             "median_evaluation_seconds": statistics.median(evaluations),
-            "relaxation_seconds": relaxation_time, "relaxation_iterations": relaxed.iterations,
-            "relaxation_converged": relaxed.converged,
-            "relaxation_max_force": float(np.max(abs(relaxed.evaluation.forces))),
+            "full_derivative": False, "force_convention": "fixed_charge",
             "peak_process_rss_mib": rss/(1024**2 if sys.platform == "darwin" else 1024)}
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--worker", type=int)
-    parser.add_argument("--output", type=Path, default=ROOT / "validation" / "benchmark.json")
+    parser.add_argument("--output", type=Path, default=ROOT / "validation" / "benchmark-fixed-charge.json")
     args = parser.parse_args()
     if args.worker:
         print(json.dumps(worker(args.worker)))
         return
     report = {"date": datetime.now(timezone.utc).isoformat(), "python": sys.version,
               "platform": platform.platform(), "numpy": np.__version__,
-              "autograd": version("autograd"), "scipy": version("scipy"),
-              "note": "Three timed repeats; evaluations include both force conventions. Relaxation capped at 20 iterations; RSS includes interpreter, libraries, and relaxation.",
+              "autograd": version("autograd"), "force_field_sha256": ForceField.zno().checksum,
+              "full_derivative": False, "force_convention": "fixed_charge",
+              "note": "Three timed repeats; evaluations compute only fixed-charge forces. No charge-response forces or relaxation; RSS includes interpreter and numerical libraries.",
               "results": []}
     for n in (20, 100, 200):
         child = subprocess.run([sys.executable, __file__, "--worker", str(n)], capture_output=True, text=True, check=True)

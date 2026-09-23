@@ -26,8 +26,11 @@ equilibrium structures or benchmark predictions of water-cluster stability.
 
 Verified properties are charges, dipole vectors (e Å), per-atom total bond
 orders, lone-pair counts, and bond counts at the LAMMPS default threshold of
-0.3. Force comparisons use `lammps_forces`; the primary `forces` include the
-QEq response and are checked separately by finite differences in the tests.
+0.3. Force comparisons use the default fixed-charge `forces`
+(`full_derivative=False`), matching LAMMPS. The example computes no
+charge-response forces. Those are available through
+`calc.evaluate(symbols, positions, full_derivative=True)` and are checked
+separately by finite differences in the tests.
 
 See [saved results](../validation/water/summary.json) and the
 [package README](../README.md) for supported formats and limitations.

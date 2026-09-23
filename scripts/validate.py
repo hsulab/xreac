@@ -36,7 +36,7 @@ def main():
               "force_tolerance": 1e-4, "relaxation_converged": relaxed.converged and relaxed20.converged,
               "cluster20_relaxation_iterations": relaxed20.iterations,
               "cluster20_relaxation_max_force": float(np.max(abs(relaxed20.evaluation.forces))),
-              "force_comparison": "lammps_forces (fixed QEq charges)", "cases": {}}
+              "force_comparison": "fixed_charge", "full_derivative": False, "cases": {}}
     for name, (symbols, positions) in cases.items():
         actual = calc.evaluate(symbols, positions)
         ref = evaluate_lammps(ff, symbols, positions, directory=args.output/name, executable=args.executable)
@@ -45,8 +45,7 @@ def main():
         row = {"atoms": len(symbols), "energy_error_per_atom": abs(actual.energy-ref.energy)/len(symbols),
                "component_errors": errors,
                "max_charge_error": float(np.max(abs(actual.charges-ref.charges))),
-               "max_force_error": float(np.max(abs(actual.lammps_forces-ref.forces))),
-               "max_charge_response_force": float(np.max(abs(actual.forces-actual.lammps_forces)))}
+               "max_force_error": float(np.max(abs(actual.forces-ref.forces)))}
         row["passed"] = bool(row["energy_error_per_atom"] <= 1e-5
                              and max(errors.values())/len(symbols) <= 1e-5
                              and row["max_charge_error"] <= 1e-6 and row["max_force_error"] <= 1e-4)
@@ -54,9 +53,10 @@ def main():
         (args.output/name/"python.json").write_text(json.dumps({
             "energy": actual.energy, "components": actual.components,
             "charges": actual.charges.tolist(), "forces": actual.forces.tolist(),
-            "lammps_forces": actual.lammps_forces.tolist()}, indent=2)+"\n")
+            "full_derivative": actual.full_derivative,
+            "force_convention": actual.force_convention}, indent=2)+"\n")
         print(f"{name}: {'PASS' if row['passed'] else 'FAIL'}, force error {row['max_force_error']:.3g}", flush=True)
-    report["passed"] = bool(relaxed.converged and all(row["passed"] for row in report["cases"].values()))
+    report["passed"] = bool(report["relaxation_converged"] and all(row["passed"] for row in report["cases"].values()))
     (args.output/"summary.json").write_text(json.dumps(report, indent=2)+"\n")
     print(f"Report: {args.output / 'summary.json'}")
     if not report["passed"]:

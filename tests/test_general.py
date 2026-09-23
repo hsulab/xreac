@@ -80,7 +80,7 @@ def test_atom_labels_preserved(tmp_path):
 def test_water_gradients_and_properties(name):
     calc = Calculator(ForceField.bundled("qeq_ff.water"))
     symbols, x = WATER[name]
-    result = calc.evaluate(symbols, x)
+    result = calc.evaluate(symbols, x, full_derivative=True)
     h = 1e-5
     direction = np.random.default_rng(410).normal(size=x.shape)
     direction /= np.linalg.norm(direction)
@@ -143,7 +143,7 @@ def test_carbon_gradients(name):
     symbols, x = CARBON[name]
     x = np.array(x, dtype=float)
     calc = Calculator(ForceField.bundled("ffield.reax.cho"))
-    result = calc.evaluate(symbols, x)
+    result = calc.evaluate(symbols, x, full_derivative=True)
     direction = np.random.default_rng(508).normal(size=x.shape)
     direction /= np.linalg.norm(direction)
     h = 1e-6
@@ -192,5 +192,7 @@ def test_water_relaxation(tmp_path):
     assert relaxed.converged, relaxed.message
     assert relaxed.evaluation.energy < calc.evaluate(symbols, x).energy
     reference = evaluate_lammps(ff, symbols, relaxed.positions, directory=tmp_path/"relaxed")
-    report = comparison(relaxed.evaluation, reference, len(x))
+    # Energy minimization uses the full derivative; reference checks use fixed-charge forces.
+    fixed = calc.evaluate(symbols, relaxed.positions)
+    report = comparison(fixed, reference, len(x))
     assert report["passed"], report

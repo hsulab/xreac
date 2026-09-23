@@ -47,11 +47,13 @@ class EnergyModel:
         r = np.sqrt(np.sum(delta * delta, axis=-1) + np.eye(self.n))
         return delta, r
 
-    def electrostatics(self, r):
+    def electrostatics(self, r, fixed_charges=None):
         u = np.minimum(r / self.g[12], 1.0)
         taper = 1 + u**4 * (-35 + u * (84 + u * (-70 + 20*u)))
         taper = np.where(r < self.g[12], taper, 0.0) * (1-np.eye(self.n))
         shield = taper / (r**3 + self.p["gamma"]) ** (1/3)
+        if fixed_charges is not None:
+            return fixed_charges, taper, shield
         h = QEQ_COULOMB * shield + np.diag(self.a["eta"])
         # A Lagrange multiplier enforces total charge = 0 exactly.
         ones = np.ones((self.n, 1))
@@ -105,9 +107,7 @@ class EnergyModel:
     def components(self, x, fixed_charges=None):
         p, a, g = self.p, self.a, self.g
         delta, r = self.geometry(x)
-        q, taper, shield = self.electrostatics(r)
-        if fixed_charges is not None:
-            q = fixed_charges
+        q, taper, shield = self.electrostatics(r, fixed_charges)
         bo, sigma, pi, pp = self.bond_orders(r)
         total = np.sum(bo, axis=1)
         d, db = total-a["valency"], total-a["valency_boc"]

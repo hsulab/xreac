@@ -34,9 +34,16 @@ def read_case(source, name):
     actual = json.loads((directory / "python.json").read_text())
     reference = json.loads((directory / "reference.json").read_text())
     assert len(atoms) == int(lines[0])
-    delta = np.asarray(actual["lammps_forces"]) - reference["forces"]
-    full_delta = np.asarray(actual["forces"]) - reference["forces"]
-    assert delta.shape == full_delta.shape == xyz.shape
+    # Read archived v0.2 results as well as the single-force-array v0.3 schema.
+    if "lammps_forces" in actual:
+        delta = np.asarray(actual["lammps_forces"]) - reference["forces"]
+        full_delta = np.asarray(actual["forces"]) - reference["forces"]
+    elif actual.get("full_derivative") is False:
+        delta = np.asarray(actual["forces"]) - reference["forces"]
+        full_delta = None
+    else:
+        raise ValueError("Reference report requires fixed-charge forces")
+    assert delta.shape == xyz.shape
     values = {
         "case": name, "atoms": len(atoms),
         "python_energy_kcal_mol": actual["energy"],
@@ -44,12 +51,16 @@ def read_case(source, name):
         "delta_energy_kcal_mol": actual["energy"] - reference["energy"],
         "max_force_component_error_kcal_mol_A": float(np.max(abs(delta))),
         "rms_force_component_error_kcal_mol_A": float(np.sqrt(np.mean(delta**2))),
-        "max_full_gradient_difference_kcal_mol_A": float(np.max(abs(full_delta))),
-        "rms_full_gradient_difference_kcal_mol_A": float(np.sqrt(np.mean(full_delta**2))),
+        "max_charge_response_difference_kcal_mol_A": None if full_delta is None else float(np.max(abs(full_delta))),
+        "rms_charge_response_difference_kcal_mol_A": None if full_delta is None else float(np.sqrt(np.mean(full_delta**2))),
     }
-    assert all(np.isfinite(v) for k, v in values.items() if k != "case")
+    assert all(np.isfinite(v) for k, v in values.items() if k != "case" and v is not None)
     return dict(name=name, symbols=symbols, xyz=xyz, actual=actual,
                 reference=reference, delta=delta, full_delta=full_delta, values=values)
+
+
+def optional_number(value, precision=3):
+    return "Not evaluated" if value is None else f"{value:.{precision}e}"
 
 
 def page(title, subtitle, number):
@@ -123,16 +134,16 @@ def overview(pdf, cases, summary):
           [.23, .07, .25, .25, .20])
     fig.text(.055, .388, "FORCE DIFFERENCES   /   kcal/mol/Å; Cartesian components", fontsize=10, weight="bold")
     table(fig, [.055, .187, .89, .185],
-          ["Structure", "Matched max |ΔF|", "Matched RMS ΔF", "Full-gradient max |ΔF|"],
+          ["Structure", "Fixed-charge max |ΔF|", "Fixed-charge RMS ΔF", "Charge-response max |ΔF|"],
           [[c["name"].replace("_", " "),
             f'{c["values"]["max_force_component_error_kcal_mol_A"]:.3e}',
             f'{c["values"]["rms_force_component_error_kcal_mol_A"]:.3e}',
-            f'{c["values"]["max_full_gradient_difference_kcal_mol_A"]:.3e}'] for c in cases],
+            optional_number(c["values"]["max_charge_response_difference_kcal_mol_A"])] for c in cases],
           [.25, .23, .23, .29])
     fig.text(.055, .15,
-             "Matched: Python lammps_forces minus LAMMPS forces, with converged charges held fixed.\n"
-             "Full-gradient: Python forces minus LAMMPS forces, including charge response. RMS averages all 3N components.\n"
-             "The two conventions differ because QEq and energy use inconsistent constants: 14.4 × 23.02 ≠ 332.06371.",
+             "Fixed-charge forces: QEq at each structure; charges held constant only during differentiation (default).\n"
+             "Charge-response forces: full derivative through QEq (optional). All differences subtract LAMMPS forces.\n"
+             "RMS averages all 3N components. Force conventions differ because 14.4 × 23.02 ≠ 332.06371 in the reference.",
              fontsize=8.5, linespacing=1.5, va="top")
     version = next(iter(summary["cases"].values()))["reference_version"]
     fig.text(.055, .064, f"Reference: {version} via lmp_mpi. Parameters: {summary['force_field']}; Achtyl et al. (2015).", fontsize=8)
@@ -153,10 +164,10 @@ def detail(pdf, case, number):
         ["Python E (kcal/mol)", f'{actual["energy"]:.12f}'],
         ["LAMMPS E (kcal/mol)", f'{reference["energy"]:.12f}'],
         ["ΔE (kcal/mol)", f'{v["delta_energy_kcal_mol"]:+.6e}'],
-        ["Matched max |ΔF|", f'{v["max_force_component_error_kcal_mol_A"]:.6e}'],
-        ["Matched RMS ΔF", f'{v["rms_force_component_error_kcal_mol_A"]:.6e}'],
-        ["Full-gradient max |ΔF|", f'{v["max_full_gradient_difference_kcal_mol_A"]:.6e}'],
-        ["Full-gradient RMS ΔF", f'{v["rms_full_gradient_difference_kcal_mol_A"]:.6e}'],
+        ["Fixed-charge max |ΔF|", f'{v["max_force_component_error_kcal_mol_A"]:.6e}'],
+        ["Fixed-charge RMS ΔF", f'{v["rms_force_component_error_kcal_mol_A"]:.6e}'],
+        ["Charge-response max |ΔF|", optional_number(v["max_charge_response_difference_kcal_mol_A"], 6)],
+        ["Charge-response RMS ΔF", optional_number(v["rms_charge_response_difference_kcal_mol_A"], 6)],
     ], [.54, .46], size=8.5)
     fig.text(.055, .495, "ENERGY COMPONENTS   /   kcal/mol", fontsize=10, weight="bold")
     rows = [[key.replace("_", " "), f'{value:.8f}', f'{value-reference["components"][key]:+.2e}']
@@ -167,9 +178,10 @@ def detail(pdf, case, number):
     indices = np.arange(1, v["atoms"]+1)
     floor = 1e-16
     ax.semilogy(indices, np.maximum(np.max(abs(case["delta"]), axis=1), floor),
-                "o-", ms=4, color=BLUE, label="Matched convention")
-    ax.semilogy(indices, np.maximum(np.max(abs(case["full_delta"]), axis=1), floor),
-                "s-", ms=4, color=RED, label="Full energy gradient")
+                "o-", ms=4, color=BLUE, label="Fixed-charge forces")
+    if case["full_delta"] is not None:
+        ax.semilogy(indices, np.maximum(np.max(abs(case["full_delta"]), axis=1), floor),
+                    "s-", ms=4, color=RED, label="Charge-response forces")
     ax.set_xticks(indices)
     ax.tick_params(axis="x", labelsize=7)
     ax.set_xlabel("Atom index (XYZ order)")
@@ -184,8 +196,8 @@ def detail(pdf, case, number):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--input", type=Path, default=ROOT / "validation/water")
-    parser.add_argument("--output", type=Path, default=ROOT / "validation/water/report.pdf")
+    parser.add_argument("--input", type=Path, default=ROOT / "validation/water-fixed-charge")
+    parser.add_argument("--output", type=Path, default=ROOT / "validation/water-fixed-charge/report.pdf")
     args = parser.parse_args()
     summary = json.loads((args.input / "summary.json").read_text())
     if not summary.get("reference_verified"):
@@ -201,7 +213,7 @@ def main():
             detail(pdf, case, number)
     csv_path = args.output.with_suffix(".csv")
     with csv_path.open("w", newline="") as stream:
-        writer = csv.DictWriter(stream, fieldnames=list(cases[0]["values"]))
+        writer = csv.DictWriter(stream, fieldnames=list(cases[0]["values"]), lineterminator="\n")
         writer.writeheader()
         writer.writerows(case["values"] for case in cases)
     print(f"Created {args.output} ({len(cases)+1} pages) and {csv_path}")
