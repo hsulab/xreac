@@ -87,16 +87,18 @@ class Neighbors:
         order = onp.lexsort((shifts[:, 2], shifts[:, 1], shifts[:, 0], j, i))
         self.i, self.j, self.shifts = (values[order].astype(onp.int64) for values in (i, j, shifts))
         self.offsets = self.shifts @ self.cell
-        keys = [(int(a), int(b), *map(int, s)) for a, b, s in zip(self.i, self.j, self.shifts)]
-        lookup = {key: k for k, key in enumerate(keys)}
-        if len(lookup) != len(keys):
+        keys = onp.column_stack((self.i, self.j, self.shifts))
+        if onp.any(onp.all(keys[1:] == keys[:-1], axis=1)):
             raise ValueError("Duplicate neighbor edges are not allowed")
-        reverse_keys = [(b, a, -sx, -sy, -sz) for a, b, sx, sy, sz in keys]
-        if any(key not in lookup for key in reverse_keys):
+        reverse_keys = onp.column_stack((self.j, self.i, -self.shifts))
+        reverse_order = onp.lexsort(reverse_keys[:, ::-1].T)
+        if not onp.array_equal(keys, reverse_keys[reverse_order]):
             raise ValueError("neighbors must include both directions: (i, j, S) and (j, i, -S)")
-        self.reverse = onp.array([lookup[key] for key in reverse_keys], dtype=int)
-        self.half = onp.array([key < rev for key, rev in zip(keys, reverse_keys)], dtype=bool)
-        self.rows = [onp.flatnonzero(self.i == atom) for atom in range(self.n)]
+        self.reverse = reverse_order
+        # The canonical list is sorted, so index order is lexicographic order.
+        self.half = onp.arange(len(self.i)) < self.reverse
+        counts = onp.bincount(self.i, minlength=self.n)
+        self.rows = onp.split(onp.arange(len(self.i)), onp.cumsum(counts)[:-1])
         for values in (self.i, self.j, self.shifts, self.offsets):
             values.flags.writeable = False
 
