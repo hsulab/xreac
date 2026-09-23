@@ -1,3 +1,5 @@
+from dataclasses import replace
+
 import numpy as np
 import pytest
 
@@ -131,10 +133,24 @@ def test_carbon_gradients(name):
     assert fd == pytest.approx(-np.sum(result.forces * direction), abs=2e-5, rel=1e-6)
 
 
-def test_collinear_active_torsion_rejected():
-    calc = Calculator(ForceField.bundled("ffield.reax.CHO.2008"))
-    with pytest.raises(ValueError, match="Collinear atoms in an active torsion"):
-        calc.evaluate(["C"] * 4, [[0, 0, 0], [1.5, 0, 0], [3, 0, 0], [4.5, 0.3, 0]])
+@pytest.mark.parametrize("active", [False, True])
+def test_collinear_torsion(active):
+    ff = ForceField.bundled("ffield.reax.CHO.2008")
+    if not active:
+        # A nonzero tor1 alone contributes no torsion or conjugation energy.
+        torsions = {key: prm.copy() for key, prm in ff.torsions.items()}
+        for prm in torsions.values():
+            prm[[0, 1, 2, 4]] = 0
+        ff = replace(ff, torsions=torsions)
+    calc = Calculator(ff)
+    symbols, x = ["C"] * 4, [[0, 0, 0], [1.5, 0, 0], [3, 0, 0], [4.5, 0.3, 0]]
+    if active:
+        with pytest.raises(ValueError, match="Collinear atoms in an active torsion"):
+            calc.evaluate(symbols, x)
+    else:
+        result = calc.evaluate(symbols, x)
+        assert result.components["torsion"] == result.components["conjugation"] == 0
+        assert np.isfinite(result.forces).all()
 
 
 def altered_water_file(path, parameters):

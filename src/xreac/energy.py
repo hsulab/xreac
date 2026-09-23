@@ -67,6 +67,12 @@ class EnergyModel:
             k: onp.array([ff.pairs[s, t][k] for s in labels for t in labels])[pair_types]
             for k in ff.pairs[symbols[0], symbols[0]]
         }
+        # Reject unsupported element sequences before enumerating atom chains.
+        # Build from the current parameter table, including expanded wildcards.
+        self.torsion_types = {}
+        for (i, j, k, l), prm in ff.torsions.items():
+            if all(s in types for s in (i, j, k, l)) and onp.any(prm[[0, 1, 2, 4]] != 0):
+                self.torsion_types.setdefault((j, k), {}).setdefault(i, {})[l] = prm
 
     def electrostatics(self, r, fixed_charges=None):
         u = np.minimum(r / self.g[12], 1.0)
@@ -267,19 +273,26 @@ class EnergyModel:
         shifts = self.edges.shifts
         for middle in onp.flatnonzero(self.edges.half & (bv > THB_CUT)):
             j, k = self.i[middle], self.j[middle]
+            left_types = self.torsion_types.get((self.symbols[j], self.symbols[k]))
+            if left_types is None:
+                continue
             for left in neighbors[j]:
                 if left == middle:
                     continue
+                right_types = left_types.get(self.symbols[self.j[left]])
+                if right_types is None:
+                    continue
                 for right in neighbors[k]:
+                    prm = right_types.get(self.symbols[self.j[right]])
+                    if prm is None:
+                        continue
                     if right == self.edges.reverse[middle] or bv[left] * bv[middle] * bv[right] <= THB_CUT:
                         continue
                     i, l = self.j[left], self.j[right]
                     if i == l and onp.array_equal(shifts[left], shifts[middle] + shifts[right]):
                         continue
-                    prm = self.ff.torsions.get(tuple(self.symbols[t] for t in (i, j, k, l)))
-                    if prm is not None and onp.any(prm[[0, 1, 2, 4]] != 0):
-                        chains.append((left, middle, right))
-                        params.append(prm)
+                    chains.append((left, middle, right))
+                    params.append(prm)
         if not chains:
             return
         left, middle, right = onp.array(chains).T
