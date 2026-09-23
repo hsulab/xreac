@@ -172,12 +172,13 @@ def altered_water_file(path, parameters):
 
 @pytest.mark.reference
 @pytest.mark.parametrize("shield", [False, True])
-def test_inner_wall_variants(shield, tmp_path):
+@pytest.mark.parametrize("neighbor_backend", ["replicated", "ase"])
+def test_inner_wall_variants(shield, neighbor_backend, tmp_path):
     # These synthetic files test the equations against LAMMPS, not physical models.
     ff = altered_water_file(tmp_path/"core.ff", {9: 15. if shield else 0., 29: .8, 30: .2, 31: 3.})
     assert ff.vdw_type == (3 if shield else 2)
     symbols, x = WATER["dimer"]
-    actual = Calculator(ff).evaluate(symbols, x)
+    actual = Calculator(ff).evaluate(symbols, x, neighbor_backend=neighbor_backend)
     reference = evaluate_lammps(ff, symbols, x, directory=tmp_path/"reference")
     report = comparison(actual, reference, len(x))
     assert report["passed"], report

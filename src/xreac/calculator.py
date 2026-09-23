@@ -23,6 +23,7 @@ class Evaluation:
     bond_counts: np.ndarray
     dipole: np.ndarray
     cell_repetitions: tuple[int, int, int] = (1, 1, 1)
+    neighbor_backend: str = "replicated"
 
     @property
     def force_convention(self):
@@ -62,7 +63,7 @@ class Calculator:
         self.max_expanded_atoms = max_expanded_atoms
 
     def evaluate(self, symbols, positions, *, total_charge=0, cell=None,
-                 pbc=None, full_derivative=False):
+                 pbc=None, full_derivative=False, neighbor_backend="replicated"):
         """Return energy, equilibrated charges, and the selected forces.
 
         By default, fixed-charge forces hold the freshly equilibrated charges
@@ -72,15 +73,25 @@ class Calculator:
 
         cell contains three lengths or three row vectors in Angstrom. Supplying
         it enables all periodic directions unless pbc is explicitly set to a
-        boolean or three flags. Small cells use tied internal copies; energies
-        and properties refer to the input cell. cell_repetitions records the
-        expansion. bond_orders sums over images; bond_counts counts each image.
+        boolean or three flags. neighbor_backend="replicated" uses the native
+        dense image search with tied internal copies for small cells. "ase"
+        uses ASE's image-resolved neighbor list without expanding the cell.
+        Energies and properties refer to the input cell. cell_repetitions records
+        actual replication. bond_orders sums over images; bond_counts counts each image.
         Dipoles use the supplied coordinate branch and change upon wrapping.
         """
         if not isinstance(full_derivative, bool):
             raise ValueError("full_derivative must be a boolean")
+        if neighbor_backend not in ("replicated", "ase"):
+            raise ValueError("neighbor_backend must be 'replicated' or 'ase'")
         symbols, x = validate_input(symbols, positions, total_charge, cell, pbc)
-        model, repetitions = make_model(self.force_field, symbols, cell, pbc, self.max_expanded_atoms)
+        if neighbor_backend == "ase":
+            from .neighbor_energy import NeighborEnergyModel
+
+            model = NeighborEnergyModel(self.force_field, symbols, x, cell, pbc)
+            repetitions = (1, 1, 1)
+        else:
+            model, repetitions = make_model(self.force_field, symbols, cell, pbc, self.max_expanded_atoms)
         try:
             components, charges = model.components(x)
             fixed_charges = None if full_derivative else charges
@@ -94,7 +105,7 @@ class Calculator:
         properties = model.properties(x, charges)
         return Evaluation(float(components.sum()), force, charges,
                           dict(zip(COMPONENTS, map(float, components))), full_derivative,
-                          cell_repetitions=repetitions, **properties)
+                          cell_repetitions=repetitions, neighbor_backend=neighbor_backend, **properties)
 
     def relax(self, symbols, positions, *, force_tolerance=1e-4, max_iterations=500,
               total_charge=0, cell=None, pbc=None, backend="ase"):
@@ -105,13 +116,12 @@ class Calculator:
         component to be at most force_tolerance (kcal/mol/A). FIRE uses damped
         fictitious dynamics, not an energy line search or physical time evolution.
         Set backend="native" to use the original NumPy FIRE implementation
-        without ASE, including for benchmarks. cell and pbc follow evaluate();
+        with native replication, without ASE, including for benchmarks. The
+        default ASE FIRE path uses ASE neighbor lists. cell and pbc follow evaluate();
         the cell is fixed during relaxation.
         """
         symbols, x = validate_input(symbols, positions, total_charge, cell, pbc)
         boundary = Boundary(cell, pbc)
-        boundary.supercell(self.force_field.general[12], min(5., self.force_field.general[12]),
-                           len(symbols), self.max_expanded_atoms)
         if not np.isfinite(force_tolerance) or force_tolerance <= 0:
             raise ValueError("force_tolerance must be positive and finite")
         if isinstance(max_iterations, bool) or not isinstance(max_iterations, int) or max_iterations < 1:

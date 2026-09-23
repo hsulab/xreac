@@ -24,6 +24,20 @@ ASE exposes energy in **eV** and forces in **eV/Å**. Charges use elementary
 charge and dipoles use e Å. `atoms.calc.evaluation` retains the core result in
 kcal/mol units, including bond properties and `cell_repetitions`.
 
+ASE neighbor lists are the default (`neighbor_backend="ase"`). They retain
+periodic image shifts and work directly on small input cells without replication.
+To select the retained native method:
+
+```python
+atoms.calc.set(neighbor_backend="replicated")
+# Switch back to the default:
+atoms.calc.set(neighbor_backend="ase")
+```
+
+The last result records `evaluation.neighbor_backend`. The replication limit
+`max_expanded_atoms` applies only to `"replicated"`; see
+[neighbor handling](periodic.md#neighbor-backends).
+
 The adapter caches results, invalidating them when positions, cell, periodicity,
 or calculator settings change. Initial charge arrays must be finite and sum to
 zero; their values do not freeze the QEq solution. Position constraints are
@@ -39,8 +53,9 @@ print(relaxed.converged, relaxed.iterations, relaxed.message)
 native = calc.relax(symbols, positions, cell=[6.0]*3, backend="native")
 ```
 
-The default `backend="ase"` uses ASE FIRE. `backend="native"` keeps the original
-NumPy FIRE implementation available for benchmarks and installations without ASE.
+The default `backend="ase"` uses ASE FIRE and ASE neighbor lists.
+`backend="native"` keeps the original NumPy FIRE and replication method
+available for benchmarks and installations without ASE.
 Both re-equilibrate charges at every geometry and use **fixed-charge forces**.
 The convenience method has no `full_derivative` option. It changes positions
 while keeping the cell fixed.

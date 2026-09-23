@@ -46,8 +46,8 @@ api
 
 The implementation includes bond, coordination, lone-pair, angle, torsion,
 conjugation, hydrogen-bond, vdW, Coulomb, and QEq self-energy terms. Small
-periodic cells use tied internal replication, with results normalized to the
-input cell. Fixed-cell relaxation uses fixed-charge forces with either ASE FIRE
+periodic cells use image-resolved ASE neighbors or tied native replication,
+with results normalized to the input cell. Fixed-cell relaxation uses fixed-charge forces with either ASE FIRE
 or the retained native FIRE optimizer.
 
 Net charge, stress, variable-cell relaxation, MD integration, external fields,

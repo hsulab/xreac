@@ -9,10 +9,12 @@
 
 The constructor accepts a loaded `ForceField` and keyword-only
 `max_expanded_atoms=512`. The latter limits automatic small-cell replication;
-it must be a positive integer. Neither calculation nor native FIRE requires ASE.
+it must be a positive integer. The default core calculation and native FIRE do not require ASE.
 
 `evaluate` takes atom labels and a finite `(N, 3)` coordinate array. Options are
-`total_charge=0`, `cell=None`, `pbc=None`, and `full_derivative=False`. Only neutral
+`total_charge=0`, `cell=None`, `pbc=None`, `full_derivative=False`, and
+`neighbor_backend="replicated"`. Select `neighbor_backend="ase"` to use ASE's
+image-resolved neighbor list. Only neutral
 systems are supported. The return value is an `Evaluation`.
 
 `relax` adds `force_tolerance=1e-4`, `max_iterations=500`, and `backend="ase"`.
@@ -39,6 +41,7 @@ It always uses fixed-charge forces and returns a `Relaxation`.
 | `bond_counts` | Per-atom counts of image bonds with order greater than 0.3 |
 | `dipole` | `(3,)` vector in e Å on the supplied coordinate branch |
 | `cell_repetitions` | Three internal replication factors; `(1, 1, 1)` when unexpanded |
+| `neighbor_backend` | `"replicated"` or `"ase"`; ASE always uses the unexpanded input cell |
 
 ## Relaxation result
 
@@ -72,7 +75,9 @@ and `hydrogen_bonds`. See [parameter format](force-fields.md) for supported file
 
 Implemented ASE properties are `energy`, `forces`, `charges`, and `dipole`.
 Supported calculator parameters are `full_derivative=False`, `total_charge=0`,
-and `max_expanded_atoms=512`. Update them with `atoms.calc.set(...)` to invalidate
+`max_expanded_atoms=512`, and `neighbor_backend="ase"`.
+The expansion limit applies only when `neighbor_backend="replicated"`.
+Update parameters with `atoms.calc.set(...)` to invalidate
 the cache. ASE standard calculator initialization options are accepted through
 `**kwargs`. `atoms.calc.evaluation` retains the last core `Evaluation`.
 

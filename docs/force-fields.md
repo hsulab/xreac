@@ -64,7 +64,7 @@ which triplets are eligible. The donor–H corrected bond order must be at least
 `0.01`. All acceptor images within the H···acceptor cutoff are considered, and
 the energy depends on that distance, donor–H bond order, and triplet angle.
 
-In a small primitive cell, translated copies have distinct internal identities.
+In a small primitive cell, neighbors with different lattice shifts have distinct identities.
 A donor oxygen may therefore hydrogen-bond to another image of the same
 primitive oxygen. The actual donor is excluded as its own acceptor. This
 preserves equivalence with a larger replicated cell; see the

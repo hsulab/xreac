@@ -20,16 +20,20 @@ class ReaxFFCalculator(ASECalculator):
     and e A. ``evaluation`` retains the last core result in kcal/mol units.
     Fixed-charge forces are the default; full_derivative=True is an explicit
     option for single-point charge-response calculations.
+    neighbor_backend="ase" uses ASE's image-resolved neighbor list by default.
+    Set it to "replicated" to use the native dense image/replication method.
     """
 
     implemented_properties = ["energy", "forces", "charges", "dipole"]
-    default_parameters = {"full_derivative": False, "total_charge": 0, "max_expanded_atoms": 512}
+    default_parameters = {"full_derivative": False, "total_charge": 0,
+                          "max_expanded_atoms": 512, "neighbor_backend": "ase"}
 
-    def __init__(self, force_field, *, full_derivative=False, total_charge=0, max_expanded_atoms=512, **kwargs):
+    def __init__(self, force_field, *, full_derivative=False, total_charge=0,
+                 max_expanded_atoms=512, neighbor_backend="ase", **kwargs):
         self.core = Calculator(force_field, max_expanded_atoms=max_expanded_atoms)
         self.evaluation = None
         super().__init__(full_derivative=full_derivative, total_charge=total_charge,
-                         max_expanded_atoms=max_expanded_atoms, **kwargs)
+                         max_expanded_atoms=max_expanded_atoms, neighbor_backend=neighbor_backend, **kwargs)
 
     def set(self, **kwargs):
         unknown = set(kwargs) - set(self.default_parameters)
@@ -41,6 +45,8 @@ class ReaxFFCalculator(ASECalculator):
             raise ValueError("Only neutral systems are supported")
         if "max_expanded_atoms" in kwargs:
             validate_expansion_limit(kwargs["max_expanded_atoms"])
+        if kwargs.get("neighbor_backend", "ase") not in ("ase", "replicated"):
+            raise ValueError("neighbor_backend must be 'replicated' or 'ase'")
         changed = super().set(**kwargs)
         if changed:
             self.core.max_expanded_atoms = self.parameters.max_expanded_atoms
@@ -63,7 +69,8 @@ class ReaxFFCalculator(ASECalculator):
         result = self.core.evaluate(self.atoms.get_chemical_symbols(), self.atoms.positions,
                                     cell=self.atoms.cell.array, pbc=self.atoms.pbc,
                                     total_charge=self.parameters.total_charge,
-                                    full_derivative=self.parameters.full_derivative)
+                                    full_derivative=self.parameters.full_derivative,
+                                    neighbor_backend=self.parameters.neighbor_backend)
         self.evaluation = result
         self.results = {
             "energy": result.energy * KCAL_MOL_TO_EV,

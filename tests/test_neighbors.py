@@ -1,0 +1,171 @@
+import numpy as np
+import pytest
+from ase import Atoms
+from autograd import grad
+
+from validate_neighbors import neighbor_cases, backend_differences
+from xreac import Calculator, ForceField
+from xreac.ase import ReaxFFCalculator
+from xreac.neighbors import ASENeighbors, scatter_sum
+from xreac.neighbor_energy import NeighborEnergyModel
+
+CASES = neighbor_cases()
+
+
+@pytest.mark.parametrize("name", CASES)
+def test_neighbor_backends(name):
+    filename, symbols, x, cell, pbc = CASES[name]
+    ff = ForceField.bundled(filename)
+    expected = Calculator(ff).evaluate(symbols, x, cell=cell, pbc=pbc)
+    atoms = Atoms(symbols, positions=x, cell=cell, pbc=pbc, calculator=ReaxFFCalculator(ff))
+    atoms.get_forces()
+    actual = atoms.calc.evaluation
+    assert actual.neighbor_backend == "ase"
+    assert actual.cell_repetitions == (1, 1, 1)
+    report = backend_differences(actual, expected, len(x))
+    assert report["passed"], report
+    if name == "periodic_carbon_chain":
+        assert abs(actual.components["torsion"]) > .1
+    if name == "small_water_4A":
+        assert actual.components["hydrogen_bond"] < -.3
+    if name == "small_zinc_chain":
+        assert actual.bond_counts.tolist() == [2]
+        assert actual.bond_orders[0, 0] > 1
+
+
+@pytest.mark.parametrize("name", ["small_water_4A", "small_partial_pbc_water", "periodic_carbon_chain"])
+@pytest.mark.parametrize("full_derivative", [False, True])
+def test_neighbor_derivatives(name, full_derivative, monkeypatch):
+    from autograd.tracer import Box
+    from xreac import neighbor_energy
+
+    filename, symbols, x, cell, pbc = CASES[name]
+    ff = ForceField.bundled(filename)
+    solve, solves = neighbor_energy.np.linalg.solve, []
+
+    def checked(matrix, rhs):
+        assert matrix.shape == (len(x)+1, len(x)+1)
+        solves.append(isinstance(matrix, Box))
+        return solve(matrix, rhs)
+
+    monkeypatch.setattr(neighbor_energy.np.linalg, "solve", checked)
+    calc = Calculator(ff)
+    actual = calc.evaluate(symbols, x, cell=cell, pbc=pbc,
+                           full_derivative=full_derivative, neighbor_backend="ase")
+    assert any(solves) is full_derivative
+    expected = calc.evaluate(symbols, x, cell=cell, pbc=pbc, full_derivative=full_derivative)
+    assert backend_differences(actual, expected, len(x))["passed"]
+    direction = np.random.default_rng(192).normal(size=x.shape)
+    direction /= np.linalg.norm(direction)
+    h = 1e-5
+    fixed = None if full_derivative else actual.charges
+
+    def energy(y):
+        model = NeighborEnergyModel(ff, symbols, y, cell, pbc)
+        return model.components(y, fixed)[0].sum()
+
+    derivative = (energy(x+h*direction)-energy(x-h*direction))/(2*h)
+    assert derivative == pytest.approx(-np.sum(actual.forces*direction), abs=2e-5, rel=1e-6)
+
+
+def test_neighbor_shift_completeness():
+    # Compare ASE edges to an independent explicit image search. Includes
+    # repeated neighbors, nonzero-shift self edges, and a tilted small cell.
+    cell = np.array([[3.1, 0., 0.], [.8, 3.6, 0.], [.2, .3, 4.1]])
+    x = np.array([[0., 0., 0.], [.9, .2, .3]])
+    neighbors = ASENeighbors(x, cell, [True, True, False], 7.5)
+    actual = {(int(i), int(j), *s) for i, j, s in zip(neighbors.i, neighbors.j, neighbors.shifts)}
+    expected = set()
+    for sx in range(-4, 5):
+        for sy in range(-4, 5):
+            s = np.array([sx, sy, 0])
+            for i in range(2):
+                for j in range(2):
+                    if i == j and not s.any():
+                        continue
+                    if np.linalg.norm(x[j]-x[i]+s@cell) < 7.5:
+                        expected.add((i, j, *s))
+    assert actual == expected
+    assert max(abs(sx) for _, _, sx, _, _ in actual) >= 2
+    np.testing.assert_array_equal(neighbors.reverse[neighbors.reverse], np.arange(len(neighbors.i)))
+
+
+def test_scatter_sum_derivative():
+    indices = np.array([0, 1, 0, 3])
+    x = np.array([1., 2., 3., 4.])
+    np.testing.assert_array_equal(scatter_sum(x, indices, 5), [4, 2, 0, 4, 0])
+    derivative = grad(lambda y: np.sum(scatter_sum(y, indices, 5)**2))(x)
+    np.testing.assert_array_equal(derivative, [8, 4, 8, 8])
+
+
+def test_ase_default_no_replication_and_backend_switch(monkeypatch):
+    filename, symbols, x, cell, pbc = CASES["small_water_4A"]
+    ff = ForceField.bundled(filename)
+    from xreac.geometry import Boundary
+
+    original = Boundary.supercell
+    with monkeypatch.context() as patch:
+        def forbidden(*args, **kwargs):
+            raise AssertionError("ASE neighbor lists must not replicate atoms")
+        patch.setattr(Boundary, "supercell", forbidden)
+        atoms = Atoms(symbols, positions=x, cell=cell, pbc=pbc,
+                      calculator=ReaxFFCalculator(ff, max_expanded_atoms=1))
+        forces = atoms.get_forces()
+        assert atoms.calc.evaluation.neighbor_backend == "ase"
+    assert Boundary.supercell is original
+    atoms.calc.set(neighbor_backend="replicated")
+    assert atoms.calc.evaluation is None and not atoms.calc.results
+    with pytest.raises(ValueError, match="max_expanded_atoms"):
+        atoms.get_forces()
+    atoms.calc.set(max_expanded_atoms=81)
+    np.testing.assert_allclose(atoms.get_forces(), forces, atol=1e-11, rtol=0)
+    assert atoms.calc.evaluation.neighbor_backend == "replicated"
+    assert atoms.calc.evaluation.cell_repetitions == (3, 3, 3)
+
+
+@pytest.mark.parametrize("bad", ["unknown", None, True])
+def test_invalid_neighbor_backend(bad):
+    ff = ForceField.zno()
+    with pytest.raises(ValueError, match="neighbor_backend"):
+        ReaxFFCalculator(ff, neighbor_backend=bad)
+    with pytest.raises(ValueError, match="neighbor_backend"):
+        Calculator(ff).evaluate(["Zn"], [[0, 0, 0]], neighbor_backend=bad)
+
+
+@pytest.mark.parametrize("name", ["small_triclinic_water", "small_partial_pbc_water", "periodic_carbon_chain"])
+def test_neighbor_symmetries(name):
+    filename, symbols, x, cell, pbc = CASES[name]
+    calc = Calculator(ForceField.bundled(filename))
+    def evaluate(s, y, lattice):
+        return calc.evaluate(s, y, cell=lattice, pbc=pbc, neighbor_backend="ase")
+    original = evaluate(symbols, x, cell)
+    rng = np.random.default_rng(257)
+    shifts = rng.integers(-3, 4, x.shape)*pbc
+    wrapped = evaluate(symbols, x+shifts@cell, cell)
+    np.testing.assert_allclose(wrapped.forces, original.forces, atol=2e-8, rtol=0)
+    np.testing.assert_allclose(wrapped.charges, original.charges, atol=1e-11, rtol=0)
+    np.testing.assert_allclose(wrapped.bond_orders, original.bond_orders, atol=1e-10, rtol=0)
+    assert wrapped.energy == pytest.approx(original.energy, abs=1e-9)
+    np.testing.assert_allclose(wrapped.dipole-original.dipole,
+                               np.sum(original.charges[:, None]*(shifts@cell), axis=0), atol=1e-9)
+    rotation, _ = np.linalg.qr(rng.normal(size=(3, 3)))
+    rotated = evaluate(symbols, x@rotation+[8., -5., 20.], cell@rotation)
+    assert rotated.energy == pytest.approx(original.energy, abs=1e-9)
+    np.testing.assert_allclose(rotated.forces, original.forces@rotation, atol=2e-8, rtol=0)
+    order = rng.permutation(len(x))
+    permuted = evaluate([symbols[i] for i in order], x[order], cell)
+    assert permuted.energy == pytest.approx(original.energy, abs=1e-9)
+    np.testing.assert_allclose(permuted.forces, original.forces[order], atol=2e-8, rtol=0)
+
+
+def test_neighbor_rebuild_crossing_cutoff():
+    atoms = Atoms("ZnO", positions=[[0, 0, 0], [10.1, 0, 0]],
+                  calculator=ReaxFFCalculator(ForceField.zno()))
+    atoms.get_forces()
+    distant_energy = atoms.get_potential_energy()
+    atoms.positions[1] = [1.9, .1, .2]
+    assert atoms.get_potential_energy() != distant_energy
+    reference = Calculator(atoms.calc.core.force_field).evaluate(atoms.get_chemical_symbols(), atoms.positions)
+    assert backend_differences(atoms.calc.evaluation, reference, 2)["passed"]
+    atoms.positions[1] = [10.1, 0, 0]
+    assert atoms.get_potential_energy() == pytest.approx(distant_energy, abs=1e-12)

@@ -107,6 +107,14 @@ with FIRE(atoms, logfile="relax.log", trajectory="relax.traj") as optimizer:
     converged = optimizer.run(fmax=1e-5, steps=500)
 ```
 
+The adapter defaults to ASE neighbor lists (`neighbor_backend="ase"`), retaining
+all periodic image shifts and evaluating small cells without replicating atoms.
+Set `ReaxFFCalculator(ff, neighbor_backend="replicated")` or
+`atoms.calc.set(neighbor_backend="replicated")` to select the retained native
+image/replication method. `evaluation.neighbor_backend` records the choice.
+The core `Calculator.evaluate()` keeps `neighbor_backend="replicated"` as its
+default; pass `neighbor_backend="ase"` to use ASE neighbors there too.
+
 The adapter caches results and recalculates after geometry or parameter changes.
 It supports ASE position constraints, neutral initial charge guesses, and
 nonperiodic display boxes. `atoms.cell` and `atoms.pbc` control periodicity;
@@ -164,8 +172,8 @@ print(atoms.get_forces())
 
 In the core API, supplying `cell` enables all three periodic directions by
 default. `pbc=False` retains an isolated calculation even with a display cell.
-Cells must be finite, nonsingular, and right-handed. **Small cells are supported
-through internal replication**: the calculator repeats periodic directions
+Cells must be finite, nonsingular, and right-handed. **Both neighbor backends
+support small cells**. The native `"replicated"` backend repeats periodic directions
 until each internal face height exceeds the nonbonded cutoff and twice the
 bond cutoff (10 Å for bundled files). Nonperiodic directions are not repeated.
 Positions and charges of equivalent copies remain tied to the input atoms;
@@ -180,13 +188,17 @@ print(small.forces.shape)       # (number of input atoms, 3)
 print(small.cell_repetitions)   # (3, 3, 3) with bundled parameter files
 ```
 
-The default replication limit is **512 internal atoms**. A calculation that
+The native backend's default replication limit is **512 internal atoms**. A calculation that
 would exceed it fails before allocating the expanded pair arrays. Set
 `Calculator(ff, max_expanded_atoms=...)` or
-`ReaxFFCalculator(ff, max_expanded_atoms=...)` to change the limit. This is a
+`ReaxFFCalculator(ff, neighbor_backend="replicated", max_expanded_atoms=...)` to change the limit. This is a
 memory limit on automatic expansion, not on an already-large input cell.
-Pair/bond work scales with the expanded system; this implementation prioritizes
-correctness and adds no dependencies. It is not a sparse primitive-cell backend.
+Native pair/bond work scales with the expanded system and requires no ASE dependency.
+The ASE backend instead stores neighbor edges `(i, j, lattice_shift)` directly
+on the input cell. It reports `cell_repetitions=(1, 1, 1)` and does not use the
+replication limit. Lists are rebuilt at each evaluated geometry, with no skin;
+their topology is held fixed during autodiff. The QEq solve and returned
+bond-order matrix remain dense in the input atom count.
 
 Bonded interactions cross cell boundaries using local image vectors. vdW,
 Coulomb, QEq, and hydrogen bonds include **all images within their cutoffs**,
@@ -203,11 +215,13 @@ polarization. For expanded references, the dipole is reconstructed from LAMMPS
 charges on the original input-coordinate branch; larger-cell references use
 image flags.
 Relaxation changes positions at a fixed cell, always using fixed-charge
-forces. Stress and cell relaxation are not implemented.
+forces. ASE FIRE uses ASE neighbors; native FIRE retains native replication.
+Stress and cell relaxation are not implemented.
 
 ```sh
 mamba run -n catorch3 python examples/periodic_water.py --verify
 mamba run -n catorch3 python examples/small_cells.py --verify
+mamba run -n catorch3 python scripts/validate_neighbors.py --verify
 ```
 
 This checks boundary-crossing water, multiple interacting images, rotated
@@ -225,6 +239,11 @@ interactions, including hydrogen bonds between translated copies of one atom.
 The [small-cell implementation results](validation/small-cell-support/summary.json)
 verify nine cases against larger LAMMPS supercells.
 Run `mamba run -n catorch3 python scripts/audit_small_cells.py` to reproduce.
+
+The [neighbor-backend verification](validation/ase-neighbors/README.md) compares
+45 geometries using both methods and fresh LAMMPS single points. The maximum
+force difference between ASE neighbors and native replication is
+2.0e-12 kcal/mol/Å; all energy, charge, and bond-property comparisons pass.
 
 ## Force derivative option
 
@@ -369,8 +388,10 @@ a successfully parsed arbitrary parameter set still needs its own validation.
   denominators are guarded; singular geometries should not be used to assess
   derivative agreement. Even weak intermolecular bonds can activate torsions.
 - Dense charge equilibration takes cubic time in the input atom count.
-  Pair arrays use quadratic memory in the internal expanded atom count and
-  include up to 27 image offsets; angle/torsion lists contain local interactions.
+  Native pair arrays use quadratic memory in the internal expanded atom count
+  and include up to 27 image offsets. ASE pair storage scales with the number
+  of neighbor edges; its QEq and returned bond-order matrices remain quadratic.
+  Angle/torsion lists contain local interactions.
   Highly compressed or densely connected systems may be expensive or unstable.
 - Global QEq permits charge transfer between separated fragments. This is a
   property of the reference model, not a guarantee of physical dissociation.

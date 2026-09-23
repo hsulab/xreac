@@ -4,6 +4,22 @@ Verified locally on September 22, 2026 with LAMMPS 22 Jul 2025, Update 4,
 invoked through `/opt/homebrew/bin/lmp_mpi`. The force-field checksums and
 original citations are recorded in [NOTICE](../NOTICE).
 
+## ASE neighbor lists
+
+**226 tests pass** in `catorch3`. ASE calculators now default to direct,
+image-resolved ASE neighbors; native replication remains available explicitly
+and remains the default for core single points and native FIRE.
+
+The [45-case comparison](ase-neighbors/README.md) passes both backend equivalence
+and fresh LAMMPS checks. Maximum ASE/native differences are 3.23e-13 kcal/mol/atom
+for total energy and 1.97e-12 kcal/mol/Å for forces. Full numerical results and
+structures are retained with the report. Both backends include all periodic
+images within their cutoffs, self-image bonds, and hydrogen-bond image identities.
+
+```sh
+mamba run -n catorch3 python scripts/validate_neighbors.py --verify
+```
+
 ## Small-cell support (0.6)
 
 **163 tests pass** in `catorch3`.

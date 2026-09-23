@@ -56,7 +56,7 @@ def serialize(result):
     fields = ("energy", "forces", "charges", "components", "dipole",
               "total_bond_orders", "lone_pairs", "bond_counts")
     output = {name: getattr(result, name) for name in fields}
-    for name in ("full_derivative", "force_convention", "bond_orders", "cell_repetitions"):
+    for name in ("full_derivative", "force_convention", "bond_orders", "cell_repetitions", "neighbor_backend"):
         if hasattr(result, name):
             output[name] = getattr(result, name)
     return {key: value.tolist() if isinstance(value, np.ndarray) else value for key, value in output.items()}

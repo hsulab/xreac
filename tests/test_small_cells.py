@@ -184,7 +184,8 @@ def test_small_cell_relaxation(backend, tmp_path, monkeypatch):
                   [.97*np.cos(half), -.97*np.sin(half), 0]])
     result = Calculator(ff).relax(symbols, (x+5.6) % 6, cell=cell, backend=backend, force_tolerance=1e-5)
     assert result.converged
-    assert result.evaluation.cell_repetitions == (2, 2, 2)
+    assert result.evaluation.cell_repetitions == ((1, 1, 1) if backend == "ase" else (2, 2, 2))
+    assert result.evaluation.neighbor_backend == ("ase" if backend == "ase" else "replicated")
     assert not result.evaluation.full_derivative
     ref = evaluate_lammps(ff, symbols, result.positions, cell=cell, directory=tmp_path/backend)
     report = comparison(result.evaluation, ref, len(x))
@@ -207,7 +208,7 @@ def test_ase_small_cell_limit_and_caching():
     filename, symbols, x, cell, pbc = CASES["water_4A"]
     ff = ForceField.bundled(filename)
     atoms = Atoms(symbols, positions=x, cell=cell, pbc=pbc,
-                  calculator=ReaxFFCalculator(ff, max_expanded_atoms=80))
+                  calculator=ReaxFFCalculator(ff, max_expanded_atoms=80, neighbor_backend="replicated"))
     with pytest.raises(ValueError, match="max_expanded_atoms"):
         atoms.get_forces()
     atoms.calc.set(max_expanded_atoms=81)

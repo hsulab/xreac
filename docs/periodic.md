@@ -19,9 +19,45 @@ atoms preserves energies, forces, charges, and bond properties. Dipoles follow
 the supplied coordinate branch. Cells remain fixed during relaxation; stress
 and variable-cell optimization are not implemented.
 
-## Small cells
+## Neighbor backends
 
-Small cells are replicated internally until every periodic face height exceeds
+The two backends evaluate the same image-resolved interactions:
+
+| Backend | Default for | Neighbor construction |
+| --- | --- | --- |
+| `"replicated"` | Core `Calculator.evaluate()` and native FIRE | Dense image search, with tied copies for small cells |
+| `"ase"` | `ReaxFFCalculator` and ASE FIRE | ASE neighbor list on the input cell, retaining integer image shifts |
+
+```python
+direct = calc.evaluate(symbols, positions, cell=[4.0]*3, neighbor_backend="ase")
+native = calc.evaluate(symbols, positions, cell=[4.0]*3, neighbor_backend="replicated")
+```
+
+The ASE backend needs `.[ase]`. It calls
+[ASE's primitive neighbor list](https://docs.ase-lib.org/ase/neighborlist.html)
+with the force field's nonbonded cutoff. Every edge stores two input atom indices
+and a lattice shift; its vector is `positions[j] - positions[i] + shift @ cell`.
+Both edge directions and all images within the cutoff are retained. Only the
+zero-shift self interaction is excluded. Bond-order, angle, torsion, and
+hydrogen-bond screening then applies the same cutoffs as the native backend.
+ASE's covalent-radius defaults are not used.
+
+Angles and torsions track image identities along each bond chain. A hydrogen-bond
+donor and acceptor can share an input atom index if they occupy different images.
+Charges are solved on the input atoms; self-image couplings enter the QEq diagonal.
+Bond counts apply their threshold per image before reduction to the input atoms.
+
+The neighbor list is rebuilt for each new evaluation, including changes to
+positions, cell, or PBC. During autodiff, the selected edges and lattice shifts
+stay fixed while their vectors and distances remain differentiable. There is
+no skin or list reuse between changed geometries; ASE caches unchanged results.
+The ASE backend always reports `cell_repetitions=(1, 1, 1)` and does not use
+`max_expanded_atoms`. Pair parameters and distances are stored per edge. The QEq
+matrix and returned bond-order matrix remain dense in the input atom count.
+
+## Small cells with native replication
+
+With `neighbor_backend="replicated"`, small cells are replicated internally until every periodic face height exceeds
 both the nonbonded cutoff and twice the bond cutoff—10 Å for the bundled files.
 Nonperiodic directions are not repeated. For tilted cells, face heights rather
 than lattice-vector lengths determine replication.
@@ -45,14 +81,14 @@ the input coordinates. Returned energies and properties refer to the input cell.
 
 The default limit is **512 internal atoms** for automatic replication. Exceeding
 it raises an error before expanded pair arrays are allocated. Set
-`Calculator(ff, max_expanded_atoms=...)` or the same ASE calculator option to
-change it. This is a replication limit, not a limit on an already-large input
+`Calculator(ff, max_expanded_atoms=...)` or the same option with
+`ReaxFFCalculator(ff, neighbor_backend="replicated")` to change it.
+This is a replication limit, not a limit on an already-large input
 cell. Pair work and memory still grow with the expanded system.
 
-## Current neighbor representation
+## Native neighbor representation
 
-The implementation uses dense pair arrays, not a spatially binned or Verlet
-neighbor list. At every geometry it:
+The retained native backend uses dense pair arrays. At every geometry it:
 
 1. Computes displacements between all internal atom pairs.
 2. Examines shifts `-1`, `0`, and `+1` in each periodic direction, up to 27 image
@@ -68,8 +104,7 @@ result when its input has not changed.
 
 Pair storage scales quadratically in the internal atom count, multiplied by
 the number of image offsets. QEq's dense solve scales cubically in the input
-atom count. A direct image-aware sparse neighbor implementation could reduce
-the replicated work; it is not the current backend.
+atom count. The ASE backend avoids these expanded pair arrays.
 
 ## Reference convention
 

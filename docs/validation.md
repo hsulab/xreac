@@ -59,6 +59,32 @@ The 0.6 implementation passed **163 tests** in the recorded `catorch3` run.
 This is a historical validation count, not a dynamically executed docs build.
 LAMMPS tests are not run while building documentation.
 
+## Neighbor-backend equivalence
+
+The ASE calculator defaults to ASE's image-resolved neighbor list. Native
+replication remains selectable with `neighbor_backend="replicated"`. Across
+45 retained geometries, the maximum difference between the methods is
+**3.23e-13 kcal/mol/atom** in total energy and **1.97e-12 kcal/mol/Å** in forces.
+Charges, dipoles, full bond-order matrices, lone pairs, and bond counts also agree.
+All cases pass fresh LAMMPS checks, with a maximum force difference of
+**2.48e-8 kcal/mol/Å**. The complete suite passes **226 tests** in this run.
+
+Coverage includes all three bundled force fields, molecules and clusters up
+to 200 atoms, 192-atom bulk water, small/triclinic/partially periodic cells,
+self-image bonds, hydrogen bonds, image-spanning torsions, and cutoff crossings.
+Derivative tests check both force conventions; LAMMPS comparisons use only
+fixed-charge forces. Small-cell references keep the supercell convention below.
+
+Download the {download}`comparison summary <../validation/ase-neighbors/summary.json>`,
+{download}`structures <../validation/ase-neighbors/structures.json>`, and
+{download}`full numerical results (gzipped JSON) <../validation/ase-neighbors/results.json.gz>`.
+The numerical results are keyed by case and then `ase`, `replicated`, or
+`reference` and can be read with `json.load(gzip.open(path, "rt"))`.
+
+```sh
+mamba run -n catorch3 python scripts/validate_neighbors.py --verify
+```
+
 ## Small-cell verification
 
 Nine retained cases cover 3.12–9 Å water cells, a water dimer, tilted and partially
