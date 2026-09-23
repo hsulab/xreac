@@ -9,5 +9,5 @@ mamba run -n catorch3 python -m sphinx -n -W --keep-going -b doctest docs docs/_
 ```
 
 The local site starts at `docs/_build/html/index.html`. See
-[development.md](development.md) for Read the Docs deployment and authoring.
+[development.md](development.md) for local build and authoring instructions.
 Generated HTML is intentionally not committed.
