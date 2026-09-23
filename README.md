@@ -181,6 +181,13 @@ geometries, not equilibrated liquid snapshots. The example saves extended XYZ
 and JSON structures with cells, numerical results, and complete LAMMPS runs.
 See the [retained periodic results](validation/periodic-water/summary.json).
 
+The [small-cell audit](validation/small-cells/README.md) tests 3.12–9 Å cells
+against exactly replicated larger cells. It finds a hydrogen-bond exclusion
+discrepancy in primitive-cell LAMMPS calculations, while QEq charges agree in
+the tested cases. Small cells remain unsupported by the Python calculator;
+equivalent larger supercells are the reference for future implementation.
+Run `mamba run -n catorch3 python scripts/audit_small_cells.py` to reproduce.
+
 ## Force derivative option
 
 `evaluate(..., full_derivative=False)` is the default. It returns

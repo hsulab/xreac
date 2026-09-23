@@ -4,6 +4,21 @@ Verified locally on September 22, 2026 with LAMMPS 22 Jul 2025, Update 4,
 invoked through `/opt/homebrew/bin/lmp_mpi`. The force-field checksums and
 original citations are recorded in [NOTICE](../NOTICE).
 
+## Small-cell audit
+
+The September 23, 2026 [small-cell audit](small-cells/README.md) compares seven
+primitive cells with exactly replicated supercells using single-rank `lmp_mpi`.
+All supported Python supercells match LAMMPS. The primitive water cells at
+4 Å and 3.12 Å differ from their replicated representations in hydrogen-bond
+energy and forces. QEq charges agree in all tested cases; an independent
+explicit-image QEq sum confirms that QEq is not the discrepancy here.
+
+The pinned LAMMPS hydrogen-bond code excludes donor/acceptor images sharing
+the same original atom ID. The audit documents this representation dependence
+and the image-aware neighbor/QEq work required for small-cell support in xreac.
+The calculator's size guard remains enabled; the reference-only
+`allow_small_cell=True` switch is for diagnostics. **139 tests pass.**
+
 ## Periodic cells (0.5)
 
 Verified September 23, 2026 in `catorch3`: **136 tests pass**. Fixed orthorhombic

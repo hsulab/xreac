@@ -32,17 +32,27 @@ class ReferenceResult:
 
 def evaluate_lammps(force_field, symbols, positions, *, executable=None,
                     directory=None, timeout=120, expected_version=REFERENCE_VERSION,
-                    cell=None, pbc=None):
+                    cell=None, pbc=None, allow_small_cell=False):
     """Retain a single-point reference with fresh QEq and optional fixed-cell PBC.
 
     cell/pbc follow Calculator.evaluate(). A rotated triclinic cell is mapped
     to LAMMPS coordinates and vector results are rotated back. Image flags
     preserve the supplied coordinate branch for dipole comparisons.
+    allow_small_cell=True is for diagnostics outside LAMMPS's documented QEq
+    cell-size range, not an accepted reference for validating small-cell support.
     """
     symbols, x = validate_input(symbols, positions, cell=cell, pbc=pbc)
     force_field.validate_model(symbols)
     boundary = Boundary(cell, pbc)
-    boundary.validate_cutoff(force_field.general[12], min(5.0, force_field.general[12]))
+    if not isinstance(allow_small_cell, bool):
+        raise ValueError("allow_small_cell must be a boolean")
+    within_cell_limits = True
+    try:
+        boundary.validate_cutoff(force_field.general[12], min(5.0, force_field.general[12]))
+    except ValueError:
+        within_cell_limits = False
+        if not allow_small_cell:
+            raise
     executable = executable or os.environ.get("XREAC_LAMMPS", "lmp_mpi")
     executable = shutil.which(str(executable))
     if executable is None:
@@ -141,7 +151,8 @@ print "$(c_dipole[1]:%.17g) $(c_dipole[2]:%.17g) $(c_dipole[3]:%.17g)" file dipo
                 "force_field_sha256": force_field.checksum, "qeq_tolerance": 1e-12,
                 "cell": boundary.cell.tolist() if boundary.periodic else None,
                 "pbc": boundary.pbc.tolist(), "rotation": rotation.tolist(),
-                "origin": origin.tolist()}
+                "origin": origin.tolist(), "allow_small_cell": allow_small_cell,
+                "within_validated_cell_limits": within_cell_limits}
     (work / "metadata.json").write_text(json.dumps(metadata, indent=2)+"\n")
     if version != expected_version:
         raise RuntimeError(f"Reference version mismatch: expected {expected_version!r}, got {version!r}; see {work}")

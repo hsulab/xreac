@@ -28,6 +28,6 @@ xreac = "src/xreac"
 "xreac.data" = ["ffield.reax.*", "qeq_ff.water"]
 
 [tool.pytest.ini_options]
-pythonpath = ["src", "examples"]
+pythonpath = ["src", "examples", "scripts"]
 testpaths = ["tests"]
 markers = ["reference: requires the lmp_mpi reference executable"]
