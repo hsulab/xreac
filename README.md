@@ -100,9 +100,9 @@ from xreac.ase import ReaxFFCalculator
 atoms = Atoms("OH2", positions=[[0, 0, 0], [0.97, 0, 0], [-0.243, 0.94, 0]])
 atoms.calc = ReaxFFCalculator(ForceField.bundled("qeq_ff.water"))
 print(atoms.get_potential_energy())  # eV
-print(atoms.get_forces())           # eV/Angstrom, fixed-charge convention
-print(atoms.get_charges())          # elementary charge
-print(atoms.get_dipole_moment())    # e Angstrom
+print(atoms.get_forces())  # eV/Angstrom, fixed-charge convention
+print(atoms.get_charges())  # elementary charge
+print(atoms.get_dipole_moment())  # e Angstrom
 with FIRE(atoms, logfile="relax.log", trajectory="relax.traj") as optimizer:
     converged = optimizer.run(fmax=1e-5, steps=500)
 ```
@@ -122,8 +122,9 @@ used only to construct the native neighbor list.
 from ase.neighborlist import neighbor_list
 
 i, j, S = neighbor_list("ijS", atoms, ff.general[12])
-result = calc.evaluate(atoms.get_chemical_symbols(), atoms.positions,
-                       cell=atoms.cell.array, pbc=atoms.pbc, neighbors=(i, j, S))
+result = calc.evaluate(
+    atoms.get_chemical_symbols(), atoms.positions, cell=atoms.cell.array, pbc=atoms.pbc, neighbors=(i, j, S)
+)
 ```
 
 `i`, `j`, and `S` are fixed integer arrays. Autograd differentiates
@@ -178,13 +179,12 @@ Use `--ffield path/to/file` to select another compatible parameter set.
 # Core API: cell vectors are rows, in Angstrom (ASE convention).
 periodic = calc.evaluate(symbols, positions, cell=[12.48, 12.48, 12.48])
 # Partial periodicity or a general 3x3 triclinic cell:
-slab = calc.evaluate(symbols, positions, cell=[12.48, 12.48, 30.0],
-                     pbc=[True, True, False])
-relaxed = calc.relax(symbols, positions, cell=[12.48]*3, backend="ase")
+slab = calc.evaluate(symbols, positions, cell=[12.48, 12.48, 30.0], pbc=[True, True, False])
+relaxed = calc.relax(symbols, positions, cell=[12.48] * 3, backend="ase")
 # backend="native" also supports fixed periodic cells.
 
 # ASE: enable periodicity explicitly on Atoms.
-atoms.set_cell([12.48]*3)
+atoms.set_cell([12.48] * 3)
 atoms.set_pbc(True)
 print(atoms.get_forces())
 ```
@@ -201,10 +201,10 @@ couplings. There is no expanded-cell energy calculation or division by the
 number of copies. `cell_repetitions` describes the neighbor search only.
 
 ```python
-small = calc.evaluate(symbols, positions, cell=[4.0]*3)
-print(small.energy)             # kcal/mol per input cell
-print(small.forces.shape)       # (number of input atoms, 3)
-print(small.cell_repetitions)   # (3, 3, 3) with bundled parameter files
+small = calc.evaluate(symbols, positions, cell=[4.0] * 3)
+print(small.energy)  # kcal/mol per input cell
+print(small.forces.shape)  # (number of input atoms, 3)
+print(small.cell_repetitions)  # (3, 3, 3) with bundled parameter files
 ```
 
 The native backend's default replication limit is **512 internal atoms**. A calculation that
@@ -337,6 +337,7 @@ explicit `expected_version` argument to `evaluate_lammps` and revalidation.
 
 ```python
 from xreac.reference import evaluate_lammps
+
 ref = evaluate_lammps(ff, symbols, positions, directory="reference-water")
 ```
 

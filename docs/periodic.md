@@ -8,10 +8,9 @@ Supplying `cell` enables full periodicity unless `pbc` is explicitly specified.
 `pbc` accepts one boolean or three flags selecting periodic lattice directions.
 
 ```python
-result = calc.evaluate(symbols, positions, cell=[12.48]*3)
-slab = calc.evaluate(symbols, positions, cell=[12.48, 12.48, 30.0],
-                     pbc=[True, True, False])
-isolated = calc.evaluate(symbols, positions, cell=[12.48]*3, pbc=False)
+result = calc.evaluate(symbols, positions, cell=[12.48] * 3)
+slab = calc.evaluate(symbols, positions, cell=[12.48, 12.48, 30.0], pbc=[True, True, False])
+isolated = calc.evaluate(symbols, positions, cell=[12.48] * 3, pbc=False)
 ```
 
 Positions may be wrapped or unwrapped. Adding lattice vectors to individual

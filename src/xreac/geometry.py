@@ -1,4 +1,5 @@
 """Fixed-cell periodic geometry with explicit finite-cutoff image sums."""
+
 from itertools import product
 
 import autograd.numpy as np
@@ -35,11 +36,11 @@ class Boundary:
         if matrix.shape != (3, 3) or not onp.isfinite(matrix).all():
             raise ValueError("cell must contain three finite lengths or a finite (3, 3) matrix")
         determinant = onp.linalg.det(matrix)
-        if determinant <= 1e-12*onp.prod(onp.linalg.norm(matrix, axis=1)):
+        if determinant <= 1e-12 * onp.prod(onp.linalg.norm(matrix, axis=1)):
             raise ValueError("Periodic cells must be nonsingular and right-handed")
         self.cell = matrix
         self.inverse = onp.linalg.inv(matrix)
-        self.heights = 1/onp.linalg.norm(self.inverse, axis=0)
+        self.heights = 1 / onp.linalg.norm(self.inverse, axis=0)
         # With the cutoff/height restriction below, these shifts include every
         # contributing image after centering fractional pair displacements.
         self.translations = onp.array(list(product(*[(-1, 0, 1) if p else (0,) for p in self.pbc]))) @ matrix
@@ -47,10 +48,12 @@ class Boundary:
     def validate_cutoff(self, cutoff, bond_cutoff):
         """Check the large-cell restriction used by the LAMMPS reference."""
         if self.periodic:
-            minimum = max(cutoff, 2*bond_cutoff)
-            if onp.any(self.heights[self.pbc] <= minimum*(1+1e-12)):
-                raise ValueError(f"Periodic cell heights must exceed {minimum:g} Angstrom "
-                                 "(nonbonded cutoff and twice the bond cutoff); use a larger supercell")
+            minimum = max(cutoff, 2 * bond_cutoff)
+            if onp.any(self.heights[self.pbc] <= minimum * (1 + 1e-12)):
+                raise ValueError(
+                    f"Periodic cell heights must exceed {minimum:g} Angstrom "
+                    "(nonbonded cutoff and twice the bond cutoff); use a larger supercell"
+                )
 
     def supercell(self, cutoff, bond_cutoff, atoms, max_expanded_atoms=512):
         """Return repetitions, translation vectors, and a search/reference cell.
@@ -61,16 +64,18 @@ class Boundary:
         validate_expansion_limit(max_expanded_atoms)
         repetitions = onp.ones(3, dtype=int)
         if self.periodic:
-            minimum = max(cutoff, 2*bond_cutoff)*(1+1e-12)
-            required = onp.floor(minimum/self.heights[self.pbc])+1
+            minimum = max(cutoff, 2 * bond_cutoff) * (1 + 1e-12)
+            required = onp.floor(minimum / self.heights[self.pbc]) + 1
             copies = float(onp.prod(required))
-            if copies > 1 and copies*atoms > max_expanded_atoms:
-                raise ValueError(f"Small-cell replication needs {copies*atoms:g} internal atoms, "
-                                 f"exceeding max_expanded_atoms={max_expanded_atoms}; "
-                                 "increase this limit explicitly if memory permits")
+            if copies > 1 and copies * atoms > max_expanded_atoms:
+                raise ValueError(
+                    f"Small-cell replication needs {copies * atoms:g} internal atoms, "
+                    f"exceeding max_expanded_atoms={max_expanded_atoms}; "
+                    "increase this limit explicitly if memory permits"
+                )
             repetitions[self.pbc] = required.astype(int)
             shifts = onp.array(list(product(*(range(n) for n in repetitions)))) @ self.cell
-            return repetitions, shifts, self.cell*repetitions[:, None]
+            return repetitions, shifts, self.cell * repetitions[:, None]
         return repetitions, onp.zeros((1, 3)), None
 
     def centered_displacements(self, x):

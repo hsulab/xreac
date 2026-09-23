@@ -1,4 +1,5 @@
 """Sphinx configuration shared by local builds and Read the Docs."""
+
 from importlib.metadata import version as package_version
 import os
 

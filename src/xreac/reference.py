@@ -1,4 +1,5 @@
 """Development-only single-rank lmp_mpi reference harness."""
+
 from dataclasses import dataclass, replace
 from pathlib import Path
 import json
@@ -31,9 +32,20 @@ class ReferenceResult:
     cell_repetitions: tuple[int, int, int] = (1, 1, 1)
 
 
-def evaluate_lammps(force_field, symbols, positions, *, executable=None,
-                    directory=None, timeout=120, expected_version=REFERENCE_VERSION,
-                    cell=None, pbc=None, allow_small_cell=False, max_expanded_atoms=512):
+def evaluate_lammps(
+    force_field,
+    symbols,
+    positions,
+    *,
+    executable=None,
+    directory=None,
+    timeout=120,
+    expected_version=REFERENCE_VERSION,
+    cell=None,
+    pbc=None,
+    allow_small_cell=False,
+    max_expanded_atoms=512,
+):
     """Retain a single-point reference with fresh QEq and optional fixed-cell PBC.
 
     Small cells are replicated and results normalized to the input cell.
@@ -56,32 +68,60 @@ def evaluate_lammps(force_field, symbols, positions, *, executable=None,
         within_cell_limits = False
         if not allow_small_cell:
             repetitions, shifts, expanded_cell = boundary.supercell(
-                force_field.general[12], min(5., force_field.general[12]), len(x), max_expanded_atoms)
+                force_field.general[12], min(5.0, force_field.general[12]), len(x), max_expanded_atoms
+            )
             copies, n = len(shifts), len(x)
-            ref = evaluate_lammps(force_field, symbols*copies,
-                np.reshape(x[None, :, :]+shifts[:, None, :], (-1, 3)),
-                cell=expanded_cell, pbc=boundary.pbc, executable=executable,
-                directory=directory, timeout=timeout, expected_version=expected_version,
-                max_expanded_atoms=max_expanded_atoms)
+            ref = evaluate_lammps(
+                force_field,
+                symbols * copies,
+                np.reshape(x[None, :, :] + shifts[:, None, :], (-1, 3)),
+                cell=expanded_cell,
+                pbc=boundary.pbc,
+                executable=executable,
+                directory=directory,
+                timeout=timeout,
+                expected_version=expected_version,
+                max_expanded_atoms=max_expanded_atoms,
+            )
             folded = {}
-            for key, tolerance in (("forces", 1e-4), ("charges", 1e-6),
-                                   ("total_bond_orders", 1e-8), ("lone_pairs", 1e-8), ("bond_counts", 0)):
-                values = getattr(ref, key).reshape((copies, n)+getattr(ref, key).shape[1:])
-                if np.max(abs(values-values[0])) > tolerance:
+            for key, tolerance in (
+                ("forces", 1e-4),
+                ("charges", 1e-6),
+                ("total_bond_orders", 1e-8),
+                ("lone_pairs", 1e-8),
+                ("bond_counts", 0),
+            ):
+                values = getattr(ref, key).reshape((copies, n) + getattr(ref, key).shape[1:])
+                if np.max(abs(values - values[0])) > tolerance:
                     raise RuntimeError(f"LAMMPS replicated {key} differ between copies; see {ref.directory}")
                 folded[key] = values.mean(axis=0) if key != "bond_counts" else values[0].copy()
-            metadata_path = ref.directory/"metadata.json"
+            metadata_path = ref.directory / "metadata.json"
             metadata = json.loads(metadata_path.read_text())
-            metadata.update(input_cell=boundary.cell.tolist(), input_atoms=n,
-                            cell_repetitions=repetitions.tolist(), energy_divisor=copies,
-                            returned_results="Per input cell; forces/properties averaged across equivalent copies")
-            metadata_path.write_text(json.dumps(metadata, indent=2)+"\n")
-            (ref.directory/"primitive.json").write_text(json.dumps(dict(symbols=symbols,
-                positions=x.tolist(), cell=boundary.cell.tolist(), pbc=boundary.pbc.tolist()), indent=2)+"\n")
-            return replace(ref, energy=ref.energy/copies,
-                components={key: value/copies for key, value in ref.components.items()},
-                dipole=np.sum((x-x.mean(axis=0))*folded["charges"][:, None], axis=0),
-                cell_repetitions=tuple(map(int, repetitions)), **folded)
+            metadata.update(
+                input_cell=boundary.cell.tolist(),
+                input_atoms=n,
+                cell_repetitions=repetitions.tolist(),
+                energy_divisor=copies,
+                returned_results="Per input cell; forces/properties averaged across equivalent copies",
+            )
+            metadata_path.write_text(json.dumps(metadata, indent=2) + "\n")
+            (ref.directory / "primitive.json").write_text(
+                json.dumps(
+                    dict(
+                        symbols=symbols, positions=x.tolist(), cell=boundary.cell.tolist(), pbc=boundary.pbc.tolist()
+                    ),
+                    indent=2,
+                )
+                + "\n"
+            )
+            return replace(
+                ref,
+                energy=ref.energy / copies,
+                components={key: value / copies for key, value in ref.components.items()},
+                dipole=np.sum((x - x.mean(axis=0)) * folded["charges"][:, None], axis=0),
+                cell_repetitions=tuple(map(int, repetitions)),
+                **folded,
+            )
     executable = executable or os.environ.get("XREAC_LAMMPS", "lmp_mpi")
     executable = shutil.which(str(executable))
     if executable is None:
@@ -94,6 +134,7 @@ def evaluate_lammps(force_field, symbols, positions, *, executable=None,
     # Keep the exact input file alongside outputs, including its citation header.
     raw = force_field.path.read_bytes()
     from hashlib import sha256
+
     if sha256(raw).hexdigest() != force_field.checksum:
         raise ValueError("Force-field file changed after loading")
     (work / "ffield").write_bytes(raw)
@@ -110,8 +151,8 @@ def evaluate_lammps(force_field, symbols, positions, *, executable=None,
         fractional = x @ boundary.inverse
         for axis in np.flatnonzero(~boundary.pbc):
             margin = 15 / boundary.heights[axis]
-            lo = min(0., fractional[:, axis].min()) - margin
-            hi = max(1., fractional[:, axis].max()) + margin
+            lo = min(0.0, fractional[:, axis].min()) - margin
+            hi = max(1.0, fractional[:, axis].max()) + margin
             origin += lo * boundary.cell[axis]
             reference_cell[axis] *= hi - lo
         q, r = np.linalg.qr(reference_cell.T)
@@ -125,21 +166,25 @@ def evaluate_lammps(force_field, symbols, positions, *, executable=None,
         lines.append(f"{restricted[1, 0]:.17g} {restricted[2, 0]:.17g} {restricted[2, 1]:.17g} xy xz yz")
     else:
         for axis, dim in enumerate("xyz"):
-            lines.append(f"{x[:, axis].min()-15:.17g} {x[:, axis].max()+15:.17g} {dim}lo {dim}hi")
+            lines.append(f"{x[:, axis].min() - 15:.17g} {x[:, axis].max() + 15:.17g} {dim}lo {dim}hi")
     lines += ["", "Masses", ""]
-    lines += [f"{i+1} {force_field.atoms[s]['mass']:.17g}" for i, s in enumerate(types)]
+    lines += [f"{i + 1} {force_field.atoms[s]['mass']:.17g}" for i, s in enumerate(types)]
     lines += ["", "Atoms # charge", ""]
-    lines += [f"{i+1} {types.index(s)+1} 0 " + " ".join(f"{v:.17g}" for v in pos)
-              + " " + " ".join(str(v) for v in images[i])
-              for i, (s, pos) in enumerate(zip(symbols, reference_x))]
-    (work / "atoms.data").write_text("\n".join(lines)+"\n")
+    lines += [
+        f"{i + 1} {types.index(s) + 1} 0 "
+        + " ".join(f"{v:.17g}" for v in pos)
+        + " "
+        + " ".join(str(v) for v in images[i])
+        for i, (s, pos) in enumerate(zip(symbols, reference_x))
+    ]
+    (work / "atoms.data").write_text("\n".join(lines) + "\n")
     terms = " ".join(f"$(c_reax[{i}]:%.17g)" for i in range(1, 15))
     script = f"""units real
 atom_style charge
-boundary {' '.join('p' if flag else 'f' for flag in boundary.pbc)}
+boundary {" ".join("p" if flag else "f" for flag in boundary.pbc)}
 read_data atoms.data
 pair_style reaxff NULL tabulate 0 enobonds yes
-pair_coeff * * ffield {' '.join(types)}
+pair_coeff * * ffield {" ".join(types)}
 fix charges all qeq/reaxff 1 0 {force_field.general[12]:.17g} 1e-12 reaxff maxiter 2000
 neighbor 2.0 bin
 neigh_modify every 1 delay 0 check yes
@@ -167,26 +212,49 @@ print "$(c_dipole[1]:%.17g) $(c_dipole[2]:%.17g) $(c_dipole[3]:%.17g)" file dipo
     (work / "stdout.txt").write_text(proc.stdout)
     (work / "stderr.txt").write_text(proc.stderr)
     if proc.returncode:
-        raise RuntimeError(f"lmp_mpi failed ({proc.returncode}); see {work}\n{proc.stdout[-2000:]}\n{proc.stderr[-1000:]}")
+        raise RuntimeError(
+            f"lmp_mpi failed ({proc.returncode}); see {work}\n{proc.stdout[-2000:]}\n{proc.stderr[-1000:]}"
+        )
     if "convergence failed" in proc.stdout.lower():
         raise RuntimeError(f"LAMMPS QEq did not converge; see {work}")
     values = np.loadtxt(work / "energy.txt", ndmin=1)
     rows = (work / "atoms.dump").read_text().splitlines()
-    start = next(i for i, line in enumerate(rows) if line.startswith("ITEM: ATOMS"))+1
+    start = next(i for i, line in enumerate(rows) if line.startswith("ITEM: ATOMS")) + 1
     atoms = np.loadtxt(rows[start:], ndmin=2)
     dipole = np.loadtxt(work / "dipole.txt", ndmin=1)
     version = next((line for line in proc.stdout.splitlines() if line.startswith("LAMMPS (")), "unknown")
-    metadata = {"executable": executable, "version": version, "command": command,
-                "force_field_sha256": force_field.checksum, "qeq_tolerance": 1e-12,
-                "cell": boundary.cell.tolist() if boundary.periodic else None,
-                "pbc": boundary.pbc.tolist(), "rotation": rotation.tolist(),
-                "origin": origin.tolist(), "allow_small_cell": allow_small_cell,
-                "within_validated_cell_limits": within_cell_limits}
-    (work / "metadata.json").write_text(json.dumps(metadata, indent=2)+"\n")
+    metadata = {
+        "executable": executable,
+        "version": version,
+        "command": command,
+        "force_field_sha256": force_field.checksum,
+        "qeq_tolerance": 1e-12,
+        "cell": boundary.cell.tolist() if boundary.periodic else None,
+        "pbc": boundary.pbc.tolist(),
+        "rotation": rotation.tolist(),
+        "origin": origin.tolist(),
+        "allow_small_cell": allow_small_cell,
+        "within_validated_cell_limits": within_cell_limits,
+    }
+    (work / "metadata.json").write_text(json.dumps(metadata, indent=2) + "\n")
     if version != expected_version:
         raise RuntimeError(f"Reference version mismatch: expected {expected_version!r}, got {version!r}; see {work}")
-    if values.shape != (15,) or atoms.shape != (len(symbols), 12) or dipole.shape != (3,) or not all(np.isfinite(v).all() for v in (values, atoms, dipole)):
+    if (
+        values.shape != (15,)
+        or atoms.shape != (len(symbols), 12)
+        or dipole.shape != (3,)
+        or not all(np.isfinite(v).all() for v in (values, atoms, dipole))
+    ):
         raise RuntimeError(f"Invalid or non-finite reference output; see {work}")
-    return ReferenceResult(float(values[0]), atoms[:, 6:9] @ rotation.T, atoms[:, 2],
-                           dict(zip(COMPONENTS, map(float, values[1:]))), version, work,
-                           atoms[:, 9], atoms[:, 10], atoms[:, 11].astype(int), dipole @ rotation.T)
+    return ReferenceResult(
+        float(values[0]),
+        atoms[:, 6:9] @ rotation.T,
+        atoms[:, 2],
+        dict(zip(COMPONENTS, map(float, values[1:]))),
+        version,
+        work,
+        atoms[:, 9],
+        atoms[:, 10],
+        atoms[:, 11].astype(int),
+        dipole @ rotation.T,
+    )

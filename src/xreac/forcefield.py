@@ -3,6 +3,7 @@
 Parameter conventions follow LAMMPS stable_22Jul2025_update4 (GPL-2.0+).
 Element labels, interactions, and mixing rules are read from the parameter file.
 """
+
 from dataclasses import dataclass
 from hashlib import sha256
 from itertools import combinations_with_replacement
@@ -17,8 +18,7 @@ ATOM_NAMES = (
     "p_ovun2 p_val3 unused26 valency_val p_val5 rcore ecore acore"
 ).split()
 BOND_NAMES = (
-    "De_s De_p De_pp p_be1 p_bo5 v13cor p_bo6 p_ovun1 "
-    "p_be2 p_bo3 p_bo4 unused11 p_bo1 p_bo2 ovc unused15"
+    "De_s De_p De_pp p_be1 p_bo5 v13cor p_bo6 p_ovun1 p_be2 p_bo3 p_bo4 unused11 p_bo1 p_bo2 ovc unused15"
 ).split()
 
 
@@ -62,8 +62,8 @@ class ForceField:
         """Standard LAMMPS vdW variant: 1 shielded, 2 inner wall, 3 both."""
         types = set()
         for a in self.atoms.values():
-            shield = a["gamma_w"] > .5
-            core = a["rcore"] > .01 and a["acore"] > .01
+            shield = a["gamma_w"] > 0.5
+            core = a["rcore"] > 0.01 and a["acore"] > 0.01
             types.add(3 if shield and core else 1 if shield else 2 if core else 0)
         if len(types) != 1 or 0 in types:
             raise ValueError("Inconsistent or unsupported van der Waals method across atom types")
@@ -138,7 +138,7 @@ class ForceField:
                     if i == 0 and wildcard:
                         result.append("*")
                     elif 1 <= i <= len(names):
-                        result.append(names[i-1])
+                        result.append(names[i - 1])
                     else:
                         raise ValueError("Invalid element index")
                 return tuple(result)
@@ -164,16 +164,23 @@ class ForceField:
                 a, b = atoms[s], atoms[t]
                 for out, field in [("r_s", "r_s"), ("r_p", "r_pi"), ("r_pp", "r_pi_pi")]:
                     p[out] = (a[field] + b[field]) / 2
-                for out, field in [("p_boc3", "b_o_132"), ("p_boc4", "b_o_131"),
-                                   ("p_boc5", "b_o_133"), ("D", "epsilon"),
-                                   ("alpha", "alpha"), ("gamma_w", "gamma_w"),
-                                   ("r_vdW", "r_vdw"), ("rcore", "rcore"),
-                                   ("ecore", "ecore"), ("acore", "acore")]:
-                    if a[field]*b[field] < 0:
+                for out, field in [
+                    ("p_boc3", "b_o_132"),
+                    ("p_boc4", "b_o_131"),
+                    ("p_boc5", "b_o_133"),
+                    ("D", "epsilon"),
+                    ("alpha", "alpha"),
+                    ("gamma_w", "gamma_w"),
+                    ("r_vdW", "r_vdw"),
+                    ("rcore", "rcore"),
+                    ("ecore", "ecore"),
+                    ("acore", "acore"),
+                ]:
+                    if a[field] * b[field] < 0:
                         raise ValueError(f"Invalid mixing parameters for {s}/{t}: {field}")
                     p[out] = np.sqrt(a[field] * b[field])
                 p["r_vdW"] *= 2
-                if a["gamma"]*b["gamma"] <= 0:
+                if a["gamma"] * b["gamma"] <= 0:
                     raise ValueError("Charge shielding parameters must be positive")
                 p["gamma"] = (a["gamma"] * b["gamma"]) ** -1.5
                 pairs[key] = pairs[key[::-1]] = p
@@ -240,7 +247,7 @@ class ForceField:
             raise ValueError("Invalid bond-order correction, vdW exponent, or bond-order cutoff")
         if elements is None:
             return
-        missing = set(elements)-self.atoms.keys()
+        missing = set(elements) - self.atoms.keys()
         if missing:
             raise ValueError(f"Atom types absent from the force field: {', '.join(sorted(missing))}")
         for s in set(elements):

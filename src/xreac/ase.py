@@ -1,4 +1,5 @@
 """Optional ASE adapter. Core xreac imports do not require ASE."""
+
 from dataclasses import replace
 
 import numpy as np
@@ -28,15 +29,32 @@ class ReaxFFCalculator(ASECalculator):
     """
 
     implemented_properties = ["energy", "forces", "charges", "dipole"]
-    default_parameters = {"full_derivative": False, "total_charge": 0,
-                          "max_expanded_atoms": 512, "neighbor_backend": "ase"}
+    default_parameters = {
+        "full_derivative": False,
+        "total_charge": 0,
+        "max_expanded_atoms": 512,
+        "neighbor_backend": "ase",
+    }
 
-    def __init__(self, force_field, *, full_derivative=False, total_charge=0,
-                 max_expanded_atoms=512, neighbor_backend="ase", **kwargs):
+    def __init__(
+        self,
+        force_field,
+        *,
+        full_derivative=False,
+        total_charge=0,
+        max_expanded_atoms=512,
+        neighbor_backend="ase",
+        **kwargs,
+    ):
         self.core = Calculator(force_field, max_expanded_atoms=max_expanded_atoms)
         self.evaluation = None
-        super().__init__(full_derivative=full_derivative, total_charge=total_charge,
-                         max_expanded_atoms=max_expanded_atoms, neighbor_backend=neighbor_backend, **kwargs)
+        super().__init__(
+            full_derivative=full_derivative,
+            total_charge=total_charge,
+            max_expanded_atoms=max_expanded_atoms,
+            neighbor_backend=neighbor_backend,
+            **kwargs,
+        )
 
     def set(self, **kwargs):
         unknown = set(kwargs) - set(self.default_parameters)
@@ -76,11 +94,15 @@ class ReaxFFCalculator(ASECalculator):
             cutoff = np.nextafter(float(self.core.force_field.general[12]), np.inf)
             i, j, S = neighbor_list("ijS", self.atoms, cutoff, self_interaction=False)
             neighbors = (i, j, S)
-        result = self.core.evaluate(self.atoms.get_chemical_symbols(), self.atoms.positions,
-                                    cell=self.atoms.cell.array, pbc=self.atoms.pbc,
-                                    total_charge=self.parameters.total_charge,
-                                    full_derivative=self.parameters.full_derivative,
-                                    neighbors=neighbors)
+        result = self.core.evaluate(
+            self.atoms.get_chemical_symbols(),
+            self.atoms.positions,
+            cell=self.atoms.cell.array,
+            pbc=self.atoms.pbc,
+            total_charge=self.parameters.total_charge,
+            full_derivative=self.parameters.full_derivative,
+            neighbors=neighbors,
+        )
         # Only the adapter knows which builder supplied the core's arrays.
         result = replace(result, neighbor_backend=self.parameters.neighbor_backend)
         self.evaluation = result
@@ -105,7 +127,7 @@ def relax_with_ase(core, symbols, positions, force_tolerance, max_iterations, *,
     # ASE uses max atomic vector norm for fmax. Observe each iteration ourselves
     # to preserve xreac's existing max Cartesian component criterion.
     with FIRE(atoms, logfile=None, downhill_check=False) as optimizer:
-        for _ in optimizer.irun(fmax=force_tolerance*KCAL_MOL_TO_EV, steps=max_iterations):
+        for _ in optimizer.irun(fmax=force_tolerance * KCAL_MOL_TO_EV, steps=max_iterations):
             result = adapter.evaluation
             if np.max(np.abs(result.forces)) <= force_tolerance:
                 return atoms.positions.copy(), result, True, optimizer.nsteps

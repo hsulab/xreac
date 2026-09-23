@@ -1,27 +1,28 @@
 """Deterministic validation geometries, including active O-only many-body terms."""
+
 import numpy as np
 
 
 def cluster(n, spacing=2.15):
-    side = int(np.ceil(n**(1/3)))
+    side = int(np.ceil(n ** (1 / 3)))
     ijk = np.array(list(np.ndindex(side, side, side)))[:n]
-    rng = np.random.default_rng(1729+n)
+    rng = np.random.default_rng(1729 + n)
     symbols = ["Zn" if row.sum() % 2 == 0 else "O" for row in ijk]
-    return symbols, ijk*spacing + rng.normal(0, .025, (n, 3))
+    return symbols, ijk * spacing + rng.normal(0, 0.025, (n, 3))
 
 
 CASES = {
-    "zn_atom": (["Zn"], [[0., 0., 0.]]),
-    "o_atom": (["O"], [[0., 0., 0.]]),
-    "zn2": (["Zn", "Zn"], [[0, 0, 0], [2.5, .1, 0]]),
+    "zn_atom": (["Zn"], [[0.0, 0.0, 0.0]]),
+    "o_atom": (["O"], [[0.0, 0.0, 0.0]]),
+    "zn2": (["Zn", "Zn"], [[0, 0, 0], [2.5, 0.1, 0]]),
     "o2": (["O", "O"], [[0, 0, 0], [1.25, 0, 0]]),
     "zno": (["Zn", "O"], [[0, 0, 0], [1.9, 0, 0]]),
-    "ozno": (["O", "Zn", "O"], [[-1.8, .2, 0], [0, 0, 0], [.5, 1.8, .2]]),
-    "znozn": (["Zn", "O", "Zn"], [[-1.8, .2, 0], [0, 0, 0], [.5, 1.8, .2]]),
-    "znzno": (["Zn", "Zn", "O"], [[-2.4, .1, 0], [0, 0, 0], [.5, 1.8, .2]]),
-    "oozn": (["O", "O", "Zn"], [[-1.4, .2, 0], [0, 0, 0], [.5, 1.8, .2]]),
-    "o3": (["O"]*3, [[-1.2, .1, 0], [0, 0, 0], [.4, 1.2, .2]]),
-    "o4": (["O"]*4, [[-1.1, .6, .2], [0, 0, 0], [1.3, .1, 0], [1.8, 1.2, .5]]),
+    "ozno": (["O", "Zn", "O"], [[-1.8, 0.2, 0], [0, 0, 0], [0.5, 1.8, 0.2]]),
+    "znozn": (["Zn", "O", "Zn"], [[-1.8, 0.2, 0], [0, 0, 0], [0.5, 1.8, 0.2]]),
+    "znzno": (["Zn", "Zn", "O"], [[-2.4, 0.1, 0], [0, 0, 0], [0.5, 1.8, 0.2]]),
+    "oozn": (["O", "O", "Zn"], [[-1.4, 0.2, 0], [0, 0, 0], [0.5, 1.8, 0.2]]),
+    "o3": (["O"] * 3, [[-1.2, 0.1, 0], [0, 0, 0], [0.4, 1.2, 0.2]]),
+    "o4": (["O"] * 4, [[-1.1, 0.6, 0.2], [0, 0, 0], [1.3, 0.1, 0], [1.8, 1.2, 0.5]]),
     "cube8": cluster(8),
     "cluster20": cluster(20),
     "cluster100": cluster(100),

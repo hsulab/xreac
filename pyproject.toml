@@ -12,6 +12,7 @@ license = {text = "GPL-2.0-or-later"}
 dependencies = ["numpy>=1.24,<3", "autograd>=1.9.1,<2"]
 
 [project.optional-dependencies]
+dev = ["ruff==0.16.8"]
 ase = ["ase>=3.26,<4"]
 relax = ["ase>=3.26,<4"]
 test = ["pytest>=8", "ase>=3.26,<4"]
@@ -32,3 +33,8 @@ xreac = "src/xreac"
 pythonpath = ["src", "examples", "scripts"]
 testpaths = ["tests"]
 markers = ["reference: requires the lmp_mpi reference executable"]
+
+[tool.ruff]
+line-length = 119
+target-version = "py310"
+extend-exclude = ["docs/_build"]

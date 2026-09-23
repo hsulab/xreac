@@ -50,11 +50,10 @@ handled by ASE. Stress and net charge are unsupported.
 ## Relaxation convenience API
 
 ```python
-relaxed = calc.relax(symbols, positions, cell=[6.0]*3,
-                     force_tolerance=1e-4, max_iterations=500)
+relaxed = calc.relax(symbols, positions, cell=[6.0] * 3, force_tolerance=1e-4, max_iterations=500)
 print(relaxed.converged, relaxed.iterations, relaxed.message)
 
-native = calc.relax(symbols, positions, cell=[6.0]*3, backend="native")
+native = calc.relax(symbols, positions, cell=[6.0] * 3, backend="native")
 ```
 
 The default `backend="ase"` uses ASE FIRE and ASE neighbor lists.

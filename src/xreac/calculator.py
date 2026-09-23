@@ -1,4 +1,5 @@
 """Public calculator and force-based geometry relaxation."""
+
 from dataclasses import dataclass
 
 import autograd.numpy as anp
@@ -62,8 +63,9 @@ class Calculator:
         self.force_field = force_field
         self.max_expanded_atoms = max_expanded_atoms
 
-    def evaluate(self, symbols, positions, *, total_charge=0, cell=None,
-                 pbc=None, full_derivative=False, neighbors=None):
+    def evaluate(
+        self, symbols, positions, *, total_charge=0, cell=None, pbc=None, full_derivative=False, neighbors=None
+    ):
         """Return energy, equilibrated charges, and the selected forces.
 
         By default, fixed-charge forces hold the freshly equilibrated charges
@@ -95,8 +97,9 @@ class Calculator:
             repetitions = (1, 1, 1)
             neighbor_backend = "provided"
         else:
-            neighbors, repetitions = replicated_neighbors(x, self.force_field.general[12],
-                cell, pbc, max_expanded_atoms=self.max_expanded_atoms)
+            neighbors, repetitions = replicated_neighbors(
+                x, self.force_field.general[12], cell, pbc, max_expanded_atoms=self.max_expanded_atoms
+            )
             neighbor_backend = "replicated"
         model = EnergyModel(self.force_field, symbols, neighbors, cell, pbc)
         try:
@@ -110,12 +113,29 @@ class Calculator:
         if abs(charges.sum()) > 1e-8:
             raise ValueError("QEq charge constraint failed")
         properties = model.properties(x, charges)
-        return Evaluation(float(components.sum()), force, charges,
-                          dict(zip(COMPONENTS, map(float, components))), full_derivative,
-                          cell_repetitions=repetitions, neighbor_backend=neighbor_backend, **properties)
+        return Evaluation(
+            float(components.sum()),
+            force,
+            charges,
+            dict(zip(COMPONENTS, map(float, components))),
+            full_derivative,
+            cell_repetitions=repetitions,
+            neighbor_backend=neighbor_backend,
+            **properties,
+        )
 
-    def relax(self, symbols, positions, *, force_tolerance=1e-4, max_iterations=500,
-              total_charge=0, cell=None, pbc=None, backend="ase"):
+    def relax(
+        self,
+        symbols,
+        positions,
+        *,
+        force_tolerance=1e-4,
+        max_iterations=500,
+        total_charge=0,
+        cell=None,
+        pbc=None,
+        backend="ase",
+    ):
         """Relax with fixed-charge forces, using ASE FIRE by default.
 
         QEq is solved at each geometry, without differentiation through the
@@ -139,40 +159,41 @@ class Calculator:
             from .ase import relax_with_ase
 
             x, result, converged, iterations = relax_with_ase(
-                self, symbols, x, force_tolerance, max_iterations, cell=cell, pbc=boundary.pbc)
+                self, symbols, x, force_tolerance, max_iterations, cell=cell, pbc=boundary.pbc
+            )
             message = "Fixed-charge force tolerance reached" if converged else "Maximum relaxation iterations reached"
             return Relaxation(x, result, converged, iterations, message)
         # FIRE (Bitzek et al., Phys. Rev. Lett. 97, 170201, 2006).
         # Unit fictitious masses; step parameters are optimizer scales, not fs.
         velocity = np.zeros_like(x)
-        dt, dt_max, alpha = .02, .2, .1
+        dt, dt_max, alpha = 0.02, 0.2, 0.1
         positive_steps = 0
         result = self.evaluate(symbols, x, cell=cell, pbc=pbc, full_derivative=False)
-        for iteration in range(max_iterations+1):
+        for iteration in range(max_iterations + 1):
             force = result.forces
             if np.max(np.abs(force)) <= force_tolerance:
                 return Relaxation(x, result, True, iteration, "Fixed-charge force tolerance reached")
             if iteration == max_iterations:
                 break
-            power = float(np.sum(velocity*force))
+            power = float(np.sum(velocity * force))
             if power > 0:
-                velocity = (1-alpha)*velocity + alpha*np.linalg.norm(velocity)/np.linalg.norm(force)*force
+                velocity = (1 - alpha) * velocity + alpha * np.linalg.norm(velocity) / np.linalg.norm(force) * force
                 positive_steps += 1
                 if positive_steps > 5:
-                    dt = min(dt*1.1, dt_max)
-                    alpha *= .99
+                    dt = min(dt * 1.1, dt_max)
+                    alpha *= 0.99
             else:
-                velocity.fill(0.)
+                velocity.fill(0.0)
                 positive_steps = 0
-                alpha = .1
+                alpha = 0.1
                 if iteration > 0:
-                    dt *= .5
-            velocity += dt*force
-            displacement = dt*velocity
+                    dt *= 0.5
+            velocity += dt * force
+            displacement = dt * velocity
             # Cap the largest atomic displacement at 0.1 A per iteration.
             largest_step = np.max(np.linalg.norm(displacement, axis=1))
-            if largest_step > .1:
-                displacement *= .1/largest_step
+            if largest_step > 0.1:
+                displacement *= 0.1 / largest_step
             x = x + displacement
             result = self.evaluate(symbols, x, cell=cell, pbc=pbc, full_derivative=False)
         return Relaxation(x, result, False, max_iterations, "Maximum relaxation iterations reached")

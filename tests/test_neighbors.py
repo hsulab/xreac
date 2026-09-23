@@ -23,7 +23,7 @@ CASES = neighbor_cases()
 @pytest.fixture(scope="module")
 def archived_results():
     # Preserve an independent regression target from before model unification.
-    path = Path(__file__).resolve().parents[1]/"validation/ase-neighbors/results.json.gz"
+    path = Path(__file__).resolve().parents[1] / "validation/ase-neighbors/results.json.gz"
     with gzip.open(path, "rt") as stream:
         return json.load(stream)
 
@@ -50,18 +50,23 @@ def test_neighbor_backends(name, archived_results):
     assert actual.cell_repetitions == (1, 1, 1)
     report = backend_differences(actual, expected, len(x))
     assert report["passed"], report
-    archived = SimpleNamespace(**{key: np.asarray(value) if isinstance(value, list) else value
-                                 for key, value in archived_results[name]["replicated"].items()})
+    archived = SimpleNamespace(
+        **{
+            key: np.asarray(value) if isinstance(value, list) else value
+            for key, value in archived_results[name]["replicated"].items()
+        }
+    )
     report = backend_differences(expected, archived, len(x))
     assert report["passed"], report
-    supplied = Calculator(ff).evaluate(symbols, x, cell=cell, pbc=pbc,
-        neighbors=build_neighbors(symbols, x, cell, pbc, ff.general[12]))
+    supplied = Calculator(ff).evaluate(
+        symbols, x, cell=cell, pbc=pbc, neighbors=build_neighbors(symbols, x, cell, pbc, ff.general[12])
+    )
     assert supplied.neighbor_backend == "provided"
     assert backend_differences(supplied, expected, len(x))["passed"]
     if name == "periodic_carbon_chain":
-        assert abs(actual.components["torsion"]) > .1
+        assert abs(actual.components["torsion"]) > 0.1
     if name == "small_water_4A":
-        assert actual.components["hydrogen_bond"] < -.3
+        assert actual.components["hydrogen_bond"] < -0.3
     if name == "small_zinc_chain":
         assert actual.bond_counts.tolist() == [2]
         assert actual.bond_orders[0, 0] > 1
@@ -78,15 +83,20 @@ def test_neighbor_derivatives(name, full_derivative, monkeypatch):
     solve, solves = energy.np.linalg.solve, []
 
     def checked(matrix, rhs):
-        assert matrix.shape == (len(x)+1, len(x)+1)
+        assert matrix.shape == (len(x) + 1, len(x) + 1)
         solves.append(isinstance(matrix, Box))
         return solve(matrix, rhs)
 
     monkeypatch.setattr(energy.np.linalg, "solve", checked)
     calc = Calculator(ff)
-    actual = calc.evaluate(symbols, x, cell=cell, pbc=pbc,
-                           full_derivative=full_derivative,
-                           neighbors=build_neighbors(symbols, x, cell, pbc, ff.general[12]))
+    actual = calc.evaluate(
+        symbols,
+        x,
+        cell=cell,
+        pbc=pbc,
+        full_derivative=full_derivative,
+        neighbors=build_neighbors(symbols, x, cell, pbc, ff.general[12]),
+    )
     assert any(solves) is full_derivative
     expected = calc.evaluate(symbols, x, cell=cell, pbc=pbc, full_derivative=full_derivative)
     assert backend_differences(actual, expected, len(x))["passed"]
@@ -100,17 +110,16 @@ def test_neighbor_derivatives(name, full_derivative, monkeypatch):
         model = EnergyModel(ff, symbols, neighbors, cell, pbc)
         return model.components(y, fixed)[0].sum()
 
-    derivative = (energy(x+h*direction)-energy(x-h*direction))/(2*h)
-    assert derivative == pytest.approx(-np.sum(actual.forces*direction), abs=2e-5, rel=1e-6)
+    derivative = (energy(x + h * direction) - energy(x - h * direction)) / (2 * h)
+    assert derivative == pytest.approx(-np.sum(actual.forces * direction), abs=2e-5, rel=1e-6)
 
 
 def test_neighbor_shift_completeness():
     # Compare ASE edges to an independent explicit image search. Includes
     # repeated neighbors, nonzero-shift self edges, and a tilted small cell.
-    cell = np.array([[3.1, 0., 0.], [.8, 3.6, 0.], [.2, .3, 4.1]])
-    x = np.array([[0., 0., 0.], [.9, .2, .3]])
-    neighbors = Neighbors(build_neighbors("OO", x, cell, [True, True, False], 7.5),
-                          2, cell, [True, True, False])
+    cell = np.array([[3.1, 0.0, 0.0], [0.8, 3.6, 0.0], [0.2, 0.3, 4.1]])
+    x = np.array([[0.0, 0.0, 0.0], [0.9, 0.2, 0.3]])
+    neighbors = Neighbors(build_neighbors("OO", x, cell, [True, True, False], 7.5), 2, cell, [True, True, False])
     actual = {(int(i), int(j), *s) for i, j, s in zip(neighbors.i, neighbors.j, neighbors.shifts)}
     expected = set()
     for sx in range(-4, 5):
@@ -120,7 +129,7 @@ def test_neighbor_shift_completeness():
                 for j in range(2):
                     if i == j and not s.any():
                         continue
-                    if np.linalg.norm(x[j]-x[i]+s@cell) < 7.5:
+                    if np.linalg.norm(x[j] - x[i] + s @ cell) < 7.5:
                         expected.add((i, j, *s))
     assert actual == expected
     assert max(abs(sx) for _, _, sx, _, _ in actual) >= 2
@@ -129,9 +138,9 @@ def test_neighbor_shift_completeness():
 
 def test_scatter_sum_derivative():
     indices = np.array([0, 1, 0, 3])
-    x = np.array([1., 2., 3., 4.])
+    x = np.array([1.0, 2.0, 3.0, 4.0])
     np.testing.assert_array_equal(scatter_sum(x, indices, 5), [4, 2, 0, 4, 0])
-    derivative = grad(lambda y: np.sum(scatter_sum(y, indices, 5)**2))(x)
+    derivative = grad(lambda y: np.sum(scatter_sum(y, indices, 5) ** 2))(x)
     np.testing.assert_array_equal(derivative, [8, 4, 8, 8])
 
 
@@ -142,11 +151,12 @@ def test_ase_default_no_replication_and_backend_switch(monkeypatch):
 
     original = Boundary.supercell
     with monkeypatch.context() as patch:
+
         def forbidden(*args, **kwargs):
             raise AssertionError("ASE neighbor lists must not replicate atoms")
+
         patch.setattr(Boundary, "supercell", forbidden)
-        atoms = Atoms(symbols, positions=x, cell=cell, pbc=pbc,
-                      calculator=ReaxFFCalculator(ff, max_expanded_atoms=1))
+        atoms = Atoms(symbols, positions=x, cell=cell, pbc=pbc, calculator=ReaxFFCalculator(ff, max_expanded_atoms=1))
         forces = atoms.get_forces()
         assert atoms.calc.evaluation.neighbor_backend == "ase"
     assert Boundary.supercell is original
@@ -171,23 +181,27 @@ def test_invalid_neighbor_backend(bad):
 def test_neighbor_symmetries(name):
     filename, symbols, x, cell, pbc = CASES[name]
     calc = Calculator(ForceField.bundled(filename))
+
     def evaluate(s, y, lattice):
-        return calc.evaluate(s, y, cell=lattice, pbc=pbc,
-            neighbors=build_neighbors(s, y, lattice, pbc, calc.force_field.general[12]))
+        return calc.evaluate(
+            s, y, cell=lattice, pbc=pbc, neighbors=build_neighbors(s, y, lattice, pbc, calc.force_field.general[12])
+        )
+
     original = evaluate(symbols, x, cell)
     rng = np.random.default_rng(257)
-    shifts = rng.integers(-3, 4, x.shape)*pbc
-    wrapped = evaluate(symbols, x+shifts@cell, cell)
+    shifts = rng.integers(-3, 4, x.shape) * pbc
+    wrapped = evaluate(symbols, x + shifts @ cell, cell)
     np.testing.assert_allclose(wrapped.forces, original.forces, atol=2e-8, rtol=0)
     np.testing.assert_allclose(wrapped.charges, original.charges, atol=1e-11, rtol=0)
     np.testing.assert_allclose(wrapped.bond_orders, original.bond_orders, atol=1e-10, rtol=0)
     assert wrapped.energy == pytest.approx(original.energy, abs=1e-9)
-    np.testing.assert_allclose(wrapped.dipole-original.dipole,
-                               np.sum(original.charges[:, None]*(shifts@cell), axis=0), atol=1e-9)
+    np.testing.assert_allclose(
+        wrapped.dipole - original.dipole, np.sum(original.charges[:, None] * (shifts @ cell), axis=0), atol=1e-9
+    )
     rotation, _ = np.linalg.qr(rng.normal(size=(3, 3)))
-    rotated = evaluate(symbols, x@rotation+[8., -5., 20.], cell@rotation)
+    rotated = evaluate(symbols, x @ rotation + [8.0, -5.0, 20.0], cell @ rotation)
     assert rotated.energy == pytest.approx(original.energy, abs=1e-9)
-    np.testing.assert_allclose(rotated.forces, original.forces@rotation, atol=2e-8, rtol=0)
+    np.testing.assert_allclose(rotated.forces, original.forces @ rotation, atol=2e-8, rtol=0)
     order = rng.permutation(len(x))
     permuted = evaluate([symbols[i] for i in order], x[order], cell)
     assert permuted.energy == pytest.approx(original.energy, abs=1e-9)
@@ -195,11 +209,10 @@ def test_neighbor_symmetries(name):
 
 
 def test_neighbor_rebuild_crossing_cutoff():
-    atoms = Atoms("ZnO", positions=[[0, 0, 0], [10.1, 0, 0]],
-                  calculator=ReaxFFCalculator(ForceField.zno()))
+    atoms = Atoms("ZnO", positions=[[0, 0, 0], [10.1, 0, 0]], calculator=ReaxFFCalculator(ForceField.zno()))
     atoms.get_forces()
     distant_energy = atoms.get_potential_energy()
-    atoms.positions[1] = [1.9, .1, .2]
+    atoms.positions[1] = [1.9, 0.1, 0.2]
     assert atoms.get_potential_energy() != distant_energy
     reference = Calculator(atoms.calc.core.force_field).evaluate(atoms.get_chemical_symbols(), atoms.positions)
     assert backend_differences(atoms.calc.evaluation, reference, 2)["passed"]
@@ -231,8 +244,10 @@ def test_ase_builds_arrays_before_core_evaluation(monkeypatch):
         assert all(v.dtype.kind in "iu" for v in kwargs["neighbors"])
         # No builder call is permitted while evaluating energies or forces.
         with monkeypatch.context() as patch:
+
             def forbidden(*args, **kwargs):
                 raise AssertionError("Neighbor builder called inside core evaluate")
+
             patch.setattr(adapter, "neighbor_list", forbidden)
             patch.setattr("ase.neighborlist.primitive_neighbor_list", forbidden)
             return original_evaluate(*args, **kwargs)
@@ -262,19 +277,22 @@ assert 'ase' not in sys.modules
     subprocess.run([sys.executable, "-c", code], check=True, capture_output=True, text=True)
 
 
-@pytest.mark.parametrize("neighbors,message", [
-    (([0], [1]), "tuple"),
-    (([0], [1, 0], [[0, 0, 0]]), "shape"),
-    (([0], [1], [[0, 0]]), "shape"),
-    (([0., 1.], [1, 0], [[0, 0, 0], [0, 0, 0]]), "integers"),
-    (([0, 1], [1, 0], [[0., 0, 0], [0, 0, 0]]), "integers"),
-    (([-1, 1], [1, 0], [[0, 0, 0], [0, 0, 0]]), "out of range"),
-    (([0, 1], [2, 0], [[0, 0, 0], [0, 0, 0]]), "out of range"),
-    (([0, 1], [1, 0], [[1, 0, 0], [-1, 0, 0]]), "nonperiodic"),
-    (([0], [0], [[0, 0, 0]]), "self neighbors"),
-    (([0, 0, 1], [1, 1, 0], [[0, 0, 0]]*3), "Duplicate"),
-    (([0], [1], [[0, 0, 0]]), "both directions"),
-])
+@pytest.mark.parametrize(
+    "neighbors,message",
+    [
+        (([0], [1]), "tuple"),
+        (([0], [1, 0], [[0, 0, 0]]), "shape"),
+        (([0], [1], [[0, 0]]), "shape"),
+        (([0.0, 1.0], [1, 0], [[0, 0, 0], [0, 0, 0]]), "integers"),
+        (([0, 1], [1, 0], [[0.0, 0, 0], [0, 0, 0]]), "integers"),
+        (([-1, 1], [1, 0], [[0, 0, 0], [0, 0, 0]]), "out of range"),
+        (([0, 1], [2, 0], [[0, 0, 0], [0, 0, 0]]), "out of range"),
+        (([0, 1], [1, 0], [[1, 0, 0], [-1, 0, 0]]), "nonperiodic"),
+        (([0], [0], [[0, 0, 0]]), "self neighbors"),
+        (([0, 0, 1], [1, 1, 0], [[0, 0, 0]] * 3), "Duplicate"),
+        (([0], [1], [[0, 0, 0]]), "both directions"),
+    ],
+)
 def test_supplied_neighbor_validation(neighbors, message):
     with pytest.raises(ValueError, match=message):
         Calculator(ForceField.zno()).evaluate(["Zn", "O"], [[0, 0, 0], [1.9, 0, 0]], neighbors=neighbors)
@@ -283,12 +301,12 @@ def test_supplied_neighbor_validation(neighbors, message):
 def test_reuse_supplied_skin_list_for_displacements():
     filename, symbols, x, cell, pbc = CASES["small_water_4A"]
     ff = ForceField.bundled(filename)
-    supplied = build_neighbors(symbols, x, cell, pbc, ff.general[12]+1.)
+    supplied = build_neighbors(symbols, x, cell, pbc, ff.general[12] + 1.0)
     originals = tuple(array.copy() for array in supplied)
     # The same integer arrays can be reused over small displacements, provided
     # the caller keeps the list complete. Distances must be recomputed from x.
     calc = Calculator(ff)
-    for shift in (0., .03, -.02):
+    for shift in (0.0, 0.03, -0.02):
         y = x.copy()
         y[1, 0] += shift
         actual = calc.evaluate(symbols, y, cell=cell, pbc=pbc, neighbors=supplied)

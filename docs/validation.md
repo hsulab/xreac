@@ -11,8 +11,7 @@ Coordinates do not move during this calculation.
 ```python
 from xreac.reference import evaluate_lammps
 
-reference = evaluate_lammps(ff, symbols, positions, cell=[4.0]*3,
-                            directory="reference-water")
+reference = evaluate_lammps(ff, symbols, positions, cell=[4.0] * 3, directory="reference-water")
 print(reference.energy)
 print(reference.forces)
 ```

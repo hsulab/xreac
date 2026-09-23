@@ -16,8 +16,8 @@ calc = Calculator(ForceField.bundled("qeq_ff.water"))
 symbols = ["O", "H", "H"]
 positions = [[0, 0, 0], [0.97, 0, 0], [-0.243, 0.94, 0]]
 result = calc.evaluate(symbols, positions)
-print(result.energy)   # kcal/mol
-print(result.forces)   # kcal/mol/Angstrom; fixed-charge derivative
+print(result.energy)  # kcal/mol
+print(result.forces)  # kcal/mol/Angstrom; fixed-charge derivative
 ```
 
 Start with [installation and a working calculation](getting-started.md), then
