@@ -1,0 +1,874 @@
+{
+  "created_utc": "2026-09-23T23:40:02.862548+00:00",
+  "command": "python scripts/benchmark_lammps.py --include-large --skip-lammps-timing",
+  "method": "Cumulative optimizations in commit order; median of five one-thread wall-time batches; fresh LAMMPS single-point verification at every stage. Incremental speedup is previous/current; cumulative speedup is baseline/current. No LAMMPS timing loops are repeated here.",
+  "stages": [
+    {
+      "name": "baseline",
+      "label": "Original implementation",
+      "git_revision": "c21c74bfe48b6df96be0dc31e818b416abde2aaf",
+      "source_sha256": {
+        "src/xreac/__init__.py": "042f04a1863f7c98a8704683a71099794097c97fc48574fb07bfdfa8ccfa0ad5",
+        "src/xreac/ase.py": "57eb4b680720350ec1f93bdd0b23a8f4320fb51e87f18f42b4e9320e6eea4fc4",
+        "src/xreac/calculator.py": "6144732bc531545548c9361c737c9ede7b7a02c363d7ef90aaf80cded2ddd9f7",
+        "src/xreac/energy.py": "b11e131b34a4e89d9e6bc5cecac59f5e6c88963e90eefab53da874f5ba1c266a",
+        "src/xreac/forcefield.py": "f214ce7f30d0a8d07acfaef1f45c8d1b0545430f051153aa710ee8c4e218b6e8",
+        "src/xreac/geometry.py": "179db73ce1385f55d938e791ac75014fb696e79979a4bad89affdac279c7e75c",
+        "src/xreac/neighbors.py": "10db0864f305f2a0de6b197b05967cda55ff4167cb8e16210a2eb4617a6cd722",
+        "src/xreac/reference.py": "29209294faa2711df6b57f8785e964c07b8f61d446e8a8046a8bcf638779dddd"
+      },
+      "created_utc": "2026-09-23T23:35:31.381401+00:00",
+      "cpu": "Apple M1 Pro",
+      "platform": "macOS-26.6-arm64-arm-64bit",
+      "python": "3.10.13 | packaged by conda-forge | (main, Dec 23 2023, 15:35:25) [Clang 16.0.6 ]",
+      "environment": {
+        "numpy": "2.0.2",
+        "autograd": "1.9.1",
+        "ase": "3.27.0"
+      },
+      "thread_environment": {
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "MKL_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": "1",
+        "BLIS_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1"
+      },
+      "repeats": 5
+    },
+    {
+      "name": "parameters",
+      "label": "Array parameter lookup",
+      "git_revision": "c65b199c42d4315e679fbd0e2223fd4b5957a701",
+      "source_sha256": {
+        "src/xreac/__init__.py": "042f04a1863f7c98a8704683a71099794097c97fc48574fb07bfdfa8ccfa0ad5",
+        "src/xreac/ase.py": "57eb4b680720350ec1f93bdd0b23a8f4320fb51e87f18f42b4e9320e6eea4fc4",
+        "src/xreac/calculator.py": "6144732bc531545548c9361c737c9ede7b7a02c363d7ef90aaf80cded2ddd9f7",
+        "src/xreac/energy.py": "90cd9d6b7288af6f09c5d15161de1602fdb50509b7ebe07cc6b6cc1e4360ad62",
+        "src/xreac/forcefield.py": "f214ce7f30d0a8d07acfaef1f45c8d1b0545430f051153aa710ee8c4e218b6e8",
+        "src/xreac/geometry.py": "179db73ce1385f55d938e791ac75014fb696e79979a4bad89affdac279c7e75c",
+        "src/xreac/neighbors.py": "10db0864f305f2a0de6b197b05967cda55ff4167cb8e16210a2eb4617a6cd722",
+        "src/xreac/reference.py": "29209294faa2711df6b57f8785e964c07b8f61d446e8a8046a8bcf638779dddd"
+      },
+      "created_utc": "2026-09-23T23:36:45.920488+00:00",
+      "cpu": "Apple M1 Pro",
+      "platform": "macOS-26.6-arm64-arm-64bit",
+      "python": "3.10.13 | packaged by conda-forge | (main, Dec 23 2023, 15:35:25) [Clang 16.0.6 ]",
+      "environment": {
+        "numpy": "2.0.2",
+        "autograd": "1.9.1",
+        "ase": "3.27.0"
+      },
+      "thread_environment": {
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "MKL_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": "1",
+        "BLIS_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1"
+      },
+      "repeats": 5
+    },
+    {
+      "name": "neighbors",
+      "label": "Array neighbor bookkeeping",
+      "git_revision": "9e756fe6736d04af97488767e890d3b9cfd3fefa",
+      "source_sha256": {
+        "src/xreac/__init__.py": "042f04a1863f7c98a8704683a71099794097c97fc48574fb07bfdfa8ccfa0ad5",
+        "src/xreac/ase.py": "57eb4b680720350ec1f93bdd0b23a8f4320fb51e87f18f42b4e9320e6eea4fc4",
+        "src/xreac/calculator.py": "6144732bc531545548c9361c737c9ede7b7a02c363d7ef90aaf80cded2ddd9f7",
+        "src/xreac/energy.py": "90cd9d6b7288af6f09c5d15161de1602fdb50509b7ebe07cc6b6cc1e4360ad62",
+        "src/xreac/forcefield.py": "f214ce7f30d0a8d07acfaef1f45c8d1b0545430f051153aa710ee8c4e218b6e8",
+        "src/xreac/geometry.py": "179db73ce1385f55d938e791ac75014fb696e79979a4bad89affdac279c7e75c",
+        "src/xreac/neighbors.py": "4ee6bd8567eba58da3b66c0bb73bb76461dfca466ed4fc84050c63c5e62b139d",
+        "src/xreac/reference.py": "29209294faa2711df6b57f8785e964c07b8f61d446e8a8046a8bcf638779dddd"
+      },
+      "created_utc": "2026-09-23T23:37:44.684796+00:00",
+      "cpu": "Apple M1 Pro",
+      "platform": "macOS-26.6-arm64-arm-64bit",
+      "python": "3.10.13 | packaged by conda-forge | (main, Dec 23 2023, 15:35:25) [Clang 16.0.6 ]",
+      "environment": {
+        "numpy": "2.0.2",
+        "autograd": "1.9.1",
+        "ase": "3.27.0"
+      },
+      "thread_environment": {
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "MKL_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": "1",
+        "BLIS_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1"
+      },
+      "repeats": 5
+    },
+    {
+      "name": "torsions",
+      "label": "Early torsion filtering",
+      "git_revision": "33a53d45e23e9976c699b95dcb10a57f88810f1a",
+      "source_sha256": {
+        "src/xreac/__init__.py": "042f04a1863f7c98a8704683a71099794097c97fc48574fb07bfdfa8ccfa0ad5",
+        "src/xreac/ase.py": "57eb4b680720350ec1f93bdd0b23a8f4320fb51e87f18f42b4e9320e6eea4fc4",
+        "src/xreac/calculator.py": "6144732bc531545548c9361c737c9ede7b7a02c363d7ef90aaf80cded2ddd9f7",
+        "src/xreac/energy.py": "c8f1ef8c89b3f7fe7eeec2313e7363107b385a76fe1559605f9bba06e299ed8d",
+        "src/xreac/forcefield.py": "f214ce7f30d0a8d07acfaef1f45c8d1b0545430f051153aa710ee8c4e218b6e8",
+        "src/xreac/geometry.py": "179db73ce1385f55d938e791ac75014fb696e79979a4bad89affdac279c7e75c",
+        "src/xreac/neighbors.py": "4ee6bd8567eba58da3b66c0bb73bb76461dfca466ed4fc84050c63c5e62b139d",
+        "src/xreac/reference.py": "29209294faa2711df6b57f8785e964c07b8f61d446e8a8046a8bcf638779dddd"
+      },
+      "created_utc": "2026-09-23T23:38:54.658084+00:00",
+      "cpu": "Apple M1 Pro",
+      "platform": "macOS-26.6-arm64-arm-64bit",
+      "python": "3.10.13 | packaged by conda-forge | (main, Dec 23 2023, 15:35:25) [Clang 16.0.6 ]",
+      "environment": {
+        "numpy": "2.0.2",
+        "autograd": "1.9.1",
+        "ase": "3.27.0"
+      },
+      "thread_environment": {
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "MKL_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": "1",
+        "BLIS_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1"
+      },
+      "repeats": 5
+    },
+    {
+      "name": "energy_pass",
+      "label": "Single traced energy pass",
+      "git_revision": "0f9e92fb85fbe4df4e47d4cb053b640490b5d788",
+      "source_sha256": {
+        "src/xreac/__init__.py": "042f04a1863f7c98a8704683a71099794097c97fc48574fb07bfdfa8ccfa0ad5",
+        "src/xreac/ase.py": "57eb4b680720350ec1f93bdd0b23a8f4320fb51e87f18f42b4e9320e6eea4fc4",
+        "src/xreac/calculator.py": "8bd8929a06e7a586b20eeee634b494673528daa72c768d64cb6a469aafeee805",
+        "src/xreac/energy.py": "c8f1ef8c89b3f7fe7eeec2313e7363107b385a76fe1559605f9bba06e299ed8d",
+        "src/xreac/forcefield.py": "f214ce7f30d0a8d07acfaef1f45c8d1b0545430f051153aa710ee8c4e218b6e8",
+        "src/xreac/geometry.py": "179db73ce1385f55d938e791ac75014fb696e79979a4bad89affdac279c7e75c",
+        "src/xreac/neighbors.py": "4ee6bd8567eba58da3b66c0bb73bb76461dfca466ed4fc84050c63c5e62b139d",
+        "src/xreac/reference.py": "29209294faa2711df6b57f8785e964c07b8f61d446e8a8046a8bcf638779dddd"
+      },
+      "created_utc": "2026-09-23T23:39:34.177907+00:00",
+      "cpu": "Apple M1 Pro",
+      "platform": "macOS-26.6-arm64-arm-64bit",
+      "python": "3.10.13 | packaged by conda-forge | (main, Dec 23 2023, 15:35:25) [Clang 16.0.6 ]",
+      "environment": {
+        "numpy": "2.0.2",
+        "autograd": "1.9.1",
+        "ase": "3.27.0"
+      },
+      "thread_environment": {
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "MKL_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": "1",
+        "BLIS_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1"
+      },
+      "repeats": 5
+    }
+  ],
+  "validation": {
+    "parameters": "163 tests passed; Ruff formatting passed",
+    "neighbors": "163 tests passed; Ruff formatting passed",
+    "torsions": "164 tests passed; Ruff formatting passed",
+    "energy_pass": "164 tests passed; Ruff formatting passed"
+  },
+  "system": "zno",
+  "cases": {
+    "zno_cluster20": {
+      "atoms": 20,
+      "force_field_sha256": "b5af5a65573ce60f32405a973e33f7cc89a90bc69e624a8ca89811eb67b1a07b",
+      "stages": [
+        {
+          "name": "baseline",
+          "git_revision": "c21c74bfe48b6df96be0dc31e818b416abde2aaf",
+          "timing": {
+            "calls_per_batch": 20,
+            "batch_seconds": [
+              0.28968091681599617,
+              0.2886197501793504,
+              0.2959674997255206,
+              0.2917462093755603,
+              0.2853452917188406
+            ],
+            "median_seconds": 0.01448404584079981,
+            "min_seconds": 0.01426726458594203,
+            "max_seconds": 0.014798374986276031,
+            "first_seconds": 0.01506370771676302,
+            "cpu_to_wall_ratio": 0.9936482541028961
+          },
+          "incremental_speedup": 1.0,
+          "cumulative_speedup": 1.0,
+          "lammps_comparison": {
+            "maximum_absolute_errors": {
+              "energy_per_atom": 2.955857780762017e-13,
+              "components_per_atom": 1.3301360013429075e-12,
+              "forces": 1.5051515589448172e-10,
+              "charges": 4.317102231254921e-12,
+              "dipole": 2.605339555206143e-12,
+              "total_bond_orders": 4.440892098500626e-16,
+              "lone_pairs": 3.75547988439051e-43,
+              "bond_counts": 0.0
+            },
+            "limits": {
+              "energy_per_atom": 1e-05,
+              "components_per_atom": 1e-05,
+              "forces": 0.0001,
+              "charges": 1e-06,
+              "dipole": 1e-06,
+              "total_bond_orders": 1e-08,
+              "lone_pairs": 1e-08,
+              "bond_counts": 0
+            },
+            "passed": true
+          },
+          "reference_version": "LAMMPS (22 Jul 2025 - Update 4)"
+        },
+        {
+          "name": "parameters",
+          "git_revision": "c65b199c42d4315e679fbd0e2223fd4b5957a701",
+          "timing": {
+            "calls_per_batch": 25,
+            "batch_seconds": [
+              0.3058978756889701,
+              0.3039486249908805,
+              0.30802645813673735,
+              0.3029572917148471,
+              0.30347962584346533
+            ],
+            "median_seconds": 0.012157944999635219,
+            "min_seconds": 0.012118291668593883,
+            "max_seconds": 0.012321058325469494,
+            "first_seconds": 0.01239058282226324,
+            "cpu_to_wall_ratio": 0.9959306985600243
+          },
+          "incremental_speedup": 1.1913235206471473,
+          "cumulative_speedup": 1.1913235206471473,
+          "lammps_comparison": {
+            "maximum_absolute_errors": {
+              "energy_per_atom": 2.955857780762017e-13,
+              "components_per_atom": 1.3301360013429075e-12,
+              "forces": 1.5051515589448172e-10,
+              "charges": 4.317102231254921e-12,
+              "dipole": 2.605339555206143e-12,
+              "total_bond_orders": 4.440892098500626e-16,
+              "lone_pairs": 3.75547988439051e-43,
+              "bond_counts": 0.0
+            },
+            "limits": {
+              "energy_per_atom": 1e-05,
+              "components_per_atom": 1e-05,
+              "forces": 0.0001,
+              "charges": 1e-06,
+              "dipole": 1e-06,
+              "total_bond_orders": 1e-08,
+              "lone_pairs": 1e-08,
+              "bond_counts": 0
+            },
+            "passed": true
+          },
+          "reference_version": "LAMMPS (22 Jul 2025 - Update 4)"
+        },
+        {
+          "name": "neighbors",
+          "git_revision": "9e756fe6736d04af97488767e890d3b9cfd3fefa",
+          "timing": {
+            "calls_per_batch": 26,
+            "batch_seconds": [
+              0.30853775050491095,
+              0.31195162516087294,
+              0.297278749756515,
+              0.3111222926527262,
+              0.30782879143953323
+            ],
+            "median_seconds": 0.01186683655788119,
+            "min_seconds": 0.01143379806755827,
+            "max_seconds": 0.011998139429264344,
+            "first_seconds": 0.011753500439226627,
+            "cpu_to_wall_ratio": 0.9967351162896291
+          },
+          "incremental_speedup": 1.0245312590540985,
+          "cumulative_speedup": 1.220548186549383,
+          "lammps_comparison": {
+            "maximum_absolute_errors": {
+              "energy_per_atom": 2.955857780762017e-13,
+              "components_per_atom": 1.3301360013429075e-12,
+              "forces": 1.5051515589448172e-10,
+              "charges": 4.317102231254921e-12,
+              "dipole": 2.605339555206143e-12,
+              "total_bond_orders": 4.440892098500626e-16,
+              "lone_pairs": 3.75547988439051e-43,
+              "bond_counts": 0.0
+            },
+            "limits": {
+              "energy_per_atom": 1e-05,
+              "components_per_atom": 1e-05,
+              "forces": 0.0001,
+              "charges": 1e-06,
+              "dipole": 1e-06,
+              "total_bond_orders": 1e-08,
+              "lone_pairs": 1e-08,
+              "bond_counts": 0
+            },
+            "passed": true
+          },
+          "reference_version": "LAMMPS (22 Jul 2025 - Update 4)"
+        },
+        {
+          "name": "torsions",
+          "git_revision": "33a53d45e23e9976c699b95dcb10a57f88810f1a",
+          "timing": {
+            "calls_per_batch": 41,
+            "batch_seconds": [
+              0.2670084582641721,
+              0.2642915826290846,
+              0.25620133336633444,
+              0.2941757496446371,
+              0.2719238754361868
+            ],
+            "median_seconds": 0.0065124014210773675,
+            "min_seconds": 0.006248813008934986,
+            "max_seconds": 0.007175018284015539,
+            "first_seconds": 0.007349750027060509,
+            "cpu_to_wall_ratio": 0.9863497446075926
+          },
+          "incremental_speedup": 1.8221905854074365,
+          "cumulative_speedup": 2.2240714145664056,
+          "lammps_comparison": {
+            "maximum_absolute_errors": {
+              "energy_per_atom": 2.955857780762017e-13,
+              "components_per_atom": 1.3301360013429075e-12,
+              "forces": 1.5051515589448172e-10,
+              "charges": 4.317102231254921e-12,
+              "dipole": 2.605339555206143e-12,
+              "total_bond_orders": 4.440892098500626e-16,
+              "lone_pairs": 3.75547988439051e-43,
+              "bond_counts": 0.0
+            },
+            "limits": {
+              "energy_per_atom": 1e-05,
+              "components_per_atom": 1e-05,
+              "forces": 0.0001,
+              "charges": 1e-06,
+              "dipole": 1e-06,
+              "total_bond_orders": 1e-08,
+              "lone_pairs": 1e-08,
+              "bond_counts": 0
+            },
+            "passed": true
+          },
+          "reference_version": "LAMMPS (22 Jul 2025 - Update 4)"
+        },
+        {
+          "name": "energy_pass",
+          "git_revision": "0f9e92fb85fbe4df4e47d4cb053b640490b5d788",
+          "timing": {
+            "calls_per_batch": 55,
+            "batch_seconds": [
+              0.3158919168636203,
+              0.3190855411812663,
+              0.30578016582876444,
+              0.30785758327692747,
+              0.30276399943977594
+            ],
+            "median_seconds": 0.005597410605035045,
+            "min_seconds": 0.005504799989814108,
+            "max_seconds": 0.005801555294204842,
+            "first_seconds": 0.005478791892528534,
+            "cpu_to_wall_ratio": 0.9965345632018806
+          },
+          "incremental_speedup": 1.1634668028854733,
+          "cumulative_speedup": 2.587633258094548,
+          "lammps_comparison": {
+            "maximum_absolute_errors": {
+              "energy_per_atom": 2.955857780762017e-13,
+              "components_per_atom": 1.3301360013429075e-12,
+              "forces": 1.5051515589448172e-10,
+              "charges": 4.317102231254921e-12,
+              "dipole": 2.605339555206143e-12,
+              "total_bond_orders": 4.440892098500626e-16,
+              "lone_pairs": 3.75547988439051e-43,
+              "bond_counts": 0.0
+            },
+            "limits": {
+              "energy_per_atom": 1e-05,
+              "components_per_atom": 1e-05,
+              "forces": 0.0001,
+              "charges": 1e-06,
+              "dipole": 1e-06,
+              "total_bond_orders": 1e-08,
+              "lone_pairs": 1e-08,
+              "bond_counts": 0
+            },
+            "passed": true
+          },
+          "reference_version": "LAMMPS (22 Jul 2025 - Update 4)"
+        }
+      ]
+    },
+    "zno_cluster100": {
+      "atoms": 100,
+      "force_field_sha256": "b5af5a65573ce60f32405a973e33f7cc89a90bc69e624a8ca89811eb67b1a07b",
+      "stages": [
+        {
+          "name": "baseline",
+          "git_revision": "c21c74bfe48b6df96be0dc31e818b416abde2aaf",
+          "timing": {
+            "calls_per_batch": 2,
+            "batch_seconds": [
+              0.8733476670458913,
+              0.34186066687107086,
+              0.35273766703903675,
+              0.357941041700542,
+              0.34288262482732534
+            ],
+            "median_seconds": 0.17636883351951838,
+            "min_seconds": 0.17093033343553543,
+            "max_seconds": 0.43667383352294564,
+            "first_seconds": 0.23346849996596575,
+            "cpu_to_wall_ratio": 0.7876978547504793
+          },
+          "incremental_speedup": 1.0,
+          "cumulative_speedup": 1.0,
+          "lammps_comparison": {
+            "maximum_absolute_errors": {
+              "energy_per_atom": 1.0277290130034088e-12,
+              "components_per_atom": 4.456524038687349e-12,
+              "forces": 2.952047495341503e-10,
+              "charges": 4.232170169871097e-12,
+              "dipole": 3.2118002701864157e-11,
+              "total_bond_orders": 2.6645352591003757e-15,
+              "lone_pairs": 8.881784197001252e-16,
+              "bond_counts": 0.0
+            },
+            "limits": {
+              "energy_per_atom": 1e-05,
+              "components_per_atom": 1e-05,
+              "forces": 0.0001,
+              "charges": 1e-06,
+              "dipole": 1e-06,
+              "total_bond_orders": 1e-08,
+              "lone_pairs": 1e-08,
+              "bond_counts": 0
+            },
+            "passed": true
+          },
+          "reference_version": "LAMMPS (22 Jul 2025 - Update 4)"
+        },
+        {
+          "name": "parameters",
+          "git_revision": "c65b199c42d4315e679fbd0e2223fd4b5957a701",
+          "timing": {
+            "calls_per_batch": 3,
+            "batch_seconds": [
+              0.3697781655937433,
+              0.3685909993946552,
+              0.36749079171568155,
+              0.36969933472573757,
+              0.3694937080144882
+            ],
+            "median_seconds": 0.12316456933816274,
+            "min_seconds": 0.12249693057189386,
+            "max_seconds": 0.12325938853124778,
+            "first_seconds": 0.13165120780467987,
+            "cpu_to_wall_ratio": 0.9959215266734488
+          },
+          "incremental_speedup": 1.4319770244580412,
+          "cumulative_speedup": 1.4319770244580412,
+          "lammps_comparison": {
+            "maximum_absolute_errors": {
+              "energy_per_atom": 1.0277290130034088e-12,
+              "components_per_atom": 4.456524038687349e-12,
+              "forces": 2.952047495341503e-10,
+              "charges": 4.232170169871097e-12,
+              "dipole": 3.2118002701864157e-11,
+              "total_bond_orders": 2.6645352591003757e-15,
+              "lone_pairs": 8.881784197001252e-16,
+              "bond_counts": 0.0
+            },
+            "limits": {
+              "energy_per_atom": 1e-05,
+              "components_per_atom": 1e-05,
+              "forces": 0.0001,
+              "charges": 1e-06,
+              "dipole": 1e-06,
+              "total_bond_orders": 1e-08,
+              "lone_pairs": 1e-08,
+              "bond_counts": 0
+            },
+            "passed": true
+          },
+          "reference_version": "LAMMPS (22 Jul 2025 - Update 4)"
+        },
+        {
+          "name": "neighbors",
+          "git_revision": "9e756fe6736d04af97488767e890d3b9cfd3fefa",
+          "timing": {
+            "calls_per_batch": 3,
+            "batch_seconds": [
+              0.3373868754133582,
+              0.33973066695034504,
+              0.3384905830025673,
+              0.33975287433713675,
+              0.349393792450428
+            ],
+            "median_seconds": 0.11324355565011501,
+            "min_seconds": 0.11246229180445273,
+            "max_seconds": 0.116464597483476,
+            "first_seconds": 0.11495912540704012,
+            "cpu_to_wall_ratio": 0.9951366658759406
+          },
+          "incremental_speedup": 1.0876077550823322,
+          "cumulative_speedup": 1.557429316900288,
+          "lammps_comparison": {
+            "maximum_absolute_errors": {
+              "energy_per_atom": 1.0277290130034088e-12,
+              "components_per_atom": 4.456524038687349e-12,
+              "forces": 2.952047495341503e-10,
+              "charges": 4.232170169871097e-12,
+              "dipole": 3.2118002701864157e-11,
+              "total_bond_orders": 2.6645352591003757e-15,
+              "lone_pairs": 8.881784197001252e-16,
+              "bond_counts": 0.0
+            },
+            "limits": {
+              "energy_per_atom": 1e-05,
+              "components_per_atom": 1e-05,
+              "forces": 0.0001,
+              "charges": 1e-06,
+              "dipole": 1e-06,
+              "total_bond_orders": 1e-08,
+              "lone_pairs": 1e-08,
+              "bond_counts": 0
+            },
+            "passed": true
+          },
+          "reference_version": "LAMMPS (22 Jul 2025 - Update 4)"
+        },
+        {
+          "name": "torsions",
+          "git_revision": "33a53d45e23e9976c699b95dcb10a57f88810f1a",
+          "timing": {
+            "calls_per_batch": 10,
+            "batch_seconds": [
+              0.272861416451633,
+              0.2846668753772974,
+              0.2791496245190501,
+              0.2819161666557193,
+              0.277776375412941
+            ],
+            "median_seconds": 0.02791496245190501,
+            "min_seconds": 0.027286141645163298,
+            "max_seconds": 0.02846668753772974,
+            "first_seconds": 0.030128457583487034,
+            "cpu_to_wall_ratio": 0.9932421526395367
+          },
+          "incremental_speedup": 4.05673322488696,
+          "cumulative_speedup": 6.3180752552824,
+          "lammps_comparison": {
+            "maximum_absolute_errors": {
+              "energy_per_atom": 1.0277290130034088e-12,
+              "components_per_atom": 4.456524038687349e-12,
+              "forces": 2.952047495341503e-10,
+              "charges": 4.232170169871097e-12,
+              "dipole": 3.2118002701864157e-11,
+              "total_bond_orders": 2.6645352591003757e-15,
+              "lone_pairs": 8.881784197001252e-16,
+              "bond_counts": 0.0
+            },
+            "limits": {
+              "energy_per_atom": 1e-05,
+              "components_per_atom": 1e-05,
+              "forces": 0.0001,
+              "charges": 1e-06,
+              "dipole": 1e-06,
+              "total_bond_orders": 1e-08,
+              "lone_pairs": 1e-08,
+              "bond_counts": 0
+            },
+            "passed": true
+          },
+          "reference_version": "LAMMPS (22 Jul 2025 - Update 4)"
+        },
+        {
+          "name": "energy_pass",
+          "git_revision": "0f9e92fb85fbe4df4e47d4cb053b640490b5d788",
+          "timing": {
+            "calls_per_batch": 14,
+            "batch_seconds": [
+              0.3006672915071249,
+              0.2933576675131917,
+              0.30035758297890425,
+              0.29670820850878954,
+              0.2963789999485016
+            ],
+            "median_seconds": 0.021193443464913538,
+            "min_seconds": 0.02095411910808512,
+            "max_seconds": 0.02147623510765178,
+            "first_seconds": 0.022648166865110397,
+            "cpu_to_wall_ratio": 0.9959126896835073
+          },
+          "incremental_speedup": 1.3171508678200017,
+          "cumulative_speedup": 8.321858305447293,
+          "lammps_comparison": {
+            "maximum_absolute_errors": {
+              "energy_per_atom": 1.0277290130034088e-12,
+              "components_per_atom": 4.456524038687349e-12,
+              "forces": 2.952047495341503e-10,
+              "charges": 4.232170169871097e-12,
+              "dipole": 3.2118002701864157e-11,
+              "total_bond_orders": 2.6645352591003757e-15,
+              "lone_pairs": 8.881784197001252e-16,
+              "bond_counts": 0.0
+            },
+            "limits": {
+              "energy_per_atom": 1e-05,
+              "components_per_atom": 1e-05,
+              "forces": 0.0001,
+              "charges": 1e-06,
+              "dipole": 1e-06,
+              "total_bond_orders": 1e-08,
+              "lone_pairs": 1e-08,
+              "bond_counts": 0
+            },
+            "passed": true
+          },
+          "reference_version": "LAMMPS (22 Jul 2025 - Update 4)"
+        }
+      ]
+    },
+    "zno_cluster200": {
+      "atoms": 200,
+      "force_field_sha256": "b5af5a65573ce60f32405a973e33f7cc89a90bc69e624a8ca89811eb67b1a07b",
+      "stages": [
+        {
+          "name": "baseline",
+          "git_revision": "c21c74bfe48b6df96be0dc31e818b416abde2aaf",
+          "timing": {
+            "calls_per_batch": 1,
+            "batch_seconds": [
+              0.4633047077804804,
+              0.4715747917070985,
+              0.4640709590166807,
+              0.46622724924236536,
+              0.46872079093009233
+            ],
+            "median_seconds": 0.46622724924236536,
+            "min_seconds": 0.4633047077804804,
+            "max_seconds": 0.4715747917070985,
+            "first_seconds": 0.46767970733344555,
+            "cpu_to_wall_ratio": 0.9939742458017368
+          },
+          "incremental_speedup": 1.0,
+          "cumulative_speedup": 1.0,
+          "lammps_comparison": {
+            "maximum_absolute_errors": {
+              "energy_per_atom": 1.218722900375724e-12,
+              "components_per_atom": 8.094502845779062e-12,
+              "forces": 3.123294955997835e-10,
+              "charges": 3.4081626409943055e-12,
+              "dipole": 1.9716783761225543e-11,
+              "total_bond_orders": 2.6645352591003757e-15,
+              "lone_pairs": 1.1102230246251565e-15,
+              "bond_counts": 0.0
+            },
+            "limits": {
+              "energy_per_atom": 1e-05,
+              "components_per_atom": 1e-05,
+              "forces": 0.0001,
+              "charges": 1e-06,
+              "dipole": 1e-06,
+              "total_bond_orders": 1e-08,
+              "lone_pairs": 1e-08,
+              "bond_counts": 0
+            },
+            "passed": true
+          },
+          "reference_version": "LAMMPS (22 Jul 2025 - Update 4)"
+        },
+        {
+          "name": "parameters",
+          "git_revision": "c65b199c42d4315e679fbd0e2223fd4b5957a701",
+          "timing": {
+            "calls_per_batch": 1,
+            "batch_seconds": [
+              0.36369170900434256,
+              0.316687542013824,
+              0.31685108318924904,
+              0.31591091584414244,
+              0.3177084596827626
+            ],
+            "median_seconds": 0.31685108318924904,
+            "min_seconds": 0.31591091584414244,
+            "max_seconds": 0.36369170900434256,
+            "first_seconds": 0.3293164996430278,
+            "cpu_to_wall_ratio": 0.9792907283039457
+          },
+          "incremental_speedup": 1.4714396572344897,
+          "cumulative_speedup": 1.4714396572344897,
+          "lammps_comparison": {
+            "maximum_absolute_errors": {
+              "energy_per_atom": 1.218722900375724e-12,
+              "components_per_atom": 8.094502845779062e-12,
+              "forces": 3.123294955997835e-10,
+              "charges": 3.4081626409943055e-12,
+              "dipole": 1.9716783761225543e-11,
+              "total_bond_orders": 2.6645352591003757e-15,
+              "lone_pairs": 1.1102230246251565e-15,
+              "bond_counts": 0.0
+            },
+            "limits": {
+              "energy_per_atom": 1e-05,
+              "components_per_atom": 1e-05,
+              "forces": 0.0001,
+              "charges": 1e-06,
+              "dipole": 1e-06,
+              "total_bond_orders": 1e-08,
+              "lone_pairs": 1e-08,
+              "bond_counts": 0
+            },
+            "passed": true
+          },
+          "reference_version": "LAMMPS (22 Jul 2025 - Update 4)"
+        },
+        {
+          "name": "neighbors",
+          "git_revision": "9e756fe6736d04af97488767e890d3b9cfd3fefa",
+          "timing": {
+            "calls_per_batch": 2,
+            "batch_seconds": [
+              0.5704366248100996,
+              0.5691220834851265,
+              0.5794044584035873,
+              0.5725153749808669,
+              0.5646954169496894
+            ],
+            "median_seconds": 0.2852183124050498,
+            "min_seconds": 0.2823477084748447,
+            "max_seconds": 0.28970222920179367,
+            "first_seconds": 0.28915924951434135,
+            "cpu_to_wall_ratio": 0.9948266601252611
+          },
+          "incremental_speedup": 1.1109072223219534,
+          "cumulative_speedup": 1.6346329424327342,
+          "lammps_comparison": {
+            "maximum_absolute_errors": {
+              "energy_per_atom": 1.218722900375724e-12,
+              "components_per_atom": 8.094502845779062e-12,
+              "forces": 3.123294955997835e-10,
+              "charges": 3.4081626409943055e-12,
+              "dipole": 1.9716783761225543e-11,
+              "total_bond_orders": 2.6645352591003757e-15,
+              "lone_pairs": 1.1102230246251565e-15,
+              "bond_counts": 0.0
+            },
+            "limits": {
+              "energy_per_atom": 1e-05,
+              "components_per_atom": 1e-05,
+              "forces": 0.0001,
+              "charges": 1e-06,
+              "dipole": 1e-06,
+              "total_bond_orders": 1e-08,
+              "lone_pairs": 1e-08,
+              "bond_counts": 0
+            },
+            "passed": true
+          },
+          "reference_version": "LAMMPS (22 Jul 2025 - Update 4)"
+        },
+        {
+          "name": "torsions",
+          "git_revision": "33a53d45e23e9976c699b95dcb10a57f88810f1a",
+          "timing": {
+            "calls_per_batch": 4,
+            "batch_seconds": [
+              0.2732625836506486,
+              0.27988387551158667,
+              0.2784028332680464,
+              0.2842901246622205,
+              0.2789380419999361
+            ],
+            "median_seconds": 0.06973451049998403,
+            "min_seconds": 0.06831564591266215,
+            "max_seconds": 0.07107253116555512,
+            "first_seconds": 0.08058391604572535,
+            "cpu_to_wall_ratio": 0.9916678757484362
+          },
+          "incremental_speedup": 4.090059718783214,
+          "cumulative_speedup": 6.685746352840208,
+          "lammps_comparison": {
+            "maximum_absolute_errors": {
+              "energy_per_atom": 1.218722900375724e-12,
+              "components_per_atom": 8.094502845779062e-12,
+              "forces": 3.123294955997835e-10,
+              "charges": 3.4081626409943055e-12,
+              "dipole": 1.9716783761225543e-11,
+              "total_bond_orders": 2.6645352591003757e-15,
+              "lone_pairs": 1.1102230246251565e-15,
+              "bond_counts": 0.0
+            },
+            "limits": {
+              "energy_per_atom": 1e-05,
+              "components_per_atom": 1e-05,
+              "forces": 0.0001,
+              "charges": 1e-06,
+              "dipole": 1e-06,
+              "total_bond_orders": 1e-08,
+              "lone_pairs": 1e-08,
+              "bond_counts": 0
+            },
+            "passed": true
+          },
+          "reference_version": "LAMMPS (22 Jul 2025 - Update 4)"
+        },
+        {
+          "name": "energy_pass",
+          "git_revision": "0f9e92fb85fbe4df4e47d4cb053b640490b5d788",
+          "timing": {
+            "calls_per_batch": 6,
+            "batch_seconds": [
+              0.3459643330425024,
+              0.31591674964874983,
+              0.3259624997153878,
+              0.3184369169175625,
+              0.3306723749265075
+            ],
+            "median_seconds": 0.05432708328589797,
+            "min_seconds": 0.05265279160812497,
+            "max_seconds": 0.0576607221737504,
+            "first_seconds": 0.05597720853984356,
+            "cpu_to_wall_ratio": 0.9874517620062153
+          },
+          "incremental_speedup": 1.2836049035248955,
+          "cumulative_speedup": 8.581856802229376,
+          "lammps_comparison": {
+            "maximum_absolute_errors": {
+              "energy_per_atom": 1.218722900375724e-12,
+              "components_per_atom": 8.094502845779062e-12,
+              "forces": 3.123294955997835e-10,
+              "charges": 3.4081626409943055e-12,
+              "dipole": 1.9716783761225543e-11,
+              "total_bond_orders": 2.6645352591003757e-15,
+              "lone_pairs": 1.1102230246251565e-15,
+              "bond_counts": 0.0
+            },
+            "limits": {
+              "energy_per_atom": 1e-05,
+              "components_per_atom": 1e-05,
+              "forces": 0.0001,
+              "charges": 1e-06,
+              "dipole": 1e-06,
+              "total_bond_orders": 1e-08,
+              "lone_pairs": 1e-08,
+              "bond_counts": 0
+            },
+            "passed": true
+          },
+          "reference_version": "LAMMPS (22 Jul 2025 - Update 4)"
+        }
+      ]
+    }
+  }
+}

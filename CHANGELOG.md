@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+- Speed up evaluations with array-based parameter lookup and neighbor
+  bookkeeping, early filtering of unsupported torsions, and a single energy
+  pass for reported values and forces. Force conventions and parameter
+  equations are unchanged.
+- Add reproducible single-CPU comparisons with `lmp_mpi`, including retained
+  timings before and after optimization and per-commit speedups under `validation/`.
+
 ## 0.6.0
 
 First public release of xreac, a NumPy and Autograd ReaxFF implementation for
