@@ -17,6 +17,25 @@ The dedicated water example uses LAMMPS's `qeq_ff.water` (Achtyl et al.,
 retained cases pass: monomer, dimer, distorted dimer, trimer, and hexamer.
 See [water/summary.json](water/summary.json) for tolerances and full results.
 
+The [water PDF report](water/report.pdf) shows all five structures, both total
+energies, signed energy differences (Python minus LAMMPS), and maximum/RMS
+Cartesian force differences. It includes both matched-convention forces and
+full energy-gradient forces, with per-atom plots and energy component tables.
+The numerical overview is also available as [CSV](water/report.csv).
+These use the retained results, which are identical to the subsequent
+`water-20260923T032422Z` verification run. These geometries are not optimized;
+energy differences in this report compare implementations, not binding energies.
+
+Regenerate the report without rerunning calculations:
+
+```sh
+python -m pip install '.[report]'
+python scripts/water_report.py
+```
+
+Matplotlib is optional and is not required by the calculator. To report a new
+verified run, pass `--input path/to/results --output path/to/report.pdf`.
+
 | Compared quantity | Maximum absolute discrepancy |
 | --- | --- |
 | Total energy per atom | 7.6e-14 kcal/mol |
