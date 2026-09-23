@@ -1,0 +1,75 @@
+LAMMPS (22 Jul 2025 - Update 4)
+units real
+atom_style charge
+boundary f f f
+read_data atoms.data
+Reading data file ...
+  orthogonal box = (-15.243 -15.616969 -15) to (18.443851 15.94 15.12)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  6 atoms
+  read_data CPU = 0.000 seconds
+pair_style reaxff NULL tabulate 0 enobonds yes
+pair_coeff * * ffield O H
+WARNING: Changed valency_val to valency_boc for X (src/REAXFF/reaxff_ffield.cpp:300)
+fix charges all qeq/reaxff 1 0 10 1e-12 reaxff maxiter 2000
+neighbor 2.0 bin
+neigh_modify every 1 delay 0 check yes
+compute reax all pair reaxff
+compute bondinfo all reaxff/atom
+compute dipole all dipole
+dump atoms all custom 1 atoms.dump id type q x y z fx fy fz c_bondinfo[1] c_bondinfo[2] c_bondinfo[3]
+dump_modify atoms sort id format float %.17g
+thermo_style custom step pe c_reax[*] c_dipole[1] c_dipole[2] c_dipole[3]
+thermo_modify format float %.17g
+run 0
+WARNING: No fixes with time integration, atoms won't move
+For more information see https://docs.lammps.org/err0028 (src/verlet.cpp:60)
+Neighbor list info ...
+  update: every = 1 steps, delay = 0 steps, check = yes
+  max neighbors/atom: 2000, page size: 100000
+  master list distance cutoff = 12
+  ghost atom cutoff = 12
+  binsize = 6, bins = 6 6 6
+  2 neighbor lists, perpetual/occasional/extra = 2 0 0
+  (1) pair reaxff, perpetual
+      attributes: half, newton off, ghost
+      pair build: half/bin/ghost/newtoff
+      stencil: full/ghost/bin/3d
+      bin: standard
+  (2) fix qeq/reaxff, perpetual, copy from (1)
+      attributes: half, newton off
+      pair build: copy
+      stencil: none
+      bin: none
+Per MPI rank memory allocation (min/avg/max) = 6.669 | 6.669 | 6.669 Mbytes
+   Step         PotEng       c_reax[1]      c_reax[2]      c_reax[3]      c_reax[4]      c_reax[5]      c_reax[6]      c_reax[7]      c_reax[8]      c_reax[9]      c_reax[10]     c_reax[11]     c_reax[12]     c_reax[13]     c_reax[14]    c_dipole[1]    c_dipole[2]    c_dipole[3]  
+         0  -502.6316123673912 -517.87869375516527 -18.34982426469842 -3.5325510043093402e-09 0 6.8662915979789494 0 0 -1.9668288836826744 0.0012204633299272578 0 100.63547464971961 -186.85109119507783 0 114.91183902373726 0.41275184481545629 0.27147205460362078 -0.010456734508163751
+Loop time of 5.83e-07 on 1 procs for 0 steps with 6 atoms
+
+171.5% CPU use with 1 MPI tasks x no OpenMP threads
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Pair    | 0          | 0          | 0          |   0.0 |  0.00
+Neigh   | 0          | 0          | 0          |   0.0 |  0.00
+Comm    | 0          | 0          | 0          |   0.0 |  0.00
+Output  | 0          | 0          | 0          |   0.0 |  0.00
+Modify  | 0          | 0          | 0          |   0.0 |  0.00
+Other   |            | 5.83e-07   |            |       |100.00
+
+Nlocal:              6 ave           6 max           6 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:              0 ave           0 max           0 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:             15 ave          15 max          15 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 15
+Ave neighs/atom = 2.5
+Neighbor list builds = 0
+Dangerous builds = 0
+print "$(pe:%.17g) $(c_reax[1]:%.17g) $(c_reax[2]:%.17g) $(c_reax[3]:%.17g) $(c_reax[4]:%.17g) $(c_reax[5]:%.17g) $(c_reax[6]:%.17g) $(c_reax[7]:%.17g) $(c_reax[8]:%.17g) $(c_reax[9]:%.17g) $(c_reax[10]:%.17g) $(c_reax[11]:%.17g) $(c_reax[12]:%.17g) $(c_reax[13]:%.17g) $(c_reax[14]:%.17g)" file energy.txt screen no
+print "$(c_dipole[1]:%.17g) $(c_dipole[2]:%.17g) $(c_dipole[3]:%.17g)" file dipole.txt screen no
+Total wall time: 0:00:00

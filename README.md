@@ -95,6 +95,12 @@ approximately 0.038 kcal/mol/Å. This is recorded explicitly rather than
 absorbed into test tolerances. A geometry stationary under `forces` can have
 nonzero `lammps_forces`.
 
+The [single-point QEq audit](validation/qeq-audit/README.md) verifies that
+`run 0` equilibrates charges and compares LAMMPS forces against finite
+differences of LAMMPS's own energies, with fresh QEq at every displacement.
+The force discrepancy persists after repeating QEq and changing the initial
+charges; it is not caused by missing charge equilibration.
+
 ## Verify with lmp_mpi
 
 ```sh

@@ -1,0 +1,127 @@
+{
+  "force_field_sha256": "526dea2d55d748caed94734139dda66064e194f74f46eee9b0f511eead38b7d1",
+  "energy_units": "kcal/mol",
+  "force_units": "kcal/mol/Angstrom",
+  "charge_units": "e",
+  "qeq_residual_units": "eV",
+  "qeq_tolerance": 1e-12,
+  "cases": {
+    "monomer": {
+      "reference_version": "LAMMPS (22 Jul 2025 - Update 4)",
+      "atom_index_one_based": 1,
+      "axis": "y",
+      "charges": [
+        -0.6097174198044897,
+        0.30498571342262615,
+        0.30473170638186353
+      ],
+      "net_charge": 0.0,
+      "qeq_stationarity_residual": 8.881784197001252e-16,
+      "lammps_force": 14.007343276361278,
+      "python_matched_force": 14.007343276361233,
+      "python_full_gradient_force": 14.181258404554063,
+      "repeated_qeq_control": {
+        "energy_difference": -2.842170943040401e-14,
+        "max_charge_difference": 2.1538326677728037e-14,
+        "max_force_difference": 2.1316282072803006e-12
+      },
+      "different_initial_charges_control": {
+        "energy_difference": 0.0,
+        "max_charge_difference": 0.0,
+        "max_force_difference": 0.0
+      },
+      "finite_differences": [
+        {
+          "step_A": 0.001,
+          "energy_plus": -248.35794341508807,
+          "energy_minus": -248.3295814428439,
+          "max_charge_change_between_displacements": 0.0007755353595534364,
+          "force_from_lammps_energies": 14.18098612208496,
+          "minus_lammps_force": 0.17364284572368227,
+          "minus_python_full_gradient": -0.00027228246910304676,
+          "predicted_charge_response_from_constants": 0.17391502625066801
+        },
+        {
+          "step_A": 0.0001,
+          "energy_plus": -248.34562286413046,
+          "energy_minus": -248.34278661299408,
+          "max_charge_change_between_displacements": 7.755358095495879e-05,
+          "force_from_lammps_energies": 14.18125568193318,
+          "minus_lammps_force": 0.1739124055719028,
+          "minus_python_full_gradient": -2.7226208825226195e-06,
+          "predicted_charge_response_from_constants": 0.17391512717286922
+        },
+        {
+          "step_A": 1e-05,
+          "energy_plus": -248.3443509742433,
+          "energy_minus": -248.34406734907574,
+          "max_charge_change_between_displacements": 7.755358140348889e-06,
+          "force_from_lammps_energies": 14.181258377732318,
+          "minus_lammps_force": 0.1739151013710405,
+          "minus_python_full_gradient": -2.6821744825156202e-08,
+          "predicted_charge_response_from_constants": 0.1739151281793386
+        }
+      ]
+    },
+    "dimer": {
+      "reference_version": "LAMMPS (22 Jul 2025 - Update 4)",
+      "atom_index_one_based": 1,
+      "axis": "y",
+      "charges": [
+        -0.6178460132335868,
+        0.39349760968186476,
+        0.31148506412210036,
+        -0.6850985272061629,
+        0.2936190143750047,
+        0.30434285226077984
+      ],
+      "net_charge": -1.1102230246251565e-16,
+      "qeq_stationarity_residual": 4.973799150320701e-14,
+      "lammps_force": 14.468711064822406,
+      "python_matched_force": 14.468711064822173,
+      "python_full_gradient_force": 14.652765168443871,
+      "repeated_qeq_control": {
+        "energy_difference": -5.684341886080802e-14,
+        "max_charge_difference": 1.2967404927621828e-13,
+        "max_force_difference": 1.1169731806148775e-11
+      },
+      "different_initial_charges_control": {
+        "energy_difference": 0.0,
+        "max_charge_difference": 0.0,
+        "max_force_difference": 0.0
+      },
+      "finite_differences": [
+        {
+          "step_A": 0.001,
+          "energy_plus": -502.6443610431142,
+          "energy_minus": -502.6150560571711,
+          "max_charge_change_between_displacements": 0.000765267413226689,
+          "force_from_lammps_energies": 14.652492971549691,
+          "minus_lammps_force": 0.183781906727285,
+          "minus_python_full_gradient": -0.0002721968941798991,
+          "predicted_charge_response_from_constants": 0.18405397915538263
+        },
+        {
+          "step_A": 0.0001,
+          "energy_plus": -502.6316123673912,
+          "energy_minus": -502.6286818149018,
+          "max_charge_change_between_displacements": 7.652678738689911e-05,
+          "force_from_lammps_energies": 14.652762446871748,
+          "minus_lammps_force": 0.18405138204934168,
+          "minus_python_full_gradient": -2.7215721232209944e-06,
+          "predicted_charge_response_from_constants": 0.18405410235476558
+        },
+        {
+          "step_A": 1e-05,
+          "energy_plus": -502.63029800420884,
+          "energy_minus": -502.6300049489057,
+          "max_charge_change_between_displacements": 7.652678781777666e-06,
+          "force_from_lammps_energies": 14.652765156597523,
+          "minus_lammps_force": 0.184054091775117,
+          "minus_python_full_gradient": -1.184634790263317e-08,
+          "predicted_charge_response_from_constants": 0.18405410399620736
+        }
+      ]
+    }
+  }
+}

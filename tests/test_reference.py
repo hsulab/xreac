@@ -47,3 +47,24 @@ def test_reference_relaxed_geometry(name, tmp_path):
 def test_missing_executable(tmp_path):
     with pytest.raises(FileNotFoundError):
         evaluate_lammps(ForceField.zno(), *CASES["zno"], executable="nonexistent-xreac-lammps", directory=tmp_path)
+
+
+@pytest.mark.parametrize("name", ["monomer", "dimer"])
+def test_lammps_reequilibrated_energy_derivative(name, tmp_path):
+    """Differentiate LAMMPS energies, with fresh QEq at each displacement."""
+    from water_cluster import water_cases
+
+    ff = ForceField.bundled("qeq_ff.water")
+    symbols, x = water_cases()[name]
+    actual = Calculator(ff).evaluate(symbols, x)
+    reference = evaluate_lammps(ff, symbols, x, directory=tmp_path / "center")
+    step = 1e-5
+    displacement = np.zeros_like(x)
+    displacement[0, 1] = step
+    plus = evaluate_lammps(ff, symbols, x+displacement, directory=tmp_path / "plus")
+    minus = evaluate_lammps(ff, symbols, x-displacement, directory=tmp_path / "minus")
+    numerical_force = -(plus.energy-minus.energy)/(2*step)
+    assert np.max(abs(plus.charges-minus.charges)) > 1e-6
+    assert numerical_force == pytest.approx(actual.forces[0, 1], abs=1e-6, rel=0)
+    assert reference.forces[0, 1] == pytest.approx(actual.lammps_forces[0, 1], abs=1e-8, rel=0)
+    assert abs(numerical_force-reference.forces[0, 1]) > .1
