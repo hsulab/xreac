@@ -1,9 +1,9 @@
 # Small-cell implementation verification
 
-Generated September 23, 2026 in `catorch3` with:
+Generated September 23, 2026 with:
 
 ```sh
-mamba run -n catorch3 python examples/small_cells.py --verify --output validation/small-cell-support
+python examples/small_cells.py --verify --output validation/small-cell-support
 ```
 
 All nine cases pass against LAMMPS 22 Jul 2025, Update 4; **163 tests pass** in

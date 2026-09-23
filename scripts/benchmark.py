@@ -3,7 +3,6 @@
 import argparse
 from datetime import datetime, timezone
 import json
-import os
 import platform
 from pathlib import Path
 import resource
@@ -74,7 +73,7 @@ def main():
         default=0,
         help="Optionally time native FIRE for this many steps (fixed-charge forces only)",
     )
-    parser.add_argument("--output", type=Path, default=ROOT / "validation" / "benchmark-catorch3.json")
+    parser.add_argument("--output", type=Path, default=ROOT / "validation" / "runs" / "benchmark.json")
     args = parser.parse_args()
     if args.relax_iterations < 0:
         parser.error("--relax-iterations must be nonnegative")
@@ -88,8 +87,6 @@ def main():
         "numpy": np.__version__,
         "autograd": version("autograd"),
         "force_field_sha256": ForceField.bundled("ffield.reax.ZnOH").checksum,
-        "environment": os.environ.get("CONDA_DEFAULT_ENV"),
-        "executable": sys.executable,
         "full_derivative": False,
         "force_convention": "fixed_charge",
         "relaxation_backend": "native" if args.relax_iterations else None,

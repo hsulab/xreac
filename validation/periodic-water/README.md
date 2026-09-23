@@ -1,7 +1,7 @@
 # Periodic water verification
 
 All five cases pass against LAMMPS 22 Jul 2025, Update 4. Generated September
-23, 2026 with `mamba run -n catorch3 python examples/periodic_water.py --verify
+23, 2026 with `python examples/periodic_water.py --verify
 --output validation/periodic-water`. Reproduce using a new output directory.
 
 See [summary.json](summary.json) for signed energy differences, maximum

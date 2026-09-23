@@ -5,8 +5,6 @@
   "numpy": "2.0.2",
   "autograd": "1.9.1",
   "force_field_sha256": "b5af5a65573ce60f32405a973e33f7cc89a90bc69e624a8ca89811eb67b1a07b",
-  "environment": "catorch3",
-  "executable": "/opt/homebrew/Caskroom/miniforge/base/envs/catorch3/bin/python",
   "full_derivative": false,
   "force_convention": "fixed_charge",
   "relaxation_backend": null,

@@ -2,18 +2,18 @@
 
 ## Installation
 
-Python 3.10 or newer is required. From the repository root, install into the
-existing development environment:
+Python 3.10 or newer is required. From the repository root:
 
 ```sh
-mamba run -n catorch3 python -m pip install -e '.[dev]'
+python -m pip install '.[ase]'
 ```
 
-No local virtual environment is needed. For a minimal installation from a
-checkout, use `python -m pip install .`. Core dependencies are NumPy and HIPS
+For a minimal installation from a checkout, use `python -m pip install .`.
+Core dependencies are NumPy and HIPS
 Autograd. The optional `.[ase]` extra enables the adapter and the default
 relaxation backend, and includes Matplotlib for report generation. The `.[dev]`
 extra includes ASE, pytest, Ruff, Sphinx, MyST, and the documentation theme.
+For development, install it with `python -m pip install -e '.[dev]'`.
 
 These installation commands use a local checkout; they do not assume a public
 PyPI release or a particular Git hosting URL.
@@ -57,9 +57,9 @@ supported file; the bundled water file does not contain Zn parameters.
 From the repository root:
 
 ```sh
-mamba run -n catorch3 python examples/water_cluster.py
-mamba run -n catorch3 python examples/periodic_water.py
-mamba run -n catorch3 python examples/small_cells.py
+python examples/water_cluster.py
+python examples/periodic_water.py
+python examples/small_cells.py
 ```
 
 Add `--verify` to compare against the pinned `lmp_mpi` executable. These scripts

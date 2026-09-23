@@ -71,8 +71,8 @@ performance benchmark.
 Reproduce in a new output directory:
 
 ```sh
-mamba run -n catorch3 python scripts/validate_neighbors.py --verify
-mamba run -n catorch3 python -m pytest -q
+python scripts/validate_neighbors.py --verify
+python -m pytest -q
 ```
 
 The validation script writes complete per-case inputs, both Python results,

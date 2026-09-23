@@ -135,7 +135,6 @@ def main():
         "charge_units": "e",
         "lammps_qeq_restriction": "https://docs.lammps.org/fix_qeq_reaxff.html#restrictions",
         "python": sys.version,
-        "executable": sys.executable,
         "cases": {},
     }
     for name, ff, symbols, x, cell in cases:

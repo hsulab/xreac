@@ -49,12 +49,12 @@ when checking fixed-charge forces and fresh QEq when checking charge-response
 forces. Numerical derivative checks are tests, not the production force method.
 
 ```sh
-mamba run -n catorch3 python -m pytest -q
-mamba run -n catorch3 python -m pytest -q -m 'not reference'
-mamba run -n catorch3 python -m pytest -q -m reference
+python -m pytest -q
+python -m pytest -q -m 'not reference'
+python -m pytest -q -m reference
 ```
 
-The 0.6 implementation passed **163 tests** in the recorded `catorch3` run.
+The 0.6 implementation passed **163 tests** in the recorded run.
 This is a historical validation count, not a dynamically executed docs build.
 LAMMPS tests are not run while building documentation.
 
@@ -88,7 +88,7 @@ The numerical results are keyed by case and then `ase`, `replicated`, or
 `reference` and can be read with `json.load(gzip.open(path, "rt"))`.
 
 ```sh
-mamba run -n catorch3 python scripts/validate_neighbors.py --verify
+python scripts/validate_neighbors.py --verify
 ```
 
 ## Small-cell verification
@@ -113,8 +113,8 @@ Download the {download}`original diagnostic <../validation/small-cells/summary.j
 - {download}`Periodic water, including 192 atoms <../validation/periodic-water/summary.json>`.
 - {download}`Water clusters with fixed-charge forces <../validation/water-fixed-charge/summary.json>`.
 - {download}`Illustrated water report (PDF) <../validation/water-fixed-charge/report.pdf>`.
-- {download}`ASE FIRE relaxation <../validation/relaxation-ase-catorch3/summary.json>`.
-- {download}`Native FIRE relaxation <../validation/relaxation-native-catorch3/summary.json>`.
+- {download}`ASE FIRE relaxation <../validation/relaxation-ase/summary.json>`.
+- {download}`Native FIRE relaxation <../validation/relaxation-native/summary.json>`.
 
 These are deterministic verification geometries, not equilibrated liquid
 snapshots or predictions of physical stability. Agreement establishes

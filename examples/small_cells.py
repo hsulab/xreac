@@ -68,7 +68,6 @@ def main():
         "reference": "LAMMPS on replicated supercells; results normalized to input cell",
         "units": {"energy": "kcal/mol/input-cell", "forces": "kcal/mol/Angstrom", "charges": "e"},
         "python": sys.version,
-        "executable": sys.executable,
         "cases": {},
     }
     for name, (filename, symbols, x, cell, pbc) in small_cell_cases().items():

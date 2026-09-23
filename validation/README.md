@@ -4,6 +4,9 @@ Verified locally on September 22, 2026 with LAMMPS 22 Jul 2025, Update 4,
 invoked through `/opt/homebrew/bin/lmp_mpi`. The force-field checksums and
 original citations are recorded in [NOTICE](../NOTICE).
 
+Local environment names and Python executable paths have been omitted from
+retained summaries. Package versions and numerical results are preserved.
+
 ## Single energy model
 
 Both native replication and ASE now supply `(i, j, S)` to one `EnergyModel`.
@@ -21,7 +24,7 @@ FIRE benchmark script also run with the shared model.
 
 ## ASE neighbor lists (before model consolidation)
 
-**240 tests pass** in `catorch3`. ASE calculators now default to direct,
+**240 tests pass**. ASE calculators now default to direct,
 image-resolved ASE neighbors; native replication remains available explicitly
 and remains the default for core single points and native FIRE.
 ASE constructs `(i, j, S)` outside the core and passes `neighbors=(i, j, S)`
@@ -35,12 +38,12 @@ structures are retained with the report. Both backends include all periodic
 images within their cutoffs, self-image bonds, and hydrogen-bond image identities.
 
 ```sh
-mamba run -n catorch3 python scripts/validate_neighbors.py --verify
+python scripts/validate_neighbors.py --verify
 ```
 
 ## Small-cell support (0.6)
 
-**163 tests pass** in `catorch3`.
+**163 tests pass**.
 
 Small primitive cells now work through internal replication, with positions
 and charges tied across equivalent copies. Energies and forces are returned
@@ -72,7 +75,7 @@ input/mapping metadata. Its diagnostic `allow_small_cell=True` mode remains
 available to reproduce the original LAMMPS discrepancy below.
 
 ```sh
-mamba run -n catorch3 python examples/small_cells.py --verify
+python examples/small_cells.py --verify
 ```
 
 ## Small-cell audit
@@ -93,7 +96,7 @@ the calculator rejected small cells at that point. The reference-only
 
 ## Periodic cells (0.5)
 
-Verified September 23, 2026 in `catorch3`: **136 tests pass**. Fixed orthorhombic
+Verified September 23, 2026: **136 tests pass**. Fixed orthorhombic
 and triclinic cells, rotated cell vectors, and partial periodicity are supported.
 Periodic face heights must exceed 10 Å for the bundled files; all contributing
 nonbonded and hydrogen-bond images are summed within their finite cutoffs.
@@ -130,14 +133,13 @@ structures, and full reference inputs and outputs. Periodic dipoles depend on
 the input coordinate branch; the reference preserves it with image flags.
 
 ```sh
-mamba run -n catorch3 python examples/periodic_water.py --verify
-mamba run -n catorch3 python -m pytest -q
+python examples/periodic_water.py --verify
+python -m pytest -q
 ```
 
-## ASE and catorch3 (0.4)
+## ASE integration (0.4)
 
-The local virtual environment was removed. Development and validation now use
-`mamba run -n catorch3`, with Python 3.10.13, NumPy 2.0.2, Autograd 1.9.1,
+Validation used Python 3.10.13, NumPy 2.0.2, Autograd 1.9.1,
 and ASE 3.27.0. **102 tests pass**, including adapter units, result caching,
 parameter changes, unsupported inputs, ASE constraints, FIRE/BFGS integration,
 and both relaxation backends. Tests confirm that neither relaxation backend
@@ -157,25 +159,25 @@ Both backends pass final-geometry comparisons with `lmp_mpi`:
 | 20-atom Zn/O cluster | 205 | 209 | 1e-4 |
 | Water monomer | 75 | 85 | 1e-5 |
 
-See the retained [ASE results](relaxation-ase-catorch3/summary.json) and
-[native results](relaxation-native-catorch3/summary.json). Direct ASE examples
+See the retained [ASE results](relaxation-ase/summary.json) and
+[native results](relaxation-native/summary.json). Direct ASE examples
 also pass: [FIRE](ase-water-fire/summary.json) converges in 61 steps and
 [BFGS](ase-water-bfgs/summary.json) in 6 steps, with a 1e-5 eV/Å vector-norm
 tolerance. Their directories contain trajectories, optimizer logs, structures,
 and raw LAMMPS verification inputs/outputs.
 
-The [catorch3 calculation benchmark](benchmark-catorch3.json) records fixed-charge
-evaluations only. The [native FIRE benchmark](benchmark-native-fire-catorch3.json)
+The [September 23 calculation benchmark](benchmark-20260923.json) records fixed-charge
+evaluations only. The [native FIRE benchmark](benchmark-native-fire.json)
 adds 20-step relaxation timings using our retained implementation. These runs
 use a different interpreter/NumPy environment from the archived benchmarks;
 do not attribute timing differences solely to code changes. Capped relaxation
 timings do not imply convergence.
 
 ```sh
-mamba run -n catorch3 python -m pytest -q
-mamba run -n catorch3 python scripts/validate_relaxation.py --backend ase --output validation/runs/ase-check
-mamba run -n catorch3 python scripts/validate_relaxation.py --backend native --output validation/runs/native-check
-mamba run -n catorch3 python examples/ase_water.py --verify
+python -m pytest -q
+python scripts/validate_relaxation.py --backend ase --output validation/runs/ase-check
+python scripts/validate_relaxation.py --backend native --output validation/runs/native-check
+python examples/ase_water.py --verify
 ```
 
 ## Fixed-charge relaxation (0.3.1)
@@ -335,4 +337,4 @@ Charge-response forces (`full_derivative=True`) pass independent energy
 finite-difference tests with charges re-equilibrated. The distinction is
 necessary because the reference QEq and
 energy routines use inconsistent electrostatic conversion constants; see
-the [main README](../README.md#force-derivative-option).
+the [force-convention guide](../docs/calculations.md#force-convention).

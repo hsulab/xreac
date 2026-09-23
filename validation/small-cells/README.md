@@ -5,7 +5,7 @@ automatic replication; see the [implementation results](../small-cell-support/RE
 The original raw primitive-cell LAMMPS results below remain unchanged.
 
 Tested September 23, 2026 with the pinned single-rank `lmp_mpi` (22 Jul 2025,
-Update 4), using `mamba run -n catorch3`. All structures are fixed-geometry
+Update 4). All structures are fixed-geometry
 single points with fresh QEq. **139 tests pass.**
 
 Each primitive cell is repeated exactly until every cell height exceeds 10 Å.
@@ -83,7 +83,7 @@ marks whether a run is outside the validated cell range.
 ## Reproduce
 
 ```sh
-mamba run -n catorch3 python scripts/audit_small_cells.py
+python scripts/audit_small_cells.py
 ```
 
 Use `--output` with a new directory to retain another run. The default is a

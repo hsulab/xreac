@@ -3,13 +3,13 @@
 `water_cluster.py` runs entirely from the repository with NumPy and Autograd:
 
 ```sh
-mamba run -n catorch3 python examples/water_cluster.py
+python examples/water_cluster.py
 ```
 
 To also verify against the pinned `lmp_mpi` executable:
 
 ```sh
-mamba run -n catorch3 python examples/water_cluster.py --verify --output validation/my-water-check
+python examples/water_cluster.py --verify --output validation/my-water-check
 ```
 
 Choose a new output directory. The script saves structures in XYZ format,
@@ -38,8 +38,8 @@ See [saved results](../validation/water/summary.json) and the
 `ase_water.py` uses the optional `ReaxFFCalculator` adapter with ASE optimizers:
 
 ```sh
-mamba run -n catorch3 python examples/ase_water.py --verify
-mamba run -n catorch3 python examples/ase_water.py --optimizer BFGS --verify
+python examples/ase_water.py --verify
+python examples/ase_water.py --optimizer BFGS --verify
 ```
 
 It writes the initial/final XYZ structures, an ASE trajectory, optimizer log,
@@ -54,7 +54,7 @@ remains available through `backend="native"` and in the native relaxation benchm
 `periodic_water.py` verifies fixed-cell periodic calculations:
 
 ```sh
-mamba run -n catorch3 python examples/periodic_water.py --verify
+python examples/periodic_water.py --verify
 ```
 
 It covers wrapped molecules, multiple images within the interaction cutoffs,
@@ -70,7 +70,7 @@ supplied coordinate branch; wrapping atoms can change it.
 normalized larger LAMMPS cells:
 
 ```sh
-mamba run -n catorch3 python examples/small_cells.py --verify
+python examples/small_cells.py --verify
 ```
 
 Nine cases include 3.12–9 Å water cells, a water dimer, rotated triclinic and

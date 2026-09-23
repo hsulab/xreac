@@ -1,6 +1,6 @@
 """Relax water with ASE FIRE or BFGS using the xreac calculator.
 
-Run: mamba run -n catorch3 python examples/ase_water.py --verify
+Run: python examples/ase_water.py --verify
 """
 
 import argparse

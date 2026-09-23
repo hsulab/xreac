@@ -5,7 +5,6 @@
   "charge_units": "e",
   "lammps_qeq_restriction": "https://docs.lammps.org/fix_qeq_reaxff.html#restrictions",
   "python": "3.10.13 | packaged by conda-forge | (main, Dec 23 2023, 15:35:25) [Clang 16.0.6 ]",
-  "executable": "/opt/homebrew/Caskroom/miniforge/base/envs/catorch3/bin/python",
   "cases": {
     "water_12A": {
       "primitive_atoms": 3,

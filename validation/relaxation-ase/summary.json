@@ -1,7 +1,6 @@
 {
   "optimizer": "FIRE",
   "backend": "ase",
-  "environment": "catorch3",
   "python": "3.10.13 | packaged by conda-forge | (main, Dec 23 2023, 15:35:25) [Clang 16.0.6 ]",
   "numpy": "2.0.2",
   "autograd": "1.9.1",

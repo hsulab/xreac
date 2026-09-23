@@ -30,12 +30,12 @@ Use `master` as the main branch.
 
 Format Python code with Ruff using the repository's `pyproject.toml` settings:
 line length 119 and Python 3.10 syntax. The `dev` extra pins the formatter version.
-Use the existing `catorch3` environment:
+Install the development dependencies in your Python environment:
 
 ```sh
-mamba run -n catorch3 python -m pip install -e '.[dev]'
-mamba run -n catorch3 python -m ruff format .
-mamba run -n catorch3 python -m ruff format --check .
+python -m pip install -e '.[dev]'
+python -m ruff format .
+python -m ruff format --check .
 ```
 
 Run the formatting check before committing Python changes. Generated documentation

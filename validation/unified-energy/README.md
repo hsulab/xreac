@@ -45,6 +45,6 @@ describes the actual reference simulation expansion.
 Reproduce in a new directory:
 
 ```sh
-mamba run -n catorch3 python scripts/validate_neighbors.py --verify
-mamba run -n catorch3 python -m pytest -q
+python scripts/validate_neighbors.py --verify
+python -m pytest -q
 ```

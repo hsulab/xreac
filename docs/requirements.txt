@@ -1,5 +1,5 @@
 # Pinned documentation stack for clean RTD builds on Python 3.12.
-# The dev extra also supports the existing catorch3 Sphinx/MyST installation.
+# The dev extra also supports older compatible Sphinx/MyST installations.
 Sphinx==8.1.3
 myst-parser==4.0.1
 sphinx-rtd-theme==3.0.2

@@ -85,7 +85,6 @@ def main():
         "structures": "Deterministic test geometries; not equilibrated liquid snapshots",
         "environment": {
             "python": sys.version,
-            "executable": sys.executable,
             "platform": platform.platform(),
             "numpy": version("numpy"),
             "autograd": version("autograd"),

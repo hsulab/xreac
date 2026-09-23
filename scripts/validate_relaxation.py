@@ -2,7 +2,6 @@
 
 import argparse
 import json
-import os
 from pathlib import Path
 import sys
 from importlib.metadata import version
@@ -26,7 +25,7 @@ def main():
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()
     if args.output is None:
-        args.output = ROOT / "validation" / f"relaxation-{args.backend}-catorch3"
+        args.output = ROOT / "validation" / "runs" / f"relaxation-{args.backend}"
     args.output.mkdir(parents=True, exist_ok=False)
     cases = [
         ("zno", ForceField.bundled("ffield.reax.ZnOH"), (["Zn", "O"], [[0, 0, 0], [2.3, 0.1, 0.2]]), 1e-5),
@@ -36,7 +35,6 @@ def main():
     report = {
         "optimizer": "FIRE",
         "backend": args.backend,
-        "environment": os.environ.get("CONDA_DEFAULT_ENV"),
         "python": sys.version,
         "numpy": np.__version__,
         "autograd": version("autograd"),
