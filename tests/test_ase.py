@@ -140,7 +140,7 @@ def test_native_backend_does_not_import_ase():
 import sys
 from xreac import Calculator, ForceField
 assert 'ase' not in sys.modules
-result = Calculator(ForceField.zno()).relax(['Zn'], [[0, 0, 0]], backend='native')
+result = Calculator(ForceField.bundled("ffield.reax.ZnOH")).relax(['Zn'], [[0, 0, 0]], backend='native')
 assert result.converged
 assert 'ase' not in sys.modules
 """

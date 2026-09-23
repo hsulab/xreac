@@ -7,7 +7,7 @@ from cases import CASES
 
 @pytest.fixture(scope="module")
 def calc():
-    return Calculator(ForceField.zno())
+    return Calculator(ForceField.bundled("ffield.reax.ZnOH"))
 
 
 @pytest.mark.parametrize("name", ["zno", "o2", "ozno", "znozn", "o3", "o4", "cube8"])
@@ -159,7 +159,7 @@ def test_fixed_charge_derivative(calc):
 
 
 def test_parameter_reader(tmp_path):
-    ff = ForceField.zno()
+    ff = ForceField.bundled("ffield.reax.ZnOH")
     assert ff.checksum == "b5af5a65573ce60f32405a973e33f7cc89a90bc69e624a8ca89811eb67b1a07b"
     assert ff.atoms["O"]["eta"] == 2 * 8.3122
     assert ff.pairs["Zn", "O"]["r_vdW"] == 2 * 2.1414

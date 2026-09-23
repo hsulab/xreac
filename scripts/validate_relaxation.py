@@ -29,8 +29,8 @@ def main():
         args.output = ROOT / "validation" / f"relaxation-{args.backend}-catorch3"
     args.output.mkdir(parents=True, exist_ok=False)
     cases = [
-        ("zno", ForceField.zno(), (["Zn", "O"], [[0, 0, 0], [2.3, 0.1, 0.2]]), 1e-5),
-        ("cluster20", ForceField.zno(), CASES["cluster20"], 1e-4),
+        ("zno", ForceField.bundled("ffield.reax.ZnOH"), (["Zn", "O"], [[0, 0, 0], [2.3, 0.1, 0.2]]), 1e-5),
+        ("cluster20", ForceField.bundled("ffield.reax.ZnOH"), CASES["cluster20"], 1e-4),
         ("water_monomer", ForceField.bundled("qeq_ff.water"), water_cases()["monomer"], 1e-5),
     ]
     report = {

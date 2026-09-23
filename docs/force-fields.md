@@ -22,7 +22,7 @@ print(ff.checksum)
 | --- | --- |
 | `qeq_ff.water` | Achtyl QEq water; H/O and dummy X type |
 | `ffield.reax.cho` | Chenoweth C/H/O |
-| `ffield.reax.ZnOH` | Raymand 2010 Zn/O/H; also loaded by `ForceField.zno()` |
+| `ffield.reax.ZnOH` | Raymand 2010 Zn/O/H |
 
 Source files live under the repository's `data/` directory. Wheels include
 them as `xreac.data`. Their original contents and citation headers are retained.

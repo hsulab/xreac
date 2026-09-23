@@ -117,7 +117,7 @@ def main():
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=False)
     water = ForceField.bundled("qeq_ff.water")
-    zno = ForceField.zno()
+    zno = ForceField.bundled("ffield.reax.ZnOH")
     symbols, x = water_cases()["monomer"]
     cases = [(f"water_{side:g}A", water, symbols, x, np.diag([side] * 3)) for side in (12.0, 9.0, 6.0, 4.0, 3.12)]
     # Avoid a bond aligned exactly with a lattice vector, which activates an

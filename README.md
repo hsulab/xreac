@@ -37,7 +37,6 @@ Source parameter files live in `data/` at the repository root. Distributions
 bundle them as package data so `ForceField.bundled(name)` also works outside
 a source checkout. Bundled examples are `qeq_ff.water` (Achtyl QEq water),
 `ffield.reax.cho` (Chenoweth C/H/O), and `ffield.reax.ZnOH` (Raymand Zn/O/H).
-`ForceField.zno()` remains a backward-compatible shortcut for the last file.
 
 ## Calculate
 

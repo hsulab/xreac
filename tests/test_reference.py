@@ -10,7 +10,7 @@ pytestmark = pytest.mark.reference
 
 @pytest.mark.parametrize("name", list(CASES))
 def test_reference(name, tmp_path):
-    ff = ForceField.zno()
+    ff = ForceField.bundled("ffield.reax.ZnOH")
     symbols, x = CASES[name]
     actual = Calculator(ff).evaluate(symbols, x)
     reference = evaluate_lammps(ff, symbols, x, directory=tmp_path / name)
@@ -24,7 +24,7 @@ def test_reference(name, tmp_path):
 
 @pytest.mark.parametrize("distance", [1.5, 2.5, 3.0, 3.5, 4.0, 4.9999, 5.0001, 9.999, 10.0, 10.001])
 def test_stretch_and_cutoffs(distance, tmp_path):
-    ff = ForceField.zno()
+    ff = ForceField.bundled("ffield.reax.ZnOH")
     symbols, x = ["Zn", "O"], [[0, 0, 0], [distance, 0, 0]]
     actual = Calculator(ff).evaluate(symbols, x)
     reference = evaluate_lammps(ff, symbols, x, directory=tmp_path / "scan")
@@ -34,7 +34,7 @@ def test_stretch_and_cutoffs(distance, tmp_path):
 
 @pytest.mark.parametrize("name", ["zno", "cluster20"])
 def test_reference_relaxed_geometry(name, tmp_path):
-    ff = ForceField.zno()
+    ff = ForceField.bundled("ffield.reax.ZnOH")
     calc = Calculator(ff)
     symbols, x = CASES[name]
     relaxed = calc.relax(symbols, x)
@@ -48,7 +48,12 @@ def test_reference_relaxed_geometry(name, tmp_path):
 
 def test_missing_executable(tmp_path):
     with pytest.raises(FileNotFoundError):
-        evaluate_lammps(ForceField.zno(), *CASES["zno"], executable="nonexistent-xreac-lammps", directory=tmp_path)
+        evaluate_lammps(
+            ForceField.bundled("ffield.reax.ZnOH"),
+            *CASES["zno"],
+            executable="nonexistent-xreac-lammps",
+            directory=tmp_path,
+        )
 
 
 @pytest.mark.parametrize("name", ["monomer", "dimer"])

@@ -172,7 +172,7 @@ def test_ase_default_no_replication_and_backend_switch(monkeypatch):
 
 @pytest.mark.parametrize("bad", ["unknown", None, True])
 def test_invalid_neighbor_backend(bad):
-    ff = ForceField.zno()
+    ff = ForceField.bundled("ffield.reax.ZnOH")
     with pytest.raises(ValueError, match="neighbor_backend"):
         ReaxFFCalculator(ff, neighbor_backend=bad)
 
@@ -209,7 +209,9 @@ def test_neighbor_symmetries(name):
 
 
 def test_neighbor_rebuild_crossing_cutoff():
-    atoms = Atoms("ZnO", positions=[[0, 0, 0], [10.1, 0, 0]], calculator=ReaxFFCalculator(ForceField.zno()))
+    atoms = Atoms(
+        "ZnO", positions=[[0, 0, 0], [10.1, 0, 0]], calculator=ReaxFFCalculator(ForceField.bundled("ffield.reax.ZnOH"))
+    )
     atoms.get_forces()
     distant_energy = atoms.get_potential_energy()
     atoms.positions[1] = [1.9, 0.1, 0.2]
@@ -265,7 +267,7 @@ import sys
 import numpy as np
 from xreac import Calculator, ForceField
 assert 'ase' not in sys.modules
-calc = Calculator(ForceField.zno())
+calc = Calculator(ForceField.bundled("ffield.reax.ZnOH"))
 shifts = np.array([[s, 0, 0] for s in (-4, -3, -2, -1, 1, 2, 3, 4)])
 neighbors = (np.zeros(8, dtype=int), np.zeros(8, dtype=int), shifts)
 actual = calc.evaluate(['Zn'], [[0, 0, 0]], cell=[2.5, 12, 12], pbc=[True, False, False], neighbors=neighbors)
@@ -295,7 +297,9 @@ assert 'ase' not in sys.modules
 )
 def test_supplied_neighbor_validation(neighbors, message):
     with pytest.raises(ValueError, match=message):
-        Calculator(ForceField.zno()).evaluate(["Zn", "O"], [[0, 0, 0], [1.9, 0, 0]], neighbors=neighbors)
+        Calculator(ForceField.bundled("ffield.reax.ZnOH")).evaluate(
+            ["Zn", "O"], [[0, 0, 0], [1.9, 0, 0]], neighbors=neighbors
+        )
 
 
 def test_reuse_supplied_skin_list_for_displacements():

@@ -26,7 +26,7 @@ def main():
     parser.add_argument("--executable", default=None)
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=False)
-    ff = ForceField.zno()
+    ff = ForceField.bundled("ffield.reax.ZnOH")
     calc = Calculator(ff)
     cases = dict(CASES)
     for r in (1.5, 2.5, 3.0, 3.5, 4.0, 4.9999, 5.0001, 9.999, 10.0, 10.001):

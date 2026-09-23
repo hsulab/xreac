@@ -35,11 +35,6 @@ class ForceField:
     hydrogen_bonds: dict
 
     @classmethod
-    def zno(cls):
-        """Backward-compatible shortcut for the bundled Raymand 2010 ZnOH set."""
-        return cls.bundled("ffield.reax.ZnOH")
-
-    @classmethod
     def bundled(cls, name):
         """Load a named parameter file shipped in the repository's data directory."""
         if not isinstance(name, str) or Path(name).name != name or name in ("", ".", ".."):

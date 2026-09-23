@@ -57,7 +57,7 @@ was not reached. The cell is fixed throughout.
 
 ```{eval-rst}
 .. autoclass:: xreac.ForceField
-   :members: bundled, from_file, zno, elements, vdw_type, validate_model
+   :members: bundled, from_file, elements, vdw_type, validate_model
    :undoc-members:
 ```
 

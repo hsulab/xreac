@@ -232,7 +232,7 @@ def test_ase_small_cell_limit_and_caching():
 
 @pytest.mark.parametrize("limit", [0, -1, True, 3.5])
 def test_invalid_expansion_limit(limit):
-    ff = ForceField.zno()
+    ff = ForceField.bundled("ffield.reax.ZnOH")
     with pytest.raises(ValueError, match="max_expanded_atoms"):
         Calculator(ff, max_expanded_atoms=limit)
     with pytest.raises(ValueError, match="max_expanded_atoms"):

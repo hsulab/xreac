@@ -25,7 +25,7 @@ from xreac.neighbors import replicated_neighbors
 
 
 def worker(n, relax_iterations=0):
-    ff = ForceField.zno()
+    ff = ForceField.bundled("ffield.reax.ZnOH")
     calc = Calculator(ff)
     symbols, x = cluster(n)
     neighbors, _ = replicated_neighbors(x, ff.general[12])
@@ -87,7 +87,7 @@ def main():
         "platform": platform.platform(),
         "numpy": np.__version__,
         "autograd": version("autograd"),
-        "force_field_sha256": ForceField.zno().checksum,
+        "force_field_sha256": ForceField.bundled("ffield.reax.ZnOH").checksum,
         "environment": os.environ.get("CONDA_DEFAULT_ENV"),
         "executable": sys.executable,
         "full_derivative": False,
