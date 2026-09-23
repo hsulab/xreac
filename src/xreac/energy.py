@@ -10,6 +10,8 @@ import autograd.numpy as np
 import numpy as onp
 from autograd.tracer import getval
 
+from .geometry import Boundary
+
 C_ELE = 332.06371
 QEQ_COULOMB = 14.4
 SELF_CONVERSION = 23.02
@@ -30,12 +32,14 @@ def positive_power(x, p):
 
 
 class EnergyModel:
-    def __init__(self, ff, symbols):
+    def __init__(self, ff, symbols, cell=None, pbc=None):
         ff.validate_model(symbols)
         self.ff = ff
         self.symbols = tuple(symbols)
         self.n = len(symbols)
         self.g = ff.general
+        self.boundary = Boundary(cell, pbc)
+        self.boundary.validate_cutoff(self.g[12], min(BOND_CUT, self.g[12]))
         self.vdw_type = ff.vdw_type
         self.a = {k: onp.array([ff.atoms[s][k] for s in symbols])
                   for k in ff.atoms[symbols[0]]}
@@ -43,7 +47,7 @@ class EnergyModel:
                   for k in ff.pairs[symbols[0], symbols[0]]}
 
     def geometry(self, x):
-        delta = x[:, None, :] - x[None, :, :]
+        delta = self.boundary.minimum_displacements(x)
         r = np.sqrt(np.sum(delta * delta, axis=-1) + np.eye(self.n))
         return delta, r
 
@@ -54,7 +58,8 @@ class EnergyModel:
         shield = taper / (r**3 + self.p["gamma"]) ** (1/3)
         if fixed_charges is not None:
             return fixed_charges, taper, shield
-        h = QEQ_COULOMB * shield + np.diag(self.a["eta"])
+        coupling = np.sum(shield, axis=0) if shield.ndim == 3 else shield
+        h = QEQ_COULOMB * coupling + np.diag(self.a["eta"])
         # A Lagrange multiplier enforces total charge = 0 exactly.
         ones = np.ones((self.n, 1))
         kkt = np.concatenate((np.concatenate((h, ones), axis=1),
@@ -92,7 +97,7 @@ class EnergyModel:
         return tuple(np.where(v >= 1e-10, v, 0.0) for v in (bo, sigma, pi, pp))
 
     def properties(self, x, charges):
-        """Bond properties and neutral-system dipole (e Angstrom)."""
+        """Bond properties and dipole on the supplied coordinate branch (e A)."""
         _, r = self.geometry(x)
         bo = self.bond_orders(r)[0]
         total = np.sum(bo, axis=1)
@@ -107,7 +112,11 @@ class EnergyModel:
     def components(self, x, fixed_charges=None):
         p, a, g = self.p, self.a, self.g
         delta, r = self.geometry(x)
-        q, taper, shield = self.electrostatics(r, fixed_charges)
+        image_delta, image_r = None, r
+        if self.boundary.periodic:
+            image_delta = self.boundary.image_displacements(x)
+            image_r = np.sqrt(np.sum(image_delta**2, axis=-1)+np.eye(self.n))
+        q, taper, shield = self.electrostatics(image_r, fixed_charges)
         bo, sigma, pi, pp = self.bond_orders(r)
         total = np.sum(bo, axis=1)
         d, db = total-a["valency"], total-a["valency_boc"]
@@ -130,19 +139,19 @@ class EnergyModel:
         under = -a["p_ovun5"]*(1-np.exp(g[6]*dc))/(1+np.exp(-a["p_ovun2"]*dc))/(1+g[8]*np.exp(g[9]*ov2))
         e["atom"] = np.sum(over+under)
         if self.vdw_type in (1, 3):
-            f13 = (r**g[28]+(1/p["gamma_w"])**g[28])**(1/g[28])
+            f13 = (image_r**g[28]+(1/p["gamma_w"])**g[28])**(1/g[28])
         else:
-            f13 = r
+            f13 = image_r
         ev = np.exp(.5*p["alpha"]*(1-f13/p["r_vdW"]))
         e["vdw"] = .5*np.sum(taper*p["D"]*(ev**2-2*ev))
         if self.vdw_type in (2, 3):
-            e["vdw"] += .5*np.sum(taper*p["ecore"]*np.exp(p["acore"]*(1-r/p["rcore"])))
+            e["vdw"] += .5*np.sum(taper*p["ecore"]*np.exp(p["acore"]*(1-image_r/p["rcore"])))
         e["coulomb"] = .5*C_ELE*np.sum(q[:, None]*q[None, :]*shield)
         e["qeq"] = SELF_CONVERSION*np.sum(a["chi"]*q+.5*a["eta"]*q*q)
         neighbors = [onp.flatnonzero(row > THB_CUT) for row in getval(bo)]
         self.angles(e, delta, r, bo, pi, pp, total, d, db, nlp, vlpex, neighbors)
         self.torsions(e, delta, r, bo, pi, db, neighbors)
-        self.hydrogen_bonds(e, delta, r, bo)
+        self.hydrogen_bonds(e, delta, r, bo, image_delta, image_r)
         return np.stack([e[k] for k in COMPONENTS]), q
 
     def special_bond_corrections(self, e, bo, total, d):
@@ -163,30 +172,33 @@ class EnergyModel:
             stabilization *= np.exp(-g[3]*(total[i]-b))+np.exp(-g[3]*(total[j]-b))
             e["bond"] += np.sum(stabilization)
 
-    def hydrogen_bonds(self, e, delta, r, bo):
+    def hydrogen_bonds(self, e, delta, r, bo, image_delta=None, image_r=None):
         """Donor--H--acceptor terms selected using parameter-file role flags."""
         roles = self.a["p_hbond"]
-        rv, bv = getval(r), getval(bo)
+        if image_delta is None:
+            image_delta, image_r = delta[None, ...], r[None, ...]
+        rv, bv = getval(image_r), getval(bo)
         triples, params = [], []
         for j in onp.flatnonzero(roles == 1):
             donors = onp.flatnonzero((roles == 2) & (bv[:, j] >= HBOND_THRESHOLD))
-            acceptors = onp.flatnonzero((roles == 2) & (rv[j] <= min(HBOND_CUT, self.g[12])))
+            acceptors = onp.argwhere((roles[None, :] == 2) & (rv[:, :, j] <= min(HBOND_CUT, self.g[12])))
             for i in donors:
-                for k in acceptors:
+                for image, k in acceptors:
                     if i == k:
                         continue
                     prm = self.ff.hydrogen_bonds.get((self.symbols[i], self.symbols[j], self.symbols[k]))
                     if prm is not None and prm[0] > 0:
-                        triples.append((i, j, k))
+                        triples.append((i, j, k, image))
                         params.append(prm)
         if not triples:
             return
-        i, j, k = onp.array(triples).T
+        i, j, k, image = onp.array(triples).T
         r0, hb1, hb2, hb3 = onp.array(params).T
-        cos = np.sum(delta[i, j]*delta[k, j], axis=1)/(r[i, j]*r[j, k])
+        acceptor_r = image_r[image, k, j]
+        cos = np.sum(delta[i, j]*image_delta[image, k, j], axis=1)/(r[i, j]*acceptor_r)
         sin4 = .25*(1-np.clip(cos, -1., 1.))**2
         e["hydrogen_bond"] = np.sum(hb1*(1-np.exp(-hb2*bo[i, j]))
-            *np.exp(-hb3*(r0/r[j, k]+r[j, k]/r0-2))*sin4)
+            *np.exp(-hb3*(r0/acceptor_r+acceptor_r/r0-2))*sin4)
 
     def angles(self, e, delta, r, bo, pi, pp, total, d, db, nlp, vlpex, neighbors):
         a, g = self.a, self.g
@@ -235,7 +247,11 @@ class EnergyModel:
                     if i == k:
                         continue
                     for l in neighbors[k]:
-                        if l == j or l == i or bv[i, j]*bv[j, k]*bv[k, l] <= THB_CUT:
+                        if l == j or bv[i, j]*bv[j, k]*bv[k, l] <= THB_CUT:
+                            continue
+                        # The same atom index can denote distinct images at the
+                        # ends of a periodic chain; exclude only a closed triangle.
+                        if l == i and onp.linalg.norm(getval(delta[i, j]+delta[j, k]+delta[k, l])) < 1e-8:
                             continue
                         prm = self.ff.torsions.get(tuple(self.symbols[t] for t in (i, j, k, l)))
                         if prm is not None and onp.any(prm[[0, 1, 2, 4]] != 0):

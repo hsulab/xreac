@@ -11,6 +11,7 @@ import numpy as np
 
 from .calculator import validate_input
 from .energy import COMPONENTS
+from .geometry import Boundary
 
 REFERENCE_VERSION = "LAMMPS (22 Jul 2025 - Update 4)"
 
@@ -30,10 +31,18 @@ class ReferenceResult:
 
 
 def evaluate_lammps(force_field, symbols, positions, *, executable=None,
-                    directory=None, timeout=120, expected_version=REFERENCE_VERSION):
-    """Run and retain a reproducible reference calculation; never silently skip."""
-    symbols, x = validate_input(symbols, positions)
+                    directory=None, timeout=120, expected_version=REFERENCE_VERSION,
+                    cell=None, pbc=None):
+    """Retain a single-point reference with fresh QEq and optional fixed-cell PBC.
+
+    cell/pbc follow Calculator.evaluate(). A rotated triclinic cell is mapped
+    to LAMMPS coordinates and vector results are rotated back. Image flags
+    preserve the supplied coordinate branch for dipole comparisons.
+    """
+    symbols, x = validate_input(symbols, positions, cell=cell, pbc=pbc)
     force_field.validate_model(symbols)
+    boundary = Boundary(cell, pbc)
+    boundary.validate_cutoff(force_field.general[12], min(5.0, force_field.general[12]))
     executable = executable or os.environ.get("XREAC_LAMMPS", "lmp_mpi")
     executable = shutil.which(str(executable))
     if executable is None:
@@ -51,18 +60,44 @@ def evaluate_lammps(force_field, symbols, positions, *, executable=None,
     (work / "ffield").write_bytes(raw)
     types = list(dict.fromkeys(symbols))
     lines = ["xreac reference", "", f"{len(x)} atoms", f"{len(types)} atom types", ""]
-    for axis, dim in enumerate("xyz"):
-        lines.append(f"{x[:, axis].min()-15:.17g} {x[:, axis].max()+15:.17g} {dim}lo {dim}hi")
+    rotation = np.eye(3)
+    origin = np.zeros(3)
+    images = np.zeros((len(x), 3), dtype=int)
+    reference_x = x
+    if boundary.periodic:
+        # Pad open directions, preserving the periodic lattice vectors. Convert
+        # the cell to LAMMPS restricted triclinic coordinates by a rigid rotation.
+        reference_cell = boundary.cell.copy()
+        fractional = x @ boundary.inverse
+        for axis in np.flatnonzero(~boundary.pbc):
+            margin = 15 / boundary.heights[axis]
+            lo = min(0., fractional[:, axis].min()) - margin
+            hi = max(1., fractional[:, axis].max()) + margin
+            origin += lo * boundary.cell[axis]
+            reference_cell[axis] *= hi - lo
+        q, r = np.linalg.qr(reference_cell.T)
+        rotation = q @ np.diag(np.sign(np.diag(r)))
+        restricted = reference_cell @ rotation
+        fractional = (x - origin) @ np.linalg.inv(reference_cell)
+        images[:, boundary.pbc] = np.floor(fractional[:, boundary.pbc]).astype(int)
+        reference_x = (fractional - images) @ restricted
+        for axis, dim in enumerate("xyz"):
+            lines.append(f"0 {restricted[axis, axis]:.17g} {dim}lo {dim}hi")
+        lines.append(f"{restricted[1, 0]:.17g} {restricted[2, 0]:.17g} {restricted[2, 1]:.17g} xy xz yz")
+    else:
+        for axis, dim in enumerate("xyz"):
+            lines.append(f"{x[:, axis].min()-15:.17g} {x[:, axis].max()+15:.17g} {dim}lo {dim}hi")
     lines += ["", "Masses", ""]
     lines += [f"{i+1} {force_field.atoms[s]['mass']:.17g}" for i, s in enumerate(types)]
     lines += ["", "Atoms # charge", ""]
     lines += [f"{i+1} {types.index(s)+1} 0 " + " ".join(f"{v:.17g}" for v in pos)
-              for i, (s, pos) in enumerate(zip(symbols, x))]
+              + " " + " ".join(str(v) for v in images[i])
+              for i, (s, pos) in enumerate(zip(symbols, reference_x))]
     (work / "atoms.data").write_text("\n".join(lines)+"\n")
     terms = " ".join(f"$(c_reax[{i}]:%.17g)" for i in range(1, 15))
     script = f"""units real
 atom_style charge
-boundary f f f
+boundary {' '.join('p' if flag else 'f' for flag in boundary.pbc)}
 read_data atoms.data
 pair_style reaxff NULL tabulate 0 enobonds yes
 pair_coeff * * ffield {' '.join(types)}
@@ -103,12 +138,15 @@ print "$(c_dipole[1]:%.17g) $(c_dipole[2]:%.17g) $(c_dipole[3]:%.17g)" file dipo
     dipole = np.loadtxt(work / "dipole.txt", ndmin=1)
     version = next((line for line in proc.stdout.splitlines() if line.startswith("LAMMPS (")), "unknown")
     metadata = {"executable": executable, "version": version, "command": command,
-                "force_field_sha256": force_field.checksum, "qeq_tolerance": 1e-12}
+                "force_field_sha256": force_field.checksum, "qeq_tolerance": 1e-12,
+                "cell": boundary.cell.tolist() if boundary.periodic else None,
+                "pbc": boundary.pbc.tolist(), "rotation": rotation.tolist(),
+                "origin": origin.tolist()}
     (work / "metadata.json").write_text(json.dumps(metadata, indent=2)+"\n")
     if version != expected_version:
         raise RuntimeError(f"Reference version mismatch: expected {expected_version!r}, got {version!r}; see {work}")
     if values.shape != (15,) or atoms.shape != (len(symbols), 12) or dipole.shape != (3,) or not all(np.isfinite(v).all() for v in (values, atoms, dipole)):
         raise RuntimeError(f"Invalid or non-finite reference output; see {work}")
-    return ReferenceResult(float(values[0]), atoms[:, 6:9], atoms[:, 2],
+    return ReferenceResult(float(values[0]), atoms[:, 6:9] @ rotation.T, atoms[:, 2],
                            dict(zip(COMPONENTS, map(float, values[1:]))), version, work,
-                           atoms[:, 9], atoms[:, 10], atoms[:, 11].astype(int), dipole)
+                           atoms[:, 9], atoms[:, 10], atoms[:, 11].astype(int), dipole @ rotation.T)

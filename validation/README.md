@@ -4,6 +4,49 @@ Verified locally on September 22, 2026 with LAMMPS 22 Jul 2025, Update 4,
 invoked through `/opt/homebrew/bin/lmp_mpi`. The force-field checksums and
 original citations are recorded in [NOTICE](../NOTICE).
 
+## Periodic cells (0.5)
+
+Verified September 23, 2026 in `catorch3`: **136 tests pass**. Fixed orthorhombic
+and triclinic cells, rotated cell vectors, and partial periodicity are supported.
+Periodic face heights must exceed 10 Å for the bundled files; all contributing
+nonbonded and hydrogen-bond images are summed within their finite cutoffs.
+
+The five [retained periodic water cases](periodic-water/summary.json) pass
+total/component energy, fixed-charge force, QEq charge, dipole, bond-order,
+lone-pair, and bond-count comparisons against `lmp_mpi`. They include
+boundary-crossing molecules, multiple interacting images, rotated triclinic
+and partially periodic cells, and 64 waters / 192 atoms in a 12.48 Å box.
+These deterministic structures are not equilibrated liquid snapshots.
+
+The largest discrepancies across the retained cases are approximately:
+
+| Quantity | Maximum absolute difference |
+| --- | ---: |
+| Total energy per atom | 2.6e-12 kcal/mol |
+| Energy component per atom | 2.1e-11 kcal/mol |
+| Force component | 8.0e-10 kcal/mol/Å |
+| Charge | 1.2e-11 e |
+| Dipole component on the supplied coordinate branch | 1.7e-10 e Å |
+| Per-atom total bond order | 3.6e-15 |
+| Bond count | Exact match |
+
+The tests additionally verify lattice wrapping, translation/rotation and atom
+permutation invariance, supercell energy extensivity, derivatives under both
+force conventions, periodic C/H/O and Zn/O cases, and ASE cell/PBC cache
+invalidation. Both ASE FIRE and native FIRE converge a boundary-crossing water
+molecule with no differentiation through QEq; final forces match LAMMPS.
+
+The 192-atom evaluation took about 0.71 s in the retained run, including energy,
+QEq, fixed-charge forces, and properties. This is a single local timing, not
+an averaged benchmark. Results retain environment metadata, JSON/extended XYZ
+structures, and full reference inputs and outputs. Periodic dipoles depend on
+the input coordinate branch; the reference preserves it with image flags.
+
+```sh
+mamba run -n catorch3 python examples/periodic_water.py --verify
+mamba run -n catorch3 python -m pytest -q
+```
+
 ## ASE and catorch3 (0.4)
 
 The local virtual environment was removed. Development and validation now use

@@ -1,7 +1,7 @@
 # xreac
 
-A small NumPy + Autograd ReaxFF calculator for **neutral, isolated molecules
-and clusters**, targeting roughly 1–200 atoms. Elements and interactions come
+A small NumPy + Autograd ReaxFF calculator for **neutral molecules, clusters,
+and periodic supercells**, targeting roughly 1–200 atoms. Elements and interactions come
 from a standard ReaxFF parameter file. It computes energies, charges, forces,
 bond properties, and dipoles, and relaxes geometries using fixed-charge forces.
 No LAMMPS installation is required for calculations; `lmp_mpi` is used for
@@ -70,7 +70,8 @@ Additional results are `total_bond_orders` (per-atom row sums), `lone_pairs`,
 and `bond_counts` (per-atom counts of corrected bond orders **greater than 0.3**,
 matching the default LAMMPS bond-graph cutoff). They have shape `(N,)`.
 `dipole` is a three-component vector in e Å; for a neutral system it is
-independent of the coordinate origin. Dummy labels such as `X` remain in
+independent of the coordinate origin, but depends on the wrapping branch in
+periodic systems (see below). Dummy labels such as `X` remain in
 parameter metadata; they do not denote an additional chemical element.
 
 ## ASE calculator and optimizers
@@ -93,7 +94,8 @@ with FIRE(atoms, logfile="relax.log", trajectory="relax.traj") as optimizer:
 
 The adapter caches results and recalculates after geometry or parameter changes.
 It supports ASE position constraints, neutral initial charge guesses, and
-nonperiodic display boxes. Periodic systems, net charges, and stress are not
+nonperiodic display boxes. `atoms.cell` and `atoms.pbc` control periodicity;
+cell/PBC changes invalidate cached results. Net charges and stress are not
 supported. ASE chemical symbols must match parameter-file atom labels; use
 the core API and `backend="native"` for nonstandard labels.
 `atoms.calc.evaluation` retains the last core result, including
@@ -127,6 +129,57 @@ dipole vectors, per-atom bond-order sums, lone pairs, and bond counts against
 `lmp_mpi`. It writes XYZ structures, Python results, reference inputs/outputs,
 and a comparison summary. The output directory must not already exist.
 Use `--ffield path/to/file` to select another compatible parameter set.
+
+## Periodic cells
+
+```python
+# Core API: cell vectors are rows, in Angstrom (ASE convention).
+periodic = calc.evaluate(symbols, positions, cell=[12.48, 12.48, 12.48])
+# Partial periodicity or a general 3x3 triclinic cell:
+slab = calc.evaluate(symbols, positions, cell=[12.48, 12.48, 30.0],
+                     pbc=[True, True, False])
+relaxed = calc.relax(symbols, positions, cell=[12.48]*3, backend="ase")
+# backend="native" also supports fixed periodic cells.
+
+# ASE: enable periodicity explicitly on Atoms.
+atoms.set_cell([12.48]*3)
+atoms.set_pbc(True)
+print(atoms.get_forces())
+```
+
+In the core API, supplying `cell` enables all three periodic directions by
+default. `pbc=False` retains an isolated calculation even with a display cell.
+Cells must be finite, nonsingular, and right-handed. Each **periodic cell
+height** (perpendicular distance between opposite faces) must be strictly
+larger than both the nonbonded cutoff and twice the bond cutoff: **10 Å for
+the bundled files**. Triclinic vector lengths alone are not sufficient.
+Small primitive cells must first be replicated into larger supercells.
+
+Bonded interactions cross cell boundaries using local image vectors. vdW,
+Coulomb, QEq, and hydrogen bonds include **all images within their cutoffs**,
+so a box may be smaller than twice the nonbonded cutoff. Electrostatics use
+ReaxFF's shielded, tapered finite-cutoff model, with no Ewald/PME summation.
+The size restriction also respects the
+[LAMMPS QEq periodic-box limitation](https://docs.lammps.org/fix_qeq_reaxff.html).
+
+Positions may be wrapped or unwrapped; energies, forces, charges, and bond
+properties are invariant to adding lattice vectors to individual atoms.
+The reported dipole is computed on the **supplied coordinate branch** and
+changes when atoms are wrapped individually; it is not a unique bulk
+polarization. The reference harness preserves that branch using image flags.
+Relaxation changes positions at a fixed cell, always using fixed-charge
+forces. Stress and cell relaxation are not implemented.
+
+```sh
+mamba run -n catorch3 python examples/periodic_water.py --verify
+```
+
+This checks boundary-crossing water, multiple interacting images, rotated
+triclinic cells, partial periodicity, and **64 waters / 192 atoms** in a
+12.48 Å cubic box (approximately 1 g/cm³). These are deterministic test
+geometries, not equilibrated liquid snapshots. The example saves extended XYZ
+and JSON structures with cells, numerical results, and complete LAMMPS runs.
+See the [retained periodic results](validation/periodic-water/summary.json).
 
 ## Force derivative option
 
@@ -253,7 +306,7 @@ a successfully parsed arbitrary parameter set still needs its own validation.
 - Reference agreement establishes implementation consistency, not accuracy
   against quantum chemistry or suitability for a particular system. The bundled
   ZnOH file is the **2010** parameterization, not the earlier 2008 ZnO set.
-- No periodic cells, stress, MD, net charge, external fields, parameter fitting,
+- No small periodic cells, stress, MD, net charge, external fields, parameter fitting,
   lgvdW/five-line-atom extensions, nonzero lower taper radius, or alternative
   charge models such as ACKS2 are supported. The standard LAMMPS defaults of
   5 Å for bond candidates and 7.5 Å for hydrogen bonds are used (also limited
@@ -265,7 +318,8 @@ a successfully parsed arbitrary parameter set still needs its own validation.
   denominators are guarded; singular geometries should not be used to assess
   derivative agreement. Even weak intermolecular bonds can activate torsions.
 - Dense charge equilibration takes cubic time in atom count and quadratic
-  memory. Pair arrays are dense; angle/torsion lists contain local interactions.
+  memory. Periodic pair arrays include up to 27 image offsets; angle/torsion
+  lists contain local interactions.
   Highly compressed or densely connected systems may be expensive or unstable.
 - Global QEq permits charge transfer between separated fragments. This is a
   property of the reference model, not a guarantee of physical dissociation.

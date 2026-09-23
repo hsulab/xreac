@@ -6,6 +6,7 @@ from autograd import grad
 import numpy as np
 
 from .energy import COMPONENTS, EnergyModel
+from .geometry import Boundary
 
 
 @dataclass(frozen=True)
@@ -36,18 +37,16 @@ class Relaxation:
     message: str
 
 
-def validate_input(symbols, positions, total_charge=0, cell=None):
+def validate_input(symbols, positions, total_charge=0, cell=None, pbc=None):
     symbols = tuple(symbols)
     if not symbols or any(not isinstance(s, str) or not s for s in symbols):
         raise ValueError("A nonempty sequence of parameter-file atom labels is required")
     if total_charge != 0:
         raise ValueError("Only neutral systems are validated")
-    if cell is not None:
-        raise ValueError("Periodic cells are not supported")
     x = np.array(positions, dtype=np.float64, copy=True)
     if x.shape != (len(symbols), 3) or not np.isfinite(x).all():
         raise ValueError("positions must be a finite (N, 3) array in Angstrom")
-    distances = np.linalg.norm(x[:, None]-x[None, :], axis=-1)
+    distances = np.linalg.norm(Boundary(cell, pbc).minimum_displacements(x), axis=-1)
     if np.any(distances[np.triu_indices(len(x), 1)] < 1e-6):
         raise ValueError("Coincident atoms are not supported")
     return symbols, x
@@ -59,18 +58,24 @@ class Calculator:
         self.force_field = force_field
 
     def evaluate(self, symbols, positions, *, total_charge=0, cell=None,
-                 full_derivative=False):
+                 pbc=None, full_derivative=False):
         """Return energy, equilibrated charges, and the selected forces.
 
         By default, fixed-charge forces hold the freshly equilibrated charges
         constant during differentiation, matching LAMMPS. Set full_derivative
         to True for charge-response forces: the full reported energy derivative
         through QEq. Only the selected derivative is evaluated.
+
+        cell contains three lengths or three row vectors in Angstrom. Supplying
+        it enables all periodic directions unless pbc is explicitly set to a
+        boolean or three flags. Periodic cell heights must exceed both the
+        nonbonded cutoff and twice the bond cutoff (10 A for bundled files).
+        Dipoles use the supplied coordinate branch and change upon wrapping.
         """
         if not isinstance(full_derivative, bool):
             raise ValueError("full_derivative must be a boolean")
-        symbols, x = validate_input(symbols, positions, total_charge, cell)
-        model = EnergyModel(self.force_field, symbols)
+        symbols, x = validate_input(symbols, positions, total_charge, cell, pbc)
+        model = EnergyModel(self.force_field, symbols, cell, pbc)
         try:
             components, charges = model.components(x)
             fixed_charges = None if full_derivative else charges
@@ -86,7 +91,7 @@ class Calculator:
                           dict(zip(COMPONENTS, map(float, components))), full_derivative, **properties)
 
     def relax(self, symbols, positions, *, force_tolerance=1e-4, max_iterations=500,
-              total_charge=0, cell=None, backend="ase"):
+              total_charge=0, cell=None, pbc=None, backend="ase"):
         """Relax with fixed-charge forces, using ASE FIRE by default.
 
         QEq is solved at each geometry, without differentiation through the
@@ -94,9 +99,12 @@ class Calculator:
         component to be at most force_tolerance (kcal/mol/A). FIRE uses damped
         fictitious dynamics, not an energy line search or physical time evolution.
         Set backend="native" to use the original NumPy FIRE implementation
-        without ASE, including for benchmarks.
+        without ASE, including for benchmarks. cell and pbc follow evaluate();
+        the cell is fixed during relaxation.
         """
-        symbols, x = validate_input(symbols, positions, total_charge, cell)
+        symbols, x = validate_input(symbols, positions, total_charge, cell, pbc)
+        boundary = Boundary(cell, pbc)
+        boundary.validate_cutoff(self.force_field.general[12], min(5., self.force_field.general[12]))
         if not np.isfinite(force_tolerance) or force_tolerance <= 0:
             raise ValueError("force_tolerance must be positive and finite")
         if isinstance(max_iterations, bool) or not isinstance(max_iterations, int) or max_iterations < 1:
@@ -107,7 +115,7 @@ class Calculator:
             from .ase import relax_with_ase
 
             x, result, converged, iterations = relax_with_ase(
-                self, symbols, x, force_tolerance, max_iterations)
+                self, symbols, x, force_tolerance, max_iterations, cell=cell, pbc=boundary.pbc)
             message = "Fixed-charge force tolerance reached" if converged else "Maximum relaxation iterations reached"
             return Relaxation(x, result, converged, iterations, message)
         # FIRE (Bitzek et al., Phys. Rev. Lett. 97, 170201, 2006).
@@ -115,7 +123,7 @@ class Calculator:
         velocity = np.zeros_like(x)
         dt, dt_max, alpha = .02, .2, .1
         positive_steps = 0
-        result = self.evaluate(symbols, x, full_derivative=False)
+        result = self.evaluate(symbols, x, cell=cell, pbc=pbc, full_derivative=False)
         for iteration in range(max_iterations+1):
             force = result.forces
             if np.max(np.abs(force)) <= force_tolerance:
@@ -142,5 +150,5 @@ class Calculator:
             if largest_step > .1:
                 displacement *= .1/largest_step
             x = x + displacement
-            result = self.evaluate(symbols, x, full_derivative=False)
+            result = self.evaluate(symbols, x, cell=cell, pbc=pbc, full_derivative=False)
         return Relaxation(x, result, False, max_iterations, "Maximum relaxation iterations reached")

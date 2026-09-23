@@ -13,7 +13,7 @@ KCAL_MOL_TO_EV = kcal / mol
 
 
 class ReaxFFCalculator(ASECalculator):
-    """ReaxFF for neutral, nonperiodic ASE Atoms.
+    """ReaxFF for neutral ASE Atoms, with optional fixed-cell periodicity.
 
     Energies and forces use ASE units (eV, eV/A); charges and dipoles use e
     and e A. ``evaluation`` retains the last core result in kcal/mol units.
@@ -52,13 +52,11 @@ class ReaxFFCalculator(ASECalculator):
         self.evaluation = None
         if self.atoms is None:
             raise ValueError("An ASE Atoms object is required")
-        if self.atoms.pbc.any():
-            raise ValueError("Periodic systems are not supported")
         initial_charges = self.atoms.get_initial_charges()
         if not np.isfinite(initial_charges).all() or abs(initial_charges.sum()) > 1e-8:
             raise ValueError("Initial charges must be finite and sum to zero; only neutral systems are supported")
-        # A nonperiodic visualization box is allowed; it is not passed as a cell.
         result = self.core.evaluate(self.atoms.get_chemical_symbols(), self.atoms.positions,
+                                    cell=self.atoms.cell.array, pbc=self.atoms.pbc,
                                     total_charge=self.parameters.total_charge,
                                     full_derivative=self.parameters.full_derivative)
         self.evaluation = result
@@ -70,12 +68,12 @@ class ReaxFFCalculator(ASECalculator):
         }
 
 
-def relax_with_ase(core, symbols, positions, force_tolerance, max_iterations):
+def relax_with_ase(core, symbols, positions, force_tolerance, max_iterations, *, cell=None, pbc=False):
     """Internal bridge to ASE FIRE; retain xreac's Cartesian-component stop rule."""
     from ase import Atoms
     from ase.optimize import FIRE
 
-    atoms = Atoms(symbols, positions=positions)
+    atoms = Atoms(symbols, positions=positions, cell=cell, pbc=pbc)
     adapter = ReaxFFCalculator(core.force_field, full_derivative=False)
     # Reuse the caller's calculator, including any instrumentation/subclass.
     adapter.core = core

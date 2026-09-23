@@ -1,4 +1,4 @@
-# Molecular examples
+# Molecular and periodic examples
 
 `water_cluster.py` runs entirely from the repository with NumPy and Autograd:
 
@@ -50,3 +50,18 @@ and equilibrate charges at every evaluated geometry.
 
 `Calculator.relax()` uses ASE FIRE by default. The original FIRE implementation
 remains available through `backend="native"` and in the native relaxation benchmark.
+
+`periodic_water.py` verifies fixed-cell periodic calculations:
+
+```sh
+mamba run -n catorch3 python examples/periodic_water.py --verify
+```
+
+It covers wrapped molecules, multiple images within the interaction cutoffs,
+rotated triclinic cells, partial periodicity, and a 192-atom bulk water box.
+Structures are deterministic test fixtures, not equilibrated liquid snapshots.
+The output includes cell/PBC metadata, extended XYZ structures, fixed-charge
+results, timings, and complete LAMMPS reference runs. See
+[saved results](../validation/periodic-water/summary.json). Periodic cell heights
+must exceed 10 Å for the bundled parameter files. The dipole follows the
+supplied coordinate branch; wrapping atoms can change it.
