@@ -16,6 +16,7 @@ ase = ["ase>=3.26,<4"]
 relax = ["ase>=3.26,<4"]
 test = ["pytest>=8", "ase>=3.26,<4"]
 report = ["matplotlib>=3.8"]
+docs = ["sphinx>=5,<9", "myst-parser>=0.18,<5", "sphinx-rtd-theme>=1.1,<4", "ase>=3.26,<4"]
 
 [tool.setuptools]
 packages = ["xreac", "xreac.data"]

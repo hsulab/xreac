@@ -7,6 +7,19 @@ bond properties, and dipoles, and relaxes geometries using fixed-charge forces.
 No LAMMPS installation is required for calculations; `lmp_mpi` is used for
 independent verification.
 
+## Documentation
+
+The [Sphinx documentation](docs/index.md) uses Markdown through MyST and includes
+user guides, generated API reference pages, and validation records. Build it with:
+
+```sh
+mamba run -n catorch3 python -m pip install -e '.[docs]'
+mamba run -n catorch3 python -m sphinx -n -W --keep-going -b html docs docs/_build/html
+```
+
+Open `docs/_build/html/index.html`. The repository includes `.readthedocs.yaml`
+for deployment; see [building and publishing the docs](docs/development.md).
+
 ## Install
 
 ```sh

@@ -9,3 +9,4 @@ validation/runs/
 validation/reference/
 validation/relaxed20/
 .DS_Store
+docs/_build/

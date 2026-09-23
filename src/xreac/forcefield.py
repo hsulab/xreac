@@ -71,6 +71,13 @@ class ForceField:
 
     @classmethod
     def from_file(cls, path):
+        """Read a standard ReaxFF file and retain its citation and SHA256.
+
+        ``path`` is a filename or path-like object. Atom labels and parameter
+        tables come from the file. Malformed or unsupported formats raise
+        ``ValueError``; missing or unreadable files raise an operating-system
+        error. Loading does not validate the force field's physical accuracy.
+        """
         path = Path(path).resolve()
         raw = path.read_bytes()
         lines = raw.decode().splitlines()
