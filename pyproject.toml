@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=68"]
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -8,8 +8,13 @@ version = "0.6.0"
 description = "Parameter-driven Autograd ReaxFF for molecules and periodic supercells"
 readme = "README.md"
 requires-python = ">=3.10"
-license = {text = "GPL-2.0-or-later"}
+license = "GPL-2.0-or-later"
+license-files = ["LICENSE", "NOTICE"]
 dependencies = ["numpy>=1.24,<3", "autograd>=1.9.1,<2"]
+
+[project.urls]
+Repository = "https://github.com/hsulab/xreac"
+Issues = "https://github.com/hsulab/xreac/issues"
 
 [project.optional-dependencies]
 ase = ["ase>=3.26,<4"]
