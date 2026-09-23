@@ -13,7 +13,7 @@ The [Sphinx documentation](docs/index.md) uses Markdown through MyST and include
 user guides, generated API reference pages, and validation records. Build it with:
 
 ```sh
-mamba run -n catorch3 python -m pip install -e '.[docs]'
+mamba run -n catorch3 python -m pip install -e '.[dev]'
 mamba run -n catorch3 python -m sphinx -n -W --keep-going -b html docs docs/_build/html
 ```
 
@@ -22,14 +22,16 @@ Open `docs/_build/html/index.html`.
 ## Install
 
 ```sh
-mamba run -n catorch3 python -m pip install -e '.[ase,test]'
+mamba run -n catorch3 python -m pip install -e '.[dev]'
 ```
 
 Development uses the existing `catorch3` mamba environment; there is no local
 virtual environment. Python 3.10 or newer is required. Core calculations and
 the native FIRE optimizer need only NumPy and HIPS Autograd. ASE is an optional
 dependency for the adapter and default relaxation backend; install `.[ase]`
-or `.[relax]` to enable it. A minimal installation is `python -m pip install .`.
+to enable it. ASE also includes Matplotlib for report generation. The `.[dev]`
+extra includes ASE, testing, documentation, and formatting tools.
+A minimal installation is `python -m pip install .`.
 
 Source parameter files live in `data/` at the repository root. Distributions
 bundle them as package data so `ForceField.bundled(name)` also works outside

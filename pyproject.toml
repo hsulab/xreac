@@ -12,12 +12,15 @@ license = {text = "GPL-2.0-or-later"}
 dependencies = ["numpy>=1.24,<3", "autograd>=1.9.1,<2"]
 
 [project.optional-dependencies]
-dev = ["ruff==0.16.8"]
 ase = ["ase>=3.26,<4"]
-relax = ["ase>=3.26,<4"]
-test = ["pytest>=8", "ase>=3.26,<4"]
-report = ["matplotlib>=3.8"]
-docs = ["sphinx>=5,<9", "myst-parser>=0.18,<5", "sphinx-rtd-theme>=1.1,<4", "ase>=3.26,<4"]
+dev = [
+    "ase>=3.26,<4",
+    "pytest>=8",
+    "ruff==0.16.8",
+    "sphinx>=5,<9",
+    "myst-parser>=0.18,<5",
+    "sphinx-rtd-theme>=1.1,<4",
+]
 
 [tool.setuptools]
 packages = ["xreac", "xreac.data"]

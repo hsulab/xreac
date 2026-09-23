@@ -1,6 +1,6 @@
 """Render a PDF and CSV from saved water validation results; no calculations rerun.
 
-Install the optional report extra, then run python scripts/water_report.py.
+Install the optional ASE extra, then run python scripts/water_report.py.
 """
 
 import argparse

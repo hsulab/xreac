@@ -6,14 +6,14 @@ Python 3.10 or newer is required. From the repository root, install into the
 existing development environment:
 
 ```sh
-mamba run -n catorch3 python -m pip install -e '.[ase,test]'
+mamba run -n catorch3 python -m pip install -e '.[dev]'
 ```
 
 No local virtual environment is needed. For a minimal installation from a
 checkout, use `python -m pip install .`. Core dependencies are NumPy and HIPS
-Autograd. ASE is optional: `.[ase]` or `.[relax]` enables the adapter and the
-default relaxation backend. `.[report]` adds Matplotlib for report generation;
-`.[docs]` adds Sphinx, MyST, the theme, and ASE for API documentation.
+Autograd. The optional `.[ase]` extra enables the adapter and the default
+relaxation backend, and includes Matplotlib for report generation. The `.[dev]`
+extra includes ASE, pytest, Ruff, Sphinx, MyST, and the documentation theme.
 
 These installation commands use a local checkout; they do not assume a public
 PyPI release or a particular Git hosting URL.

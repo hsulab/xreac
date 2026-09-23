@@ -253,13 +253,13 @@ energy differences in this report compare implementations, not binding energies.
 Regenerate the report without rerunning calculations:
 
 ```sh
-python -m pip install '.[report]'
+python -m pip install '.[ase]'
 python scripts/water_report.py
 # Archived two-force report:
 python scripts/water_report.py --input validation/water --output validation/water/report.pdf
 ```
 
-Matplotlib is optional and is not required by the calculator. To report a new
+Matplotlib comes with the ASE extra and is not required by the core calculator. To report a new
 verified run, pass `--input path/to/results --output path/to/report.pdf`.
 
 | Compared quantity | Maximum absolute discrepancy |
