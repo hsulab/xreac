@@ -32,11 +32,13 @@ def positive_power(x, p):
 
 
 class EnergyModel:
-    def __init__(self, ff, symbols, cell=None, pbc=None):
+    def __init__(self, ff, symbols, cell=None, pbc=None, *, charge_atoms=None):
         ff.validate_model(symbols)
         self.ff = ff
         self.symbols = tuple(symbols)
         self.n = len(symbols)
+        self.charge_atoms = self.n if charge_atoms is None else charge_atoms
+        self.charge_copies = self.n // self.charge_atoms
         self.g = ff.general
         self.boundary = Boundary(cell, pbc)
         self.boundary.validate_cutoff(self.g[12], min(BOND_CUT, self.g[12]))
@@ -59,13 +61,19 @@ class EnergyModel:
         if fixed_charges is not None:
             return fixed_charges, taper, shield
         coupling = np.sum(shield, axis=0) if shield.ndim == 3 else shield
-        h = QEQ_COULOMB * coupling + np.diag(self.a["eta"])
+        nq, copies = self.charge_atoms, self.charge_copies
+        if copies > 1:
+            # All images of each primitive atom share a charge. Sum over the
+            # neighbor copies and average equivalent central copies. Nonzero
+            # self-image interactions enter the reduced matrix's diagonal.
+            coupling = np.mean(np.sum(np.reshape(coupling, (copies, nq, copies, nq)), axis=2), axis=0)
+        h = QEQ_COULOMB * coupling + np.diag(self.a["eta"][:nq])
         # A Lagrange multiplier enforces total charge = 0 exactly.
-        ones = np.ones((self.n, 1))
+        ones = np.ones((nq, 1))
         kkt = np.concatenate((np.concatenate((h, ones), axis=1),
                               np.concatenate((ones.T, np.zeros((1, 1))), axis=1)), axis=0)
-        rhs = np.concatenate((-self.a["chi"], np.zeros(1)))
-        q = np.linalg.solve(kkt, rhs)[:self.n]
+        rhs = np.concatenate((-self.a["chi"][:nq], np.zeros(1)))
+        q = np.tile(np.linalg.solve(kkt, rhs)[:nq], copies)
         return q, taper, shield
 
     def bond_orders(self, r):

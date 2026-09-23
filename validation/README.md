@@ -4,6 +4,43 @@ Verified locally on September 22, 2026 with LAMMPS 22 Jul 2025, Update 4,
 invoked through `/opt/homebrew/bin/lmp_mpi`. The force-field checksums and
 original citations are recorded in [NOTICE](../NOTICE).
 
+## Small-cell support (0.6)
+
+**163 tests pass** in `catorch3`.
+
+Small primitive cells now work through internal replication, with positions
+and charges tied across equivalent copies. Energies and forces are returned
+per input cell; QEq solves for only the input atom count. Nonzero self-image
+interactions and hydrogen bonds between translated copies are retained.
+`bond_orders` sums image contributions, including diagonal self-image bonds;
+`bond_counts` applies its threshold to each image separately.
+
+The nine [retained small-cell results](small-cell-support/summary.json) all pass
+against normalized LAMMPS supercells. Coverage includes 3.12–9 Å water, a water
+dimer, rotated triclinic and partially periodic cells, Zn/O, and a one-atom zinc
+chain bonded to two images of itself. The maximum force difference is
+4.2e-12 kcal/mol/Å; the maximum energy difference per atom is 4.3e-12 kcal/mol.
+
+Verification also covers both force derivatives, reduced QEq matrix dimensions,
+wrapping/rotation/permutation invariance, extensivity under different internal
+replications, ASE caching and memory-limit changes, and fixed-charge relaxation
+with both ASE and native FIRE. Relaxation convergence is checked on a
+symmetry-controlled water orientation; a separate test checks iteration-limit
+reporting for the general starting geometry. Weak image torques can make
+orientation relaxation much slower than bond relaxation.
+
+`cell_repetitions` reports the expansion. Automatic expansion defaults to a
+512-atom limit, configurable with `max_expanded_atoms`. Pair work still scales
+with the expanded system, while the QEq solve uses only the primitive atoms.
+No dependencies were added. `evaluate_lammps()` now automatically expands small
+cells and normalizes results, retaining the raw expanded run and its primitive
+input/mapping metadata. Its diagnostic `allow_small_cell=True` mode remains
+available to reproduce the original LAMMPS discrepancy below.
+
+```sh
+mamba run -n catorch3 python examples/small_cells.py --verify
+```
+
 ## Small-cell audit
 
 The September 23, 2026 [small-cell audit](small-cells/README.md) compares seven
@@ -16,8 +53,9 @@ explicit-image QEq sum confirms that QEq is not the discrepancy here.
 The pinned LAMMPS hydrogen-bond code excludes donor/acceptor images sharing
 the same original atom ID. The audit documents this representation dependence
 and the image-aware neighbor/QEq work required for small-cell support in xreac.
-The calculator's size guard remains enabled; the reference-only
-`allow_small_cell=True` switch is for diagnostics. **139 tests pass.**
+This historical audit predates the internal-replication implementation above;
+the calculator rejected small cells at that point. The reference-only
+`allow_small_cell=True` switch is for diagnostics. **139 tests passed.**
 
 ## Periodic cells (0.5)
 

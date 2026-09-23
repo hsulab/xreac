@@ -8,6 +8,7 @@ except ImportError as exc:
     raise ImportError("Install xreac[ase] to use the ASE calculator") from exc
 
 from .calculator import Calculator
+from .geometry import validate_expansion_limit
 
 KCAL_MOL_TO_EV = kcal / mol
 
@@ -22,12 +23,13 @@ class ReaxFFCalculator(ASECalculator):
     """
 
     implemented_properties = ["energy", "forces", "charges", "dipole"]
-    default_parameters = {"full_derivative": False, "total_charge": 0}
+    default_parameters = {"full_derivative": False, "total_charge": 0, "max_expanded_atoms": 512}
 
-    def __init__(self, force_field, *, full_derivative=False, total_charge=0, **kwargs):
-        self.core = Calculator(force_field)
+    def __init__(self, force_field, *, full_derivative=False, total_charge=0, max_expanded_atoms=512, **kwargs):
+        self.core = Calculator(force_field, max_expanded_atoms=max_expanded_atoms)
         self.evaluation = None
-        super().__init__(full_derivative=full_derivative, total_charge=total_charge, **kwargs)
+        super().__init__(full_derivative=full_derivative, total_charge=total_charge,
+                         max_expanded_atoms=max_expanded_atoms, **kwargs)
 
     def set(self, **kwargs):
         unknown = set(kwargs) - set(self.default_parameters)
@@ -37,8 +39,11 @@ class ReaxFFCalculator(ASECalculator):
             raise ValueError("full_derivative must be a boolean")
         if kwargs.get("total_charge", 0) != 0:
             raise ValueError("Only neutral systems are supported")
+        if "max_expanded_atoms" in kwargs:
+            validate_expansion_limit(kwargs["max_expanded_atoms"])
         changed = super().set(**kwargs)
         if changed:
+            self.core.max_expanded_atoms = self.parameters.max_expanded_atoms
             self.reset()
         return changed
 
@@ -74,7 +79,7 @@ def relax_with_ase(core, symbols, positions, force_tolerance, max_iterations, *,
     from ase.optimize import FIRE
 
     atoms = Atoms(symbols, positions=positions, cell=cell, pbc=pbc)
-    adapter = ReaxFFCalculator(core.force_field, full_derivative=False)
+    adapter = ReaxFFCalculator(core.force_field, full_derivative=False, max_expanded_atoms=core.max_expanded_atoms)
     # Reuse the caller's calculator, including any instrumentation/subclass.
     adapter.core = core
     atoms.calc = adapter

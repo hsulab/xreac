@@ -44,6 +44,7 @@ def test_symmetries(calc, full_derivative):
 
 @pytest.mark.parametrize("symbols,x,kwargs", [
     ([], [], {}), (["He"], [[0, 0, 0]], {}),
+    (["He"], [[0, 0, 0]], {"cell": [4.]*3}),
     (["Zn", "O"], [[0, 0, 0], [0, 0, 0]], {}),
     (["Zn"], [[np.nan, 0, 0]], {}), (["Zn"], [[0, 0]], {}),
     (["Zn"], [[0, 0, 0]], {"total_charge": 1}),

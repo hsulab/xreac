@@ -1,0 +1,85 @@
+{
+  "executable": "/opt/homebrew/bin/lmp_mpi",
+  "version": "LAMMPS (22 Jul 2025 - Update 4)",
+  "command": [
+    "/opt/homebrew/bin/lmp_mpi",
+    "-in",
+    "in.lammps",
+    "-log",
+    "log.lammps",
+    "-nocite"
+  ],
+  "force_field_sha256": "526dea2d55d748caed94734139dda66064e194f74f46eee9b0f511eead38b7d1",
+  "qeq_tolerance": 1e-12,
+  "cell": [
+    [
+      12.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      12.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      12.0
+    ]
+  ],
+  "pbc": [
+    true,
+    true,
+    true
+  ],
+  "rotation": [
+    [
+      1.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      1.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      1.0
+    ]
+  ],
+  "origin": [
+    0.0,
+    0.0,
+    0.0
+  ],
+  "allow_small_cell": false,
+  "within_validated_cell_limits": true,
+  "input_cell": [
+    [
+      6.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      6.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      6.0
+    ]
+  ],
+  "input_atoms": 3,
+  "cell_repetitions": [
+    2,
+    2,
+    2
+  ],
+  "energy_divisor": 8,
+  "returned_results": "Per input cell; forces/properties averaged across equivalent copies"
+}

@@ -62,6 +62,20 @@ rotated triclinic cells, partial periodicity, and a 192-atom bulk water box.
 Structures are deterministic test fixtures, not equilibrated liquid snapshots.
 The output includes cell/PBC metadata, extended XYZ structures, fixed-charge
 results, timings, and complete LAMMPS reference runs. See
-[saved results](../validation/periodic-water/summary.json). Periodic cell heights
-must exceed 10 Å for the bundled parameter files. The dipole follows the
+[saved results](../validation/periodic-water/summary.json). Small periodic cells
+are replicated internally to exceed the interaction cutoffs. The dipole follows the
 supplied coordinate branch; wrapping atoms can change it.
+
+`small_cells.py` demonstrates automatic replication and verification against
+normalized larger LAMMPS cells:
+
+```sh
+mamba run -n catorch3 python examples/small_cells.py --verify
+```
+
+Nine cases include 3.12–9 Å water cells, a water dimer, rotated triclinic and
+partially periodic cells, Zn/O, and a one-atom zinc chain bonded to its own
+images. Results use the input cell and atom count. `cell_repetitions` records
+the internal expansion; QEq solves only for the input atoms. The default limit
+is 512 internal atoms, configurable with `max_expanded_atoms`. See the
+[retained results](../validation/small-cell-support/summary.json).

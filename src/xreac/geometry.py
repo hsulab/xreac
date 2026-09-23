@@ -6,6 +6,11 @@ from autograd.tracer import getval
 import numpy as onp
 
 
+def validate_expansion_limit(value):
+    if isinstance(value, bool) or not isinstance(value, (int, onp.integer)) or value < 1:
+        raise ValueError("max_expanded_atoms must be a positive integer")
+
+
 class Boundary:
     """Cell vectors are rows, as in ASE; pbc selects periodic lattice vectors."""
 
@@ -45,6 +50,27 @@ class Boundary:
             if onp.any(self.heights[self.pbc] <= minimum*(1+1e-12)):
                 raise ValueError(f"Periodic cell heights must exceed {minimum:g} Angstrom "
                                  "(nonbonded cutoff and twice the bond cutoff); use a larger supercell")
+
+    def supercell(self, cutoff, bond_cutoff, atoms, max_expanded_atoms=512):
+        """Return repetitions, translation vectors, and a safe internal cell.
+
+        Replication gives every interacting image a distinct atom identity.
+        The public coordinates remain the primitive degrees of freedom.
+        """
+        validate_expansion_limit(max_expanded_atoms)
+        repetitions = onp.ones(3, dtype=int)
+        if self.periodic:
+            minimum = max(cutoff, 2*bond_cutoff)*(1+1e-12)
+            required = onp.floor(minimum/self.heights[self.pbc])+1
+            copies = float(onp.prod(required))
+            if copies > 1 and copies*atoms > max_expanded_atoms:
+                raise ValueError(f"Small-cell replication needs {copies*atoms:g} internal atoms, "
+                                 f"exceeding max_expanded_atoms={max_expanded_atoms}; "
+                                 "increase this limit explicitly if memory permits")
+            repetitions[self.pbc] = required.astype(int)
+            shifts = onp.array(list(product(*(range(n) for n in repetitions)))) @ self.cell
+            return repetitions, shifts, self.cell*repetitions[:, None]
+        return repetitions, onp.zeros((1, 3)), None
 
     def centered_displacements(self, x):
         delta = x[:, None, :] - x[None, :, :]

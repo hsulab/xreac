@@ -5,8 +5,9 @@ import autograd.numpy as anp
 from autograd import grad
 import numpy as np
 
-from .energy import COMPONENTS, EnergyModel
-from .geometry import Boundary
+from .energy import COMPONENTS
+from .geometry import Boundary, validate_expansion_limit
+from .periodic import make_model
 
 
 @dataclass(frozen=True)
@@ -21,6 +22,7 @@ class Evaluation:
     lone_pairs: np.ndarray
     bond_counts: np.ndarray
     dipole: np.ndarray
+    cell_repetitions: tuple[int, int, int] = (1, 1, 1)
 
     @property
     def force_convention(self):
@@ -53,9 +55,11 @@ def validate_input(symbols, positions, total_charge=0, cell=None, pbc=None):
 
 
 class Calculator:
-    def __init__(self, force_field):
+    def __init__(self, force_field, *, max_expanded_atoms=512):
         force_field.validate_model()
+        validate_expansion_limit(max_expanded_atoms)
         self.force_field = force_field
+        self.max_expanded_atoms = max_expanded_atoms
 
     def evaluate(self, symbols, positions, *, total_charge=0, cell=None,
                  pbc=None, full_derivative=False):
@@ -68,14 +72,15 @@ class Calculator:
 
         cell contains three lengths or three row vectors in Angstrom. Supplying
         it enables all periodic directions unless pbc is explicitly set to a
-        boolean or three flags. Periodic cell heights must exceed both the
-        nonbonded cutoff and twice the bond cutoff (10 A for bundled files).
+        boolean or three flags. Small cells use tied internal copies; energies
+        and properties refer to the input cell. cell_repetitions records the
+        expansion. bond_orders sums over images; bond_counts counts each image.
         Dipoles use the supplied coordinate branch and change upon wrapping.
         """
         if not isinstance(full_derivative, bool):
             raise ValueError("full_derivative must be a boolean")
         symbols, x = validate_input(symbols, positions, total_charge, cell, pbc)
-        model = EnergyModel(self.force_field, symbols, cell, pbc)
+        model, repetitions = make_model(self.force_field, symbols, cell, pbc, self.max_expanded_atoms)
         try:
             components, charges = model.components(x)
             fixed_charges = None if full_derivative else charges
@@ -88,7 +93,8 @@ class Calculator:
             raise ValueError("QEq charge constraint failed")
         properties = model.properties(x, charges)
         return Evaluation(float(components.sum()), force, charges,
-                          dict(zip(COMPONENTS, map(float, components))), full_derivative, **properties)
+                          dict(zip(COMPONENTS, map(float, components))), full_derivative,
+                          cell_repetitions=repetitions, **properties)
 
     def relax(self, symbols, positions, *, force_tolerance=1e-4, max_iterations=500,
               total_charge=0, cell=None, pbc=None, backend="ase"):
@@ -104,7 +110,8 @@ class Calculator:
         """
         symbols, x = validate_input(symbols, positions, total_charge, cell, pbc)
         boundary = Boundary(cell, pbc)
-        boundary.validate_cutoff(self.force_field.general[12], min(5., self.force_field.general[12]))
+        boundary.supercell(self.force_field.general[12], min(5., self.force_field.general[12]),
+                           len(symbols), self.max_expanded_atoms)
         if not np.isfinite(force_tolerance) or force_tolerance <= 0:
             raise ValueError("force_tolerance must be positive and finite")
         if isinstance(max_iterations, bool) or not isinstance(max_iterations, int) or max_iterations < 1:

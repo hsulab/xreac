@@ -1,5 +1,9 @@
 # Small-cell diagnostic
 
+Historical audit before version 0.6. Small cells are now supported through
+automatic replication; see the [implementation results](../small-cell-support/README.md).
+The original raw primitive-cell LAMMPS results below remain unchanged.
+
 Tested September 23, 2026 with the pinned single-rank `lmp_mpi` (22 Jul 2025,
 Update 4), using `mamba run -n catorch3`. All structures are fixed-geometry
 single points with fresh QEq. **139 tests pass.**

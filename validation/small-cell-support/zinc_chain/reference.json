@@ -1,0 +1,48 @@
+{
+  "energy": -10.868673983099146,
+  "forces": [
+    [
+      8.596062664640997e-16,
+      0.0,
+      0.0
+    ]
+  ],
+  "charges": [
+    5.2983586259006494e-18
+  ],
+  "components": {
+    "bond": -21.40100908413263,
+    "atom": -0.5864705578205411,
+    "lone_pair": 0.0,
+    "molecule": 0.0,
+    "angle": 0.0,
+    "penalty": 0.0,
+    "angle_conjugation": 0.0,
+    "hydrogen_bond": 0.0,
+    "torsion": 0.0,
+    "conjugation": 0.0,
+    "vdw": 11.118805658854033,
+    "coulomb": 3.980868713950158e-33,
+    "electric_field": 0.0,
+    "qeq": 2.466075350574102e-16
+  },
+  "dipole": [
+    0.0,
+    0.0,
+    0.0
+  ],
+  "total_bond_orders": [
+    1.280335411730507
+  ],
+  "lone_pairs": [
+    4.624253301868374e-05
+  ],
+  "bond_counts": [
+    2
+  ],
+  "cell_repetitions": [
+    5,
+    1,
+    1
+  ]
+}

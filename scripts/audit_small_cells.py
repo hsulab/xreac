@@ -1,4 +1,4 @@
-"""Audit small cells against equivalent supercells without enabling them in xreac.
+"""Audit primitive LAMMPS cells against equivalent supercells.
 
 Primitive-cell LAMMPS runs below the documented QEq size limit are diagnostics.
 The trusted comparison uses xreac and LAMMPS on an exactly replicated cell with
@@ -116,7 +116,7 @@ def main():
     ds, dx = water_cases()["distorted_dimer"]
     cases.append(("water_dimer_6A", water, ds, dx, np.diag([6.]*3)))
     cases.append(("zno_4A", zno, ["Zn", "O"], np.array([[0., 0, 0], [1.9, .1, .2]]), np.diag([4.]*3)))
-    report = {"scope": "Small-cell diagnostic; does not enable small cells in the calculator",
+    report = {"scope": "Primitive LAMMPS representation diagnostic; supercells are the reference",
               "energy_units": "kcal/mol", "force_units": "kcal/mol/Angstrom", "charge_units": "e",
               "lammps_qeq_restriction": "https://docs.lammps.org/fix_qeq_reaxff.html#restrictions",
               "python": sys.version, "executable": sys.executable, "cases": {}}

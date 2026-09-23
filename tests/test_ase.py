@@ -72,8 +72,8 @@ def test_nonperiodic_box_and_unsupported_properties(atoms):
         atoms.get_stress()
     atoms.pbc = True
     assert atoms.get_potential_energy() == pytest.approx(energy, abs=1e-12)
-    atoms.cell = [9., 20., 20.]
-    with pytest.raises(ValueError, match="Periodic"):
+    atoms.cell = [0., 20., 20.]
+    with pytest.raises(ValueError):
         atoms.get_potential_energy()
     assert atoms.calc.results == {}
     assert atoms.calc.evaluation is None

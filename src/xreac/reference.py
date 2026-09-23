@@ -1,5 +1,5 @@
 """Development-only single-rank lmp_mpi reference harness."""
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 import json
 import os
@@ -11,7 +11,7 @@ import numpy as np
 
 from .calculator import validate_input
 from .energy import COMPONENTS
-from .geometry import Boundary
+from .geometry import Boundary, validate_expansion_limit
 
 REFERENCE_VERSION = "LAMMPS (22 Jul 2025 - Update 4)"
 
@@ -28,13 +28,15 @@ class ReferenceResult:
     lone_pairs: np.ndarray
     bond_counts: np.ndarray
     dipole: np.ndarray
+    cell_repetitions: tuple[int, int, int] = (1, 1, 1)
 
 
 def evaluate_lammps(force_field, symbols, positions, *, executable=None,
                     directory=None, timeout=120, expected_version=REFERENCE_VERSION,
-                    cell=None, pbc=None, allow_small_cell=False):
+                    cell=None, pbc=None, allow_small_cell=False, max_expanded_atoms=512):
     """Retain a single-point reference with fresh QEq and optional fixed-cell PBC.
 
+    Small cells are replicated and results normalized to the input cell.
     cell/pbc follow Calculator.evaluate(). A rotated triclinic cell is mapped
     to LAMMPS coordinates and vector results are rotated back. Image flags
     preserve the supplied coordinate branch for dipole comparisons.
@@ -46,13 +48,40 @@ def evaluate_lammps(force_field, symbols, positions, *, executable=None,
     boundary = Boundary(cell, pbc)
     if not isinstance(allow_small_cell, bool):
         raise ValueError("allow_small_cell must be a boolean")
+    validate_expansion_limit(max_expanded_atoms)
     within_cell_limits = True
     try:
         boundary.validate_cutoff(force_field.general[12], min(5.0, force_field.general[12]))
     except ValueError:
         within_cell_limits = False
         if not allow_small_cell:
-            raise
+            repetitions, shifts, expanded_cell = boundary.supercell(
+                force_field.general[12], min(5., force_field.general[12]), len(x), max_expanded_atoms)
+            copies, n = len(shifts), len(x)
+            ref = evaluate_lammps(force_field, symbols*copies,
+                np.reshape(x[None, :, :]+shifts[:, None, :], (-1, 3)),
+                cell=expanded_cell, pbc=boundary.pbc, executable=executable,
+                directory=directory, timeout=timeout, expected_version=expected_version,
+                max_expanded_atoms=max_expanded_atoms)
+            folded = {}
+            for key, tolerance in (("forces", 1e-4), ("charges", 1e-6),
+                                   ("total_bond_orders", 1e-8), ("lone_pairs", 1e-8), ("bond_counts", 0)):
+                values = getattr(ref, key).reshape((copies, n)+getattr(ref, key).shape[1:])
+                if np.max(abs(values-values[0])) > tolerance:
+                    raise RuntimeError(f"LAMMPS replicated {key} differ between copies; see {ref.directory}")
+                folded[key] = values.mean(axis=0) if key != "bond_counts" else values[0].copy()
+            metadata_path = ref.directory/"metadata.json"
+            metadata = json.loads(metadata_path.read_text())
+            metadata.update(input_cell=boundary.cell.tolist(), input_atoms=n,
+                            cell_repetitions=repetitions.tolist(), energy_divisor=copies,
+                            returned_results="Per input cell; forces/properties averaged across equivalent copies")
+            metadata_path.write_text(json.dumps(metadata, indent=2)+"\n")
+            (ref.directory/"primitive.json").write_text(json.dumps(dict(symbols=symbols,
+                positions=x.tolist(), cell=boundary.cell.tolist(), pbc=boundary.pbc.tolist()), indent=2)+"\n")
+            return replace(ref, energy=ref.energy/copies,
+                components={key: value/copies for key, value in ref.components.items()},
+                dipole=np.sum((x-x.mean(axis=0))*folded["charges"][:, None], axis=0),
+                cell_repetitions=tuple(map(int, repetitions)), **folded)
     executable = executable or os.environ.get("XREAC_LAMMPS", "lmp_mpi")
     executable = shutil.which(str(executable))
     if executable is None:

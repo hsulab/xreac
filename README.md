@@ -69,6 +69,9 @@ The standard C2 correction and terminal triple-bond stabilization are included.
 Additional results are `total_bond_orders` (per-atom row sums), `lone_pairs`,
 and `bond_counts` (per-atom counts of corrected bond orders **greater than 0.3**,
 matching the default LAMMPS bond-graph cutoff). They have shape `(N,)`.
+In small periodic cells, `bond_orders[i, j]` sums bonds to **all images** of
+atom `j`, so the diagonal can be nonzero. Bond counts apply the threshold to
+each individual image before summing, rather than to this aggregated matrix.
 `dipole` is a three-component vector in e Å; for a neutral system it is
 independent of the coordinate origin, but depends on the wrapping branch in
 periodic systems (see below). Dummy labels such as `X` remain in
@@ -149,29 +152,50 @@ print(atoms.get_forces())
 
 In the core API, supplying `cell` enables all three periodic directions by
 default. `pbc=False` retains an isolated calculation even with a display cell.
-Cells must be finite, nonsingular, and right-handed. Each **periodic cell
-height** (perpendicular distance between opposite faces) must be strictly
-larger than both the nonbonded cutoff and twice the bond cutoff: **10 Å for
-the bundled files**. Triclinic vector lengths alone are not sufficient.
-Small primitive cells must first be replicated into larger supercells.
+Cells must be finite, nonsingular, and right-handed. **Small cells are supported
+through internal replication**: the calculator repeats periodic directions
+until each internal face height exceeds the nonbonded cutoff and twice the
+bond cutoff (10 Å for bundled files). Nonperiodic directions are not repeated.
+Positions and charges of equivalent copies remain tied to the input atoms;
+QEq solves for only the input-cell charges, including nonzero self-image
+contributions. Energies are normalized per input cell, and derivatives fold
+image forces back onto the input coordinates.
+
+```python
+small = calc.evaluate(symbols, positions, cell=[4.0]*3)
+print(small.energy)             # kcal/mol per input cell
+print(small.forces.shape)       # (number of input atoms, 3)
+print(small.cell_repetitions)   # (3, 3, 3) with bundled parameter files
+```
+
+The default replication limit is **512 internal atoms**. A calculation that
+would exceed it fails before allocating the expanded pair arrays. Set
+`Calculator(ff, max_expanded_atoms=...)` or
+`ReaxFFCalculator(ff, max_expanded_atoms=...)` to change the limit. This is a
+memory limit on automatic expansion, not on an already-large input cell.
+Pair/bond work scales with the expanded system; this implementation prioritizes
+correctness and adds no dependencies. It is not a sparse primitive-cell backend.
 
 Bonded interactions cross cell boundaries using local image vectors. vdW,
 Coulomb, QEq, and hydrogen bonds include **all images within their cutoffs**,
 so a box may be smaller than twice the nonbonded cutoff. Electrostatics use
 ReaxFF's shielded, tapered finite-cutoff model, with no Ewald/PME summation.
-The size restriction also respects the
+The internal cell also respects the
 [LAMMPS QEq periodic-box limitation](https://docs.lammps.org/fix_qeq_reaxff.html).
 
 Positions may be wrapped or unwrapped; energies, forces, charges, and bond
 properties are invariant to adding lattice vectors to individual atoms.
 The reported dipole is computed on the **supplied coordinate branch** and
 changes when atoms are wrapped individually; it is not a unique bulk
-polarization. The reference harness preserves that branch using image flags.
+polarization. For expanded references, the dipole is reconstructed from LAMMPS
+charges on the original input-coordinate branch; larger-cell references use
+image flags.
 Relaxation changes positions at a fixed cell, always using fixed-charge
 forces. Stress and cell relaxation are not implemented.
 
 ```sh
 mamba run -n catorch3 python examples/periodic_water.py --verify
+mamba run -n catorch3 python examples/small_cells.py --verify
 ```
 
 This checks boundary-crossing water, multiple interacting images, rotated
@@ -184,8 +208,10 @@ See the [retained periodic results](validation/periodic-water/summary.json).
 The [small-cell audit](validation/small-cells/README.md) tests 3.12–9 Å cells
 against exactly replicated larger cells. It finds a hydrogen-bond exclusion
 discrepancy in primitive-cell LAMMPS calculations, while QEq charges agree in
-the tested cases. Small cells remain unsupported by the Python calculator;
-equivalent larger supercells are the reference for future implementation.
+the tested cases. Our small-cell calculations preserve equivalent-supercell
+interactions, including hydrogen bonds between translated copies of one atom.
+The [small-cell implementation results](validation/small-cell-support/summary.json)
+verify nine cases against larger LAMMPS supercells.
 Run `mamba run -n catorch3 python scripts/audit_small_cells.py` to reproduce.
 
 ## Force derivative option
@@ -265,6 +291,12 @@ ref = evaluate_lammps(ff, symbols, positions, directory="reference-water")
 
 Use a new or empty directory. It retains the exact parameter file, structure,
 input script, log, atom dump, energies, stdout/stderr, version, and SHA256.
+For small cells, `evaluate_lammps()` automatically expands the input and
+normalizes its returned results per input cell. Raw files describe the expanded
+run; `primitive.json` and metadata record the input and normalization factor.
+Equivalent-copy properties are checked before averaging. The explicit
+`allow_small_cell=True` option bypasses expansion for diagnostic runs only;
+those primitive LAMMPS results are not the validation target for small cells.
 Reference tests use temporary directories. The original Zn/O regression and
 benchmark scripts remain available:
 
@@ -313,7 +345,7 @@ a successfully parsed arbitrary parameter set still needs its own validation.
 - Reference agreement establishes implementation consistency, not accuracy
   against quantum chemistry or suitability for a particular system. The bundled
   ZnOH file is the **2010** parameterization, not the earlier 2008 ZnO set.
-- No small periodic cells, stress, MD, net charge, external fields, parameter fitting,
+- No stress, MD, net charge, external fields, parameter fitting,
   lgvdW/five-line-atom extensions, nonzero lower taper radius, or alternative
   charge models such as ACKS2 are supported. The standard LAMMPS defaults of
   5 Å for bond candidates and 7.5 Å for hydrogen bonds are used (also limited
@@ -324,9 +356,9 @@ a successfully parsed arbitrary parameter set still needs its own validation.
   explicit error because their dihedral derivative is undefined. Angle
   denominators are guarded; singular geometries should not be used to assess
   derivative agreement. Even weak intermolecular bonds can activate torsions.
-- Dense charge equilibration takes cubic time in atom count and quadratic
-  memory. Periodic pair arrays include up to 27 image offsets; angle/torsion
-  lists contain local interactions.
+- Dense charge equilibration takes cubic time in the input atom count.
+  Pair arrays use quadratic memory in the internal expanded atom count and
+  include up to 27 image offsets; angle/torsion lists contain local interactions.
   Highly compressed or densely connected systems may be expensive or unstable.
 - Global QEq permits charge transfer between separated fragments. This is a
   property of the reference model, not a guarantee of physical dissociation.

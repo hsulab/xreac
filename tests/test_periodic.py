@@ -92,9 +92,9 @@ def test_periodic_derivative(calc, name, full_derivative):
 
 
 @pytest.mark.parametrize("cell,pbc", [
-    (None, True), ([10., 12., 12.], True), ([9.9, 12., 12.], True),
+    (None, True),
     ([12., 12., 0.], True), (np.zeros((3, 3)), True),
-    ([12., -12., 12.], True), ([[12., 0, 0], [20., 12., 0], [0, 0, 12.]], True),
+    ([12., -12., 12.], True),
     ([12., 12., float("nan")], True), ([12., 12.], True),
     ([12.]*3, "true"), ([12.]*3, [True, False]), ([12.]*3, [1, 2, 0]),
 ])
