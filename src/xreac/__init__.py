@@ -1,4 +1,4 @@
-"""Lightweight ReaxFF calculations for isolated Zn/O clusters."""
+"""Parameter-driven ReaxFF calculations for isolated neutral molecules and clusters."""
 from .calculator import Calculator, Evaluation, Relaxation
 from .forcefield import ForceField
 

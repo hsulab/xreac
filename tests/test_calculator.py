@@ -42,7 +42,7 @@ def test_symmetries(calc):
 
 
 @pytest.mark.parametrize("symbols,x,kwargs", [
-    ([], [], {}), (["H"], [[0, 0, 0]], {}),
+    ([], [], {}), (["He"], [[0, 0, 0]], {}),
     (["Zn", "O"], [[0, 0, 0], [0, 0, 0]], {}),
     (["Zn"], [[np.nan, 0, 0]], {}), (["Zn"], [[0, 0]], {}),
     (["Zn"], [[0, 0, 0]], {"total_charge": 1}),

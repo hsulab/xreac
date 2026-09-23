@@ -1,10 +1,11 @@
 """Reader for the standard four-line-atom ReaxFF parameter format.
 
 Parameter conventions follow LAMMPS stable_22Jul2025_update4 (GPL-2.0+).
-Only the bundled Zn/O model has been validated against the reference engine.
+Element labels, interactions, and mixing rules are read from the parameter file.
 """
 from dataclasses import dataclass
 from hashlib import sha256
+from itertools import combinations_with_replacement
 from pathlib import Path
 
 import numpy as np
@@ -35,20 +36,46 @@ class ForceField:
 
     @classmethod
     def zno(cls):
-        """Load the bundled Raymand 2010 ZnOH set (Zn/O calculations only)."""
+        """Backward-compatible shortcut for the bundled Raymand 2010 ZnOH set."""
+        return cls.bundled("ffield.reax.ZnOH")
+
+    @classmethod
+    def bundled(cls, name):
+        """Load a named parameter file shipped in the repository's data directory."""
+        if not isinstance(name, str) or Path(name).name != name or name in ("", ".", ".."):
+            raise ValueError("A bundled parameter name must be a plain filename")
         # Wheels bundle the top-level data directory as xreac.data. Source
         # checkouts (including editable installs) read it directly from the repo.
         module = Path(__file__).resolve()
-        bundled = module.with_name("data") / "ffield.reax.ZnOH"
+        bundled = module.with_name("data") / name
         if bundled.is_file():
             return cls.from_file(bundled)
-        return cls.from_file(module.parents[2] / "data" / "ffield.reax.ZnOH")
+        return cls.from_file(module.parents[2] / "data" / name)
+
+    @property
+    def elements(self):
+        """Parameter-file atom labels, in their original order (including dummy types)."""
+        return tuple(self.atoms)
+
+    @property
+    def vdw_type(self):
+        """Standard LAMMPS vdW variant: 1 shielded, 2 inner wall, 3 both."""
+        types = set()
+        for a in self.atoms.values():
+            shield = a["gamma_w"] > .5
+            core = a["rcore"] > .01 and a["acore"] > .01
+            types.add(3 if shield and core else 1 if shield else 2 if core else 0)
+        if len(types) != 1 or 0 in types:
+            raise ValueError("Inconsistent or unsupported van der Waals method across atom types")
+        return types.pop()
 
     @classmethod
     def from_file(cls, path):
         path = Path(path).resolve()
         raw = path.read_bytes()
         lines = raw.decode().splitlines()
+        if not lines:
+            raise ValueError(f"Empty ReaxFF parameter file: {path}")
         citation = lines.pop(0)
         rows = iter(lines)
 
@@ -76,19 +103,22 @@ class ForceField:
             ng = count()
             if ng != 39:
                 raise ValueError("Only the standard 39-global-parameter format is supported")
-            g = np.array([float(row()[0]) for _ in range(ng)])
+            g = np.array([floats(row()[:1], 1)[0] for _ in range(ng)])
             na = count()
+            if na == 0:
+                raise ValueError("A force field must define at least one atom type")
             for _ in range(3):
                 next(rows)
             atoms, names = {}, []
             for _ in range(na):
                 first = row()
-                name = first[0].capitalize()
-                if name in atoms:
+                name = first[0]
+                if any(name.casefold() == existing.casefold() for existing in atoms):
                     raise ValueError(f"Duplicate element {name}")
                 vals = floats(first[1:] + row() + row() + row(), 32)
                 a = dict(zip(ATOM_NAMES, vals))
                 a["eta"] *= 2
+                a["p_hbond"] = int(a["p_hbond"])
                 if a["mass"] < 21:
                     a["valency_val"] = a["valency_boc"]
                 atoms[name] = a
@@ -112,17 +142,32 @@ class ForceField:
             for _ in range(nb):
                 first = row()
                 key = indices(first[:2])
-                vals = floats(first[2:] + row(), 16)
+                second = row()
+                # Standard files may omit the last unused bond parameter.
+                if len(second) == 7:
+                    second.append("0")
+                vals = floats(first[2:] + second, 16)
                 p = dict(zip(BOND_NAMES, vals))
-                a, b = [atoms[s] for s in key]
+                pairs[key] = pairs[key[::-1]] = p
+            # Nonbonded mixing is defined for every pair, independently of
+            # whether an explicit bond record exists (including dummy types).
+            for s, t in combinations_with_replacement(names, 2):
+                key = (s, t)
+                p = pairs.get(key, dict.fromkeys(BOND_NAMES, 0.0))
+                a, b = atoms[s], atoms[t]
                 for out, field in [("r_s", "r_s"), ("r_p", "r_pi"), ("r_pp", "r_pi_pi")]:
                     p[out] = (a[field] + b[field]) / 2
                 for out, field in [("p_boc3", "b_o_132"), ("p_boc4", "b_o_131"),
                                    ("p_boc5", "b_o_133"), ("D", "epsilon"),
                                    ("alpha", "alpha"), ("gamma_w", "gamma_w"),
-                                   ("r_vdW", "r_vdw")]:
+                                   ("r_vdW", "r_vdw"), ("rcore", "rcore"),
+                                   ("ecore", "ecore"), ("acore", "acore")]:
+                    if a[field]*b[field] < 0:
+                        raise ValueError(f"Invalid mixing parameters for {s}/{t}: {field}")
                     p[out] = np.sqrt(a[field] * b[field])
                 p["r_vdW"] *= 2
+                if a["gamma"]*b["gamma"] <= 0:
+                    raise ValueError("Charge shielding parameters must be positive")
                 p["gamma"] = (a["gamma"] * b["gamma"]) ** -1.5
                 pairs[key] = pairs[key[::-1]] = p
             for _ in range(count()):
@@ -142,15 +187,33 @@ class ForceField:
                 for k in {key, key[::-1]}:
                     angles.setdefault(k, []).append(vals)
             torsions = {}
+            explicit_torsions = set()
             for _ in range(count()):
                 values = row()
                 key = indices(values[:4], wildcard=True)
-                vals = floats(values[4:], 7)
-                if "*" in key:
-                    raise ValueError("Wildcard torsion parameters are not supported")
-                torsions[key] = torsions[key[::-1]] = vals[:5]
+                if len(values[4:]) not in (5, 6, 7):
+                    raise ValueError("Expected 5 to 7 torsion parameters")
+                vals = floats(values[4:], len(values[4:]))[:5]
+                if "*" not in key:
+                    torsions[key] = torsions[key[::-1]] = vals
+                    explicit_torsions.update((key, key[::-1]))
+                else:
+                    if key[0] != "*" or key[3] != "*" or "*" in key[1:3]:
+                        raise ValueError("Only terminal 0-i-j-0 torsion wildcards are supported")
+                    # LAMMPS: explicit entries always win; later wildcard rows
+                    # replace earlier wildcard defaults for the same pair.
+                    for s in names:
+                        for t in names:
+                            expanded = (s, key[1], key[2], t)
+                            for k in (expanded, expanded[::-1]):
+                                if k not in explicit_torsions:
+                                    torsions[k] = vals
             hydrogen = {}
-            for _ in range(count()):
+            try:
+                nh = count()
+            except StopIteration:
+                nh = 0  # LAMMPS permits omission of the final hydrogen-bond block.
+            for _ in range(nh):
                 values = row()
                 hydrogen[indices(values[:3])] = floats(values[3:], 4)
             if any(line.split("!")[0].split("#")[0].strip() for line in rows):
@@ -161,20 +224,28 @@ class ForceField:
             raise ValueError(f"Invalid or unsupported ReaxFF file {path}: {exc}") from exc
         return cls(path, sha256(raw).hexdigest(), citation, g, atoms, pairs, angles, torsions, hydrogen)
 
-    def validate_model(self):
+    def validate_model(self, elements=None):
         """Conservatively reject models not covered by the implemented equations."""
-        if not {"Zn", "O"} <= self.atoms.keys():
-            raise ValueError("The force field must contain Zn and O")
-        for s in ("Zn", "O"):
+        self.vdw_type
+        if self.general[11] != 0 or self.general[12] <= 0:
+            raise ValueError("Only zero lower taper radius and a positive upper cutoff are supported")
+        if self.general[1] <= 0 or self.general[28] <= 0 or self.general[29] <= 0:
+            raise ValueError("Invalid bond-order correction, vdW exponent, or bond-order cutoff")
+        if elements is None:
+            return
+        missing = set(elements)-self.atoms.keys()
+        if missing:
+            raise ValueError(f"Atom types absent from the force field: {', '.join(sorted(missing))}")
+        for s in set(elements):
             a = self.atoms[s]
-            if a["gamma_w"] <= .5 or a["rcore"] != 0 or a["ecore"] != 0:
-                raise ValueError("Only shielded vdW without an inner wall is supported")
             if a["eta"] <= 0 or a["gamma"] <= 0:
                 raise ValueError("Invalid QEq hardness or shielding")
-            if a["r_s"] <= 0 or a["valency"] <= 0:
-                raise ValueError("Positive sigma radius and valency are required")
-            for t in ("Zn", "O"):
-                if (s, t) not in self.pairs:
-                    raise ValueError(f"Missing bond parameters for {s}/{t}")
-        if self.general[11] != 0 or self.general[12] <= 5 or self.general[37] != 0:
-            raise ValueError("Unsupported taper or triple-bond stabilization variant")
+            if a["mass"] <= 0 or a["valency"] < 0:
+                raise ValueError("Positive atomic masses and nonnegative valencies are required")
+            for t in set(elements):
+                p = self.pairs[s, t]
+                if p["r_vdW"] <= 0:
+                    raise ValueError(f"Invalid van der Waals radius for {s}/{t}")
+                for atom_radius, pair_radius in (("r_s", "r_s"), ("r_pi", "r_p"), ("r_pi_pi", "r_pp")):
+                    if a[atom_radius] > 0 and self.atoms[t][atom_radius] > 0 and p[pair_radius] <= 0:
+                        raise ValueError(f"Invalid {pair_radius} for {s}/{t}")

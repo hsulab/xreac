@@ -1,4 +1,4 @@
-"""Differentiable Zn/O ReaxFF energies in kcal/mol and Angstrom.
+"""Differentiable standard ReaxFF energies in kcal/mol and Angstrom.
 
 Equations and conventions adapted from the LAMMPS/PuReMD REAXFF sources,
 stable_22Jul2025_update4. Copyright (2010) Purdue University; LAMMPS
@@ -16,6 +16,9 @@ SELF_CONVERSION = 23.02
 THB_CUT = .001
 THB_PRODUCT_CUT = .00001
 BOND_CUT = 5.0
+HBOND_CUT = 7.5
+HBOND_THRESHOLD = .01
+BOND_GRAPH_CUT = .3
 COMPONENTS = ("bond", "atom", "lone_pair", "molecule", "angle", "penalty",
               "angle_conjugation", "hydrogen_bond", "torsion", "conjugation",
               "vdw", "coulomb", "electric_field", "qeq")
@@ -28,10 +31,12 @@ def positive_power(x, p):
 
 class EnergyModel:
     def __init__(self, ff, symbols):
+        ff.validate_model(symbols)
         self.ff = ff
         self.symbols = tuple(symbols)
         self.n = len(symbols)
         self.g = ff.general
+        self.vdw_type = ff.vdw_type
         self.a = {k: onp.array([ff.atoms[s][k] for s in symbols])
                   for k in ff.atoms[symbols[0]]}
         self.p = {k: onp.array([[ff.pairs[s, t][k] for t in symbols] for s in symbols])
@@ -59,13 +64,15 @@ class EnergyModel:
     def bond_orders(self, r):
         p, a, g = self.p, self.a, self.g
         cutoff = .01 * g[29]
-        sigma = (1+cutoff) * np.exp(p["p_bo1"] * (r/p["r_s"])**p["p_bo2"])
+        sigma_ok = (a["r_s"][:, None] > 0) & (a["r_s"][None, :] > 0)
+        sigma = np.where(sigma_ok, (1+cutoff) * np.exp(p["p_bo1"] *
+                         (r/np.where(sigma_ok, p["r_s"], 1))**p["p_bo2"]), 0)
         pi_ok = (a["r_pi"][:, None] > 0) & (a["r_pi"][None, :] > 0)
         pp_ok = (a["r_pi_pi"][:, None] > 0) & (a["r_pi_pi"][None, :] > 0)
         pi = np.where(pi_ok, np.exp(p["p_bo3"] * (r / np.where(pi_ok, p["r_p"], 1))**p["p_bo4"]), 0)
         pp = np.where(pp_ok, np.exp(p["p_bo5"] * (r / np.where(pp_ok, p["r_pp"], 1))**p["p_bo6"]), 0)
         raw = sigma + pi + pp
-        mask = (getval(raw) >= cutoff) & (getval(r) <= BOND_CUT) & ~onp.eye(self.n, dtype=bool)
+        mask = (getval(raw) >= cutoff) & (getval(r) <= min(BOND_CUT, g[12])) & ~onp.eye(self.n, dtype=bool)
         bo = np.where(mask, raw-cutoff, 0)
         pi, pp = np.where(mask, pi, 0), np.where(mask, pp, 0)
         total = np.sum(bo, axis=1)
@@ -81,6 +88,19 @@ class EnergyModel:
         bo, pi, pp = bo*corr, pi*corr*f1, pp*corr*f1
         sigma = bo-pi-pp
         return tuple(np.where(v >= 1e-10, v, 0.0) for v in (bo, sigma, pi, pp))
+
+    def properties(self, x, charges):
+        """Bond properties and neutral-system dipole (e Angstrom)."""
+        _, r = self.geometry(x)
+        bo = self.bond_orders(r)[0]
+        total = np.sum(bo, axis=1)
+        de = total-self.a["valency_e"]
+        half = onp.trunc(getval(de)/2)
+        nlp = np.exp(-self.g[15]*(2+de-2*half)**2)-half
+        center = np.sum(x*self.a["mass"][:, None], axis=0)/np.sum(self.a["mass"])
+        return dict(bond_orders=bo, total_bond_orders=total, lone_pairs=nlp,
+                    bond_counts=onp.sum(getval(bo) > BOND_GRAPH_CUT, axis=1),
+                    dipole=np.sum((x-center)*charges[:, None], axis=0))
 
     def components(self, x, fixed_charges=None):
         p, a, g = self.p, self.a, self.g
@@ -101,6 +121,7 @@ class EnergyModel:
         e["bond"] = -.5*np.sum(p["De_s"]*sigma*np.exp(p["p_be1"]*(1-positive_power(sigma, p["p_be2"])))
                               +p["De_p"]*pi+p["De_pp"]*pp)
         e["lone_pair"] = np.sum(a["p_lp2"]*dlp/(1+np.exp(-75*dlp)))
+        self.special_bond_corrections(e, bo, total, d)
         dfvl = (a["mass"] <= 21).astype(float)
         ov1 = np.sum(p["p_ovun1"]*p["De_s"]*bo, axis=1)
         ov2 = np.sum((d[None, :]-dfvl[:, None]*dlpt[None, :])*(pi+pp), axis=1)
@@ -108,15 +129,64 @@ class EnergyModel:
         over = ov1*dc/(dc+a["valency"]+1e-8)/(1+np.exp(a["p_ovun2"]*dc))
         under = -a["p_ovun5"]*(1-np.exp(g[6]*dc))/(1+np.exp(-a["p_ovun2"]*dc))/(1+g[8]*np.exp(g[9]*ov2))
         e["atom"] = np.sum(over+under)
-        f13 = (r**g[28]+(1/p["gamma_w"])**g[28])**(1/g[28])
+        if self.vdw_type in (1, 3):
+            f13 = (r**g[28]+(1/p["gamma_w"])**g[28])**(1/g[28])
+        else:
+            f13 = r
         ev = np.exp(.5*p["alpha"]*(1-f13/p["r_vdW"]))
         e["vdw"] = .5*np.sum(taper*p["D"]*(ev**2-2*ev))
+        if self.vdw_type in (2, 3):
+            e["vdw"] += .5*np.sum(taper*p["ecore"]*np.exp(p["acore"]*(1-r/p["rcore"])))
         e["coulomb"] = .5*C_ELE*np.sum(q[:, None]*q[None, :]*shield)
         e["qeq"] = SELF_CONVERSION*np.sum(a["chi"]*q+.5*a["eta"]*q*q)
         neighbors = [onp.flatnonzero(row > THB_CUT) for row in getval(bo)]
         self.angles(e, delta, r, bo, pi, pp, total, d, db, nlp, vlpex, neighbors)
         self.torsions(e, delta, r, bo, pi, db, neighbors)
+        self.hydrogen_bonds(e, delta, r, bo)
         return np.stack([e[k] for k in COMPONENTS]), q
+
+    def special_bond_corrections(self, e, bo, total, d):
+        """Standard C2 lone-pair correction and terminal triple-bond stabilization."""
+        a, g = self.a, self.g
+        carbon = onp.array([s.upper() == "C" for s in self.symbols])
+        if g[5] > .001 and onp.any(carbon):
+            vov3 = bo-d[:, None]-.040*d[:, None]**4
+            mask = carbon[:, None] & carbon[None, :] & ~onp.eye(self.n, dtype=bool)
+            e["lone_pair"] += np.sum(np.where(mask & (getval(vov3) > 3), g[5]*(vov3-3)**2, 0))
+        masses = a["mass"]
+        co = ((masses[:, None] == 12.) & (masses[None, :] == 15.999))
+        allowed = (co | co.T) if int(g[37]) != 2 else onp.ones((self.n, self.n), dtype=bool)
+        i, j = onp.where(onp.triu(allowed & (getval(bo) >= 1.), 1))
+        if len(i):
+            b = bo[i, j]
+            stabilization = g[10]*np.exp(-g[7]*(b-2.5)**2)/(1+25*np.exp(g[4]*(d[i]+d[j])))
+            stabilization *= np.exp(-g[3]*(total[i]-b))+np.exp(-g[3]*(total[j]-b))
+            e["bond"] += np.sum(stabilization)
+
+    def hydrogen_bonds(self, e, delta, r, bo):
+        """Donor--H--acceptor terms selected using parameter-file role flags."""
+        roles = self.a["p_hbond"]
+        rv, bv = getval(r), getval(bo)
+        triples, params = [], []
+        for j in onp.flatnonzero(roles == 1):
+            donors = onp.flatnonzero((roles == 2) & (bv[:, j] >= HBOND_THRESHOLD))
+            acceptors = onp.flatnonzero((roles == 2) & (rv[j] <= min(HBOND_CUT, self.g[12])))
+            for i in donors:
+                for k in acceptors:
+                    if i == k:
+                        continue
+                    prm = self.ff.hydrogen_bonds.get((self.symbols[i], self.symbols[j], self.symbols[k]))
+                    if prm is not None and prm[0] > 0:
+                        triples.append((i, j, k))
+                        params.append(prm)
+        if not triples:
+            return
+        i, j, k = onp.array(triples).T
+        r0, hb1, hb2, hb3 = onp.array(params).T
+        cos = np.sum(delta[i, j]*delta[k, j], axis=1)/(r[i, j]*r[j, k])
+        sin4 = .25*(1-np.clip(cos, -1., 1.))**2
+        e["hydrogen_bond"] = np.sum(hb1*(1-np.exp(-hb2*bo[i, j]))
+            *np.exp(-hb3*(r0/r[j, k]+r[j, k]/r0-2))*sin4)
 
     def angles(self, e, delta, r, bo, pi, pp, total, d, db, nlp, vlpex, neighbors):
         a, g = self.a, self.g
@@ -168,7 +238,7 @@ class EnergyModel:
                         if l == j or l == i or bv[i, j]*bv[j, k]*bv[k, l] <= THB_CUT:
                             continue
                         prm = self.ff.torsions.get(tuple(self.symbols[t] for t in (i, j, k, l)))
-                        if prm is not None:
+                        if prm is not None and onp.any(prm[[0, 1, 2, 4]] != 0):
                             quads.append((i, j, k, l))
                             params.append(prm)
         if not quads:
@@ -177,12 +247,16 @@ class EnergyModel:
         v1, v2, v3, tor1, cot1 = onp.array(params).T
         # LAMMPS vectors point j->i, j->k, k->l.
         u, v, w = delta[i, j], delta[k, j], delta[l, k]
-        cos1 = np.sum(u*v, axis=1)/(r[i, j]*r[j, k])
-        cos2 = -np.sum(v*w, axis=1)/(r[j, k]*r[k, l])
-        sinprod = np.sqrt(np.maximum(1-cos1*cos1, 1e-20))*np.sqrt(np.maximum(1-cos2*cos2, 1e-20))
-        normcos = r[j, k]**2*np.sum(u*w, axis=1)-np.sum(u*v, axis=1)*np.sum(v*w, axis=1)
-        normsin = -r[j, k]*np.sum(u*np.cross(v, w), axis=1)
-        cw = normcos/np.sqrt(np.maximum(normcos**2+normsin**2, 1e-30))
+        normal1, normal2 = np.cross(u, v), np.cross(w, v)
+        area1, area2 = np.sum(normal1**2, axis=1), np.sum(normal2**2, axis=1)
+        sine1_sq = area1/(r[i, j]*r[j, k])**2
+        sine2_sq = area2/(r[j, k]*r[k, l])**2
+        if onp.any(getval(sine1_sq) < 1e-20) or onp.any(getval(sine2_sq) < 1e-20):
+            raise ValueError("Collinear atoms in an active torsion: the dihedral derivative is undefined; perturb the geometry")
+        # Cross products avoid catastrophic cancellation in 1-cos(theta)^2
+        # for nearly linear angles. Exact collinearity has no unique derivative.
+        sinprod = np.sqrt(sine1_sq*sine2_sq)
+        cw = np.sum(normal1*normal2, axis=1)/np.sqrt(area1*area2)
         b1, b2, b3 = bo[i, j]-THB_CUT, bo[j, k]-THB_CUT, bo[k, l]-THB_CUT
         ds = db[j]+db[k]
         ex3, ex4 = np.exp(-self.g[24]*ds), np.exp(self.g[25]*ds)

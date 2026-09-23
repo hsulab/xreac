@@ -23,12 +23,17 @@ class ReferenceResult:
     components: dict[str, float]
     version: str
     directory: Path
+    total_bond_orders: np.ndarray
+    lone_pairs: np.ndarray
+    bond_counts: np.ndarray
+    dipole: np.ndarray
 
 
 def evaluate_lammps(force_field, symbols, positions, *, executable=None,
                     directory=None, timeout=120, expected_version=REFERENCE_VERSION):
     """Run and retain a reproducible reference calculation; never silently skip."""
     symbols, x = validate_input(symbols, positions)
+    force_field.validate_model(symbols)
     executable = executable or os.environ.get("XREAC_LAMMPS", "lmp_mpi")
     executable = shutil.which(str(executable))
     if executable is None:
@@ -65,11 +70,15 @@ fix charges all qeq/reaxff 1 0 {force_field.general[12]:.17g} 1e-12 reaxff maxit
 neighbor 2.0 bin
 neigh_modify every 1 delay 0 check yes
 compute reax all pair reaxff
-thermo_style custom step pe c_reax[*]
+compute bondinfo all reaxff/atom
+compute dipole all dipole
+dump atoms all custom 1 atoms.dump id type q x y z fx fy fz c_bondinfo[1] c_bondinfo[2] c_bondinfo[3]
+dump_modify atoms sort id format float %.17g
+thermo_style custom step pe c_reax[*] c_dipole[1] c_dipole[2] c_dipole[3]
 thermo_modify format float %.17g
 run 0
 print "$(pe:%.17g) {terms}" file energy.txt screen no
-write_dump all custom atoms.dump id type q x y z fx fy fz modify sort id format float %.17g
+print "$(c_dipole[1]:%.17g) $(c_dipole[2]:%.17g) $(c_dipole[3]:%.17g)" file dipole.txt screen no
 """
     (work / "in.lammps").write_text(script)
     command = [executable, "-in", "in.lammps", "-log", "log.lammps", "-nocite"]
@@ -91,13 +100,15 @@ write_dump all custom atoms.dump id type q x y z fx fy fz modify sort id format 
     rows = (work / "atoms.dump").read_text().splitlines()
     start = next(i for i, line in enumerate(rows) if line.startswith("ITEM: ATOMS"))+1
     atoms = np.loadtxt(rows[start:], ndmin=2)
+    dipole = np.loadtxt(work / "dipole.txt", ndmin=1)
     version = next((line for line in proc.stdout.splitlines() if line.startswith("LAMMPS (")), "unknown")
     metadata = {"executable": executable, "version": version, "command": command,
                 "force_field_sha256": force_field.checksum, "qeq_tolerance": 1e-12}
     (work / "metadata.json").write_text(json.dumps(metadata, indent=2)+"\n")
     if version != expected_version:
         raise RuntimeError(f"Reference version mismatch: expected {expected_version!r}, got {version!r}; see {work}")
-    if values.shape != (15,) or atoms.shape != (len(symbols), 9) or not np.isfinite(values).all() or not np.isfinite(atoms).all():
+    if values.shape != (15,) or atoms.shape != (len(symbols), 12) or dipole.shape != (3,) or not all(np.isfinite(v).all() for v in (values, atoms, dipole)):
         raise RuntimeError(f"Invalid or non-finite reference output; see {work}")
     return ReferenceResult(float(values[0]), atoms[:, 6:9], atoms[:, 2],
-                           dict(zip(COMPONENTS, map(float, values[1:]))), version, work)
+                           dict(zip(COMPONENTS, map(float, values[1:]))), version, work,
+                           atoms[:, 9], atoms[:, 10], atoms[:, 11].astype(int), dipole)

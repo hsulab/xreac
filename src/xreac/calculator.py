@@ -15,6 +15,11 @@ class Evaluation:
     charges: np.ndarray
     components: dict[str, float]
     lammps_forces: np.ndarray
+    bond_orders: np.ndarray
+    total_bond_orders: np.ndarray
+    lone_pairs: np.ndarray
+    bond_counts: np.ndarray
+    dipole: np.ndarray
 
 
 @dataclass(frozen=True)
@@ -28,8 +33,8 @@ class Relaxation:
 
 def validate_input(symbols, positions, total_charge=0, cell=None):
     symbols = tuple(symbols)
-    if not symbols or any(s not in ("Zn", "O") for s in symbols):
-        raise ValueError("Only nonempty Zn/O systems are supported")
+    if not symbols or any(not isinstance(s, str) or not s for s in symbols):
+        raise ValueError("A nonempty sequence of parameter-file atom labels is required")
     if total_charge != 0:
         raise ValueError("Only neutral systems are validated")
     if cell is not None:
@@ -68,8 +73,9 @@ class Calculator:
             raise ValueError("Non-finite energy, charges, or forces; check the geometry")
         if abs(charges.sum()) > 1e-8:
             raise ValueError("QEq charge constraint failed")
+        properties = model.properties(x, charges)
         return Evaluation(float(components.sum()), force, charges,
-                          dict(zip(COMPONENTS, map(float, components))), reference_force)
+                          dict(zip(COMPONENTS, map(float, components))), reference_force, **properties)
 
     def relax(self, symbols, positions, *, force_tolerance=1e-4, max_iterations=500,
               total_charge=0, cell=None):

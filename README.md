@@ -1,9 +1,11 @@
 # xreac
 
-A small NumPy + Autograd ReaxFF calculator for **neutral, isolated Zn/O
-clusters**, targeting roughly 1–200 atoms. It computes energies, charges,
-forces, and optionally relaxes geometries using SciPy. No LAMMPS installation
-is required for calculations; `lmp_mpi` is used for independent verification.
+A small NumPy + Autograd ReaxFF calculator for **neutral, isolated molecules
+and clusters**, targeting roughly 1–200 atoms. Elements and interactions come
+from a standard ReaxFF parameter file. It computes energies, charges, forces,
+bond properties, and dipoles, and optionally relaxes geometries using SciPy.
+No LAMMPS installation is required for calculations; `lmp_mpi` is used for
+independent verification.
 
 ## Install
 
@@ -15,25 +17,31 @@ python -m pip install '.[relax]'  # optional geometry optimization
 Python 3.10 or newer is required. The core dependencies are NumPy and HIPS
 Autograd; SciPy is only imported when relaxation is requested.
 
-The source parameter file lives in `data/ffield.reax.ZnOH` at the repository
-root. Distributions bundle it as package data so `ForceField.zno()` also works
-outside a source checkout.
+Source parameter files live in `data/` at the repository root. Distributions
+bundle them as package data so `ForceField.bundled(name)` also works outside
+a source checkout. Bundled examples are `qeq_ff.water` (Achtyl QEq water),
+`ffield.reax.cho` (Chenoweth C/H/O), and `ffield.reax.ZnOH` (Raymand Zn/O/H).
+`ForceField.zno()` remains a backward-compatible shortcut for the last file.
 
 ## Calculate
 
 ```python
 from xreac import Calculator, ForceField
 
-ff = ForceField.zno()  # bundled Raymand 2010 ZnOH parameters
-# In a source checkout: ff = ForceField.from_file("data/ffield.reax.ZnOH")
+ff = ForceField.bundled("qeq_ff.water")
+# Or use your own supported parameter file:
+# ff = ForceField.from_file("my_force_field.ff")
+print(ff.elements)  # ('H', 'O', 'X'); labels are defined by the parameter file
 calc = Calculator(ff)
-symbols = ["Zn", "O"]
-positions = [[0.0, 0.0, 0.0], [2.1, 0.0, 0.0]]
+symbols = ["O", "H", "H"]
+positions = [[0.0, 0.0, 0.0], [0.97, 0.0, 0.0], [-0.243, 0.94, 0.0]]
 result = calc.evaluate(symbols, positions)
 print(result.energy)
 print(result.forces)
 print(result.charges)
 print(result.components)
+print(result.dipole)  # e Angstrom
+print(result.bond_orders)  # symmetric (N, N) corrected bond-order matrix
 
 relaxed = calc.relax(symbols, positions, force_tolerance=1e-4, max_iterations=500)
 print(relaxed.converged, relaxed.message)
@@ -44,8 +52,32 @@ Coordinates and forces have shape `(N, 3)`; charges have shape `(N,)`.
 Units are Å, kcal/mol, kcal/mol/Å, and elementary charge. Calculations use
 float64. Energy components correspond to the 14 LAMMPS `compute pair reaxff`
 entries, with zero entries retained for inactive terms. Bond energies,
-coordination and lone-pair energies, angles, angle penalties, O-only torsions
-and conjugation, shielded vdW, Coulomb energy, and QEq self-energy are included.
+coordination and lone-pair energies, angles, penalties and conjugation,
+torsions, hydrogen bonding, vdW, Coulomb energy, and QEq self-energy are included.
+The standard C2 correction and terminal triple-bond stabilization are included.
+
+Additional results are `total_bond_orders` (per-atom row sums), `lone_pairs`,
+and `bond_counts` (per-atom counts of corrected bond orders **greater than 0.3**,
+matching the default LAMMPS bond-graph cutoff). They have shape `(N,)`.
+`dipole` is a three-component vector in e Å; for a neutral system it is
+independent of the coordinate origin. Dummy labels such as `X` remain in
+parameter metadata; they do not denote an additional chemical element.
+
+## Water-cluster example
+
+```sh
+python examples/water_cluster.py
+python examples/water_cluster.py --verify --output validation/my-water-check
+```
+
+The example evaluates a monomer, dimer, distorted dimer, trimer, and hexamer
+with the dedicated `qeq_ff.water` file distributed in LAMMPS's water example.
+The structures are reproducible test geometries, not optimized clusters.
+`--verify` checks all energy components, every force component, charges,
+dipole vectors, per-atom bond-order sums, lone pairs, and bond counts against
+`lmp_mpi`. It writes XYZ structures, Python results, reference inputs/outputs,
+and a comparison summary. The output directory must not already exist.
+Use `--ffield path/to/file` to select another compatible parameter set.
 
 ## Two force conventions
 
@@ -86,13 +118,13 @@ explicit `expected_version` argument to `evaluate_lammps` and revalidation.
 
 ```python
 from xreac.reference import evaluate_lammps
-ref = evaluate_lammps(ff, symbols, positions, directory="reference-zno")
+ref = evaluate_lammps(ff, symbols, positions, directory="reference-water")
 ```
 
 Use a new or empty directory. It retains the exact parameter file, structure,
 input script, log, atom dump, energies, stdout/stderr, version, and SHA256.
-Reference tests use temporary directories. The validation script retains a
-complete reproducible suite and a JSON summary:
+Reference tests use temporary directories. The original Zn/O regression and
+benchmark scripts remain available:
 
 ```sh
 python scripts/validate.py
@@ -103,24 +135,43 @@ Acceptance targets are 1e-5 kcal/mol/atom for total/component energy,
 1e-6 e for charges, and 1e-4 kcal/mol/Å for `lammps_forces`. Independent
 finite-difference tests check `forces` with QEq re-solved on each displacement.
 
-The initial results (46 passing tests, 27 saved reference cases, and timings
-through 200 atoms) are recorded in [validation/README.md](validation/README.md).
+Property comparisons additionally require dipoles within 1e-6 e Å,
+bond-order sums and lone pairs within 1e-8, and identical bond counts.
+The results and retained water and Zn/O reference runs are recorded in
+[validation/README.md](validation/README.md).
+
+## Supported parameter format
+
+The reader supports the standard **39-global-parameter, four-line-atom**
+LAMMPS ReaxFF format. It preserves atom-type labels and reads explicit bonds,
+off-diagonal overrides, repeated angle entries, hydrogen-bond parameters,
+and explicit or terminal `0-i-j-0` wildcard torsions. Explicit torsions take
+precedence over wildcard defaults, including when they appear later in the
+file. Nonbonded mixing covers every atom-type pair. Fortran `D` exponents and
+an omitted final hydrogen-bond block are accepted.
+
+Calculation support is determined by parameters, not by an element whitelist.
+Standard shielded vdW, inner-wall vdW, and their combination are implemented.
+Missing atom labels and unsupported formats/settings raise errors. The
+dedicated water, C/H/O, and Zn/O regressions establish the tested coverage;
+a successfully parsed arbitrary parameter set still needs its own validation.
 
 ## Limits
 
-- The bundled **2010 ZnOH** file is the initial reference model, not the 2008
-  ZnO set. Reference agreement establishes implementation consistency, not
-  accuracy against quantum chemistry or suitability for a particular cluster.
-  The reader accepts compatible standard parameter files, but other parameter
-  sets have not been validated and do not inherit this model's compatibility claim.
-- Only Zn/O calculations are enabled; H in the file is not supported. No
-  periodic cells, stress, MD, net charge, external fields, parameter fitting,
-  inner-wall vdW, lgvdW, or wildcard torsion variants are supported.
+- Reference agreement establishes implementation consistency, not accuracy
+  against quantum chemistry or suitability for a particular system. The bundled
+  ZnOH file is the **2010** parameterization, not the earlier 2008 ZnO set.
+- No periodic cells, stress, MD, net charge, external fields, parameter fitting,
+  lgvdW/five-line-atom extensions, nonzero lower taper radius, or alternative
+  charge models such as ACKS2 are supported. The standard LAMMPS defaults of
+  5 Å for bond candidates and 7.5 Å for hydrogen bonds are used (also limited
+  by the force field's nonbonded cutoff).
 - The reference model has branch thresholds in bond orders and interaction
   selection. Derivatives are local to the active branches, not derivatives of
-  discrete list membership. Exact collinear angles/torsions are singular;
-  geometric denominators are guarded, and exact singular geometries should
-  not be used to assess derivative agreement.
+  discrete list membership. Exactly collinear **active torsions** raise an
+  explicit error because their dihedral derivative is undefined. Angle
+  denominators are guarded; singular geometries should not be used to assess
+  derivative agreement. Even weak intermolecular bonds can activate torsions.
 - Dense charge equilibration takes cubic time in atom count and quadratic
   memory. Pair arrays are dense; angle/torsion lists contain local interactions.
   Highly compressed or densely connected systems may be expensive or unstable.
@@ -130,5 +181,5 @@ through 200 atoms) are recorded in [validation/README.md](validation/README.md).
 ## Attribution
 
 GPL-2.0-or-later. Equations and conventions are adapted from the LAMMPS/PuReMD
-implementation. The unmodified parameter file retains its original citation.
+implementation. The unmodified parameter files retain their original citations.
 See [NOTICE](NOTICE) and [LICENSE](LICENSE) for attribution and provenance.

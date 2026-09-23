@@ -26,5 +26,19 @@ D. Raymand, A. C. T. van Duin, D. Spangberg, W. A. Goddard, K. Hermansson,
 Surface Science 604 (9-10), 741-752 (2010), as cited in the parameter file.
 Contributor: Aidan Thompson, athomps@sandia.gov. File date: 2011-02-18.
 This is the 2010 ZnOH set, not the earlier 2008 ZnO parameterization.
-Only Zn and O are enabled in this package; H and X entries remain in the
-unmodified source data for provenance and compatibility.
+All original entries remain in the unmodified source data.
+
+data/qeq_ff.water is an unmodified copy of examples/reaxff/water/qeq_ff.water
+from the same LAMMPS release and distribution.
+https://github.com/lammps/lammps/blob/stable_22Jul2025_update4/examples/reaxff/water/qeq_ff.water
+SHA256: 526dea2d55d748caed94734139dda66064e194f74f46eee9b0f511eead38b7d1
+Original header citation: Achtyl et al., Nature Communications 6, 6539 (2015).
+The example uses its QEq model, not the separate ACKS2 parameter file.
+
+data/ffield.reax.cho is an unmodified copy of potentials/ffield.reax.cho
+from the same LAMMPS release and distribution.
+https://github.com/lammps/lammps/blob/stable_22Jul2025_update4/potentials/ffield.reax.cho
+SHA256: c5240c07e664dde5626fcdb740be1bdbe5e7e34d919902603db0bf962fea9aee
+Original header citation: K. Chenoweth, A. C. T. van Duin, W. A. Goddard,
+Journal of Physical Chemistry A 112, 1040-1053 (2008).
+Contributor: Aidan Thompson, athomps@sandia.gov. File date: 2011-02-18.
