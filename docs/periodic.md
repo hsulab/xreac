@@ -25,17 +25,34 @@ The two backends evaluate the same image-resolved interactions:
 
 | Backend | Default for | Neighbor construction |
 | --- | --- | --- |
-| `"replicated"` | Core `Calculator.evaluate()` and native FIRE | Dense image search, with tied copies for small cells |
-| `"ase"` | `ReaxFFCalculator` and ASE FIRE | ASE neighbor list on the input cell, retaining integer image shifts |
+| Native replication | Core `Calculator.evaluate()` without `neighbors` and native FIRE | Dense image search, with tied copies for small cells |
+| Supplied `(i, j, S)` | `ReaxFFCalculator` and ASE FIRE build these with ASE | Directed neighbor arrays on the input cell, retaining integer image shifts |
 
-```python
-direct = calc.evaluate(symbols, positions, cell=[4.0]*3, neighbor_backend="ase")
-native = calc.evaluate(symbols, positions, cell=[4.0]*3, neighbor_backend="replicated")
+```{testcode} supplied-neighbors
+from ase import Atoms
+from ase.neighborlist import neighbor_list
+
+ff = ForceField.bundled("qeq_ff.water")
+calc = Calculator(ff)
+atoms = Atoms("OH2", positions=[[0, 0, 0], [0.97, 0, 0], [-0.243, 0.94, 0]],
+              cell=[4.0]*3, pbc=True)
+i, j, S = neighbor_list("ijS", atoms, ff.general[12])
+direct = calc.evaluate(atoms.get_chemical_symbols(), atoms.positions,
+                       cell=atoms.cell.array, pbc=atoms.pbc, neighbors=(i, j, S))
+native = calc.evaluate(atoms.get_chemical_symbols(), atoms.positions,
+                       cell=atoms.cell.array, pbc=atoms.pbc)
+assert direct.cell_repetitions == (1, 1, 1)
+assert direct.neighbor_backend == "provided"
+assert abs(direct.energy - native.energy) < 1e-9
+assert np.max(abs(direct.forces - native.forces)) < 1e-9
 ```
 
-The ASE backend needs `.[ase]`. It calls
-[ASE's primitive neighbor list](https://docs.ase-lib.org/ase/neighborlist.html)
-with the force field's nonbonded cutoff. Every edge stores two input atom indices
+The ASE adapter needs `.[ase]`. It calls
+[ASE's neighbor list](https://docs.ase-lib.org/ase/neighborlist.html)
+with the force field's nonbonded cutoff **before** calling the core evaluator,
+then passes `neighbors=(i, j, S)` explicitly. The core has no ASE dependency and
+performs no neighbor search when arrays are supplied. Other builders can supply
+the same tuple. Every edge stores two input atom indices
 and a lattice shift; its vector is `positions[j] - positions[i] + shift @ cell`.
 Both edge directions and all images within the cutoff are retained. Only the
 zero-shift self interaction is excluded. Bond-order, angle, torsion, and
@@ -47,17 +64,25 @@ donor and acceptor can share an input atom index if they occupy different images
 Charges are solved on the input atoms; self-image couplings enter the QEq diagonal.
 Bond counts apply their threshold per image before reduction to the input atoms.
 
-The neighbor list is rebuilt for each new evaluation, including changes to
-positions, cell, or PBC. During autodiff, the selected edges and lattice shifts
+The ASE adapter rebuilds the neighbor list for each new evaluation, including
+changes to positions, cell, or PBC. During autodiff, the selected edges and lattice shifts
 stay fixed while their vectors and distances remain differentiable. There is
 no skin or list reuse between changed geometries; ASE caches unchanged results.
-The ASE backend always reports `cell_repetitions=(1, 1, 1)` and does not use
+When calling the core with your own arrays, **you** must keep the list complete
+for the current coordinates, cell, and PBC. Both edge directions are required;
+half lists, duplicates, out-of-range indices, and zero-shift self edges are
+rejected. Completeness cannot be checked without rebuilding the list, so it is
+the caller's responsibility. Extra neighbors from a skin are supported and are
+screened by the physical cutoffs. The core copies the arrays and does not mutate them.
+
+Supplied arrays always give `cell_repetitions=(1, 1, 1)` and do not use
 `max_expanded_atoms`. Pair parameters and distances are stored per edge. The QEq
 matrix and returned bond-order matrix remain dense in the input atom count.
 
 ## Small cells with native replication
 
-With `neighbor_backend="replicated"`, small cells are replicated internally until every periodic face height exceeds
+Without supplied arrays (or with `neighbor_backend="replicated"` on the ASE adapter),
+small cells are replicated internally until every periodic face height exceeds
 both the nonbonded cutoff and twice the bond cutoff—10 Å for the bundled files.
 Nonperiodic directions are not repeated. For tilted cells, face heights rather
 than lattice-vector lengths determine replication.

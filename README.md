@@ -112,8 +112,25 @@ all periodic image shifts and evaluating small cells without replicating atoms.
 Set `ReaxFFCalculator(ff, neighbor_backend="replicated")` or
 `atoms.calc.set(neighbor_backend="replicated")` to select the retained native
 image/replication method. `evaluation.neighbor_backend` records the choice.
-The core `Calculator.evaluate()` keeps `neighbor_backend="replicated"` as its
-default; pass `neighbor_backend="ase"` to use ASE neighbors there too.
+The core `Calculator.evaluate()` accepts `neighbors=(i, j, S)` from any builder.
+The ASE adapter calls `neighbor_list("ijS", atoms, cutoff)` first and passes those
+arrays explicitly. Without `neighbors`, the core uses native replication.
+
+```python
+from ase.neighborlist import neighbor_list
+
+i, j, S = neighbor_list("ijS", atoms, ff.general[12])
+result = calc.evaluate(atoms.get_chemical_symbols(), atoms.positions,
+                       cell=atoms.cell.array, pbc=atoms.pbc, neighbors=(i, j, S))
+```
+
+`i`, `j`, and `S` are fixed integer arrays. Autograd differentiates
+`positions[j] - positions[i] + S @ cell` through positions; it never calls the
+neighbor builder. Supplied lists must contain both edge directions and all
+images within the nonbonded cutoff, excluding zero-shift self edges. The caller
+must rebuild the list when needed. A larger cutoff/skin is allowed. The supplied
+array path has no ASE dependency and reports `neighbor_backend="provided"`;
+the ASE adapter records the known source as `"ase"`.
 
 The adapter caches results and recalculates after geometry or parameter changes.
 It supports ASE position constraints, neutral initial charge guesses, and

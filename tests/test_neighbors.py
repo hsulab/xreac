@@ -1,15 +1,23 @@
+import subprocess
+import sys
+
 import numpy as np
 import pytest
 from ase import Atoms
+from ase.neighborlist import neighbor_list
 from autograd import grad
 
 from validate_neighbors import neighbor_cases, backend_differences
 from xreac import Calculator, ForceField
 from xreac.ase import ReaxFFCalculator
-from xreac.neighbors import ASENeighbors, scatter_sum
+from xreac.neighbors import Neighbors, scatter_sum
 from xreac.neighbor_energy import NeighborEnergyModel
 
 CASES = neighbor_cases()
+
+
+def build_neighbors(symbols, x, cell, pbc, cutoff):
+    return neighbor_list("ijS", Atoms(symbols, positions=x, cell=cell, pbc=pbc), np.nextafter(cutoff, np.inf))
 
 
 @pytest.mark.parametrize("name", CASES)
@@ -24,6 +32,10 @@ def test_neighbor_backends(name):
     assert actual.cell_repetitions == (1, 1, 1)
     report = backend_differences(actual, expected, len(x))
     assert report["passed"], report
+    supplied = Calculator(ff).evaluate(symbols, x, cell=cell, pbc=pbc,
+        neighbors=build_neighbors(symbols, x, cell, pbc, ff.general[12]))
+    assert supplied.neighbor_backend == "provided"
+    assert backend_differences(supplied, expected, len(x))["passed"]
     if name == "periodic_carbon_chain":
         assert abs(actual.components["torsion"]) > .1
     if name == "small_water_4A":
@@ -51,7 +63,8 @@ def test_neighbor_derivatives(name, full_derivative, monkeypatch):
     monkeypatch.setattr(neighbor_energy.np.linalg, "solve", checked)
     calc = Calculator(ff)
     actual = calc.evaluate(symbols, x, cell=cell, pbc=pbc,
-                           full_derivative=full_derivative, neighbor_backend="ase")
+                           full_derivative=full_derivative,
+                           neighbors=build_neighbors(symbols, x, cell, pbc, ff.general[12]))
     assert any(solves) is full_derivative
     expected = calc.evaluate(symbols, x, cell=cell, pbc=pbc, full_derivative=full_derivative)
     assert backend_differences(actual, expected, len(x))["passed"]
@@ -61,7 +74,8 @@ def test_neighbor_derivatives(name, full_derivative, monkeypatch):
     fixed = None if full_derivative else actual.charges
 
     def energy(y):
-        model = NeighborEnergyModel(ff, symbols, y, cell, pbc)
+        neighbors = build_neighbors(symbols, y, cell, pbc, ff.general[12])
+        model = NeighborEnergyModel(ff, symbols, neighbors, cell, pbc)
         return model.components(y, fixed)[0].sum()
 
     derivative = (energy(x+h*direction)-energy(x-h*direction))/(2*h)
@@ -73,7 +87,8 @@ def test_neighbor_shift_completeness():
     # repeated neighbors, nonzero-shift self edges, and a tilted small cell.
     cell = np.array([[3.1, 0., 0.], [.8, 3.6, 0.], [.2, .3, 4.1]])
     x = np.array([[0., 0., 0.], [.9, .2, .3]])
-    neighbors = ASENeighbors(x, cell, [True, True, False], 7.5)
+    neighbors = Neighbors(build_neighbors("OO", x, cell, [True, True, False], 7.5),
+                          2, cell, [True, True, False])
     actual = {(int(i), int(j), *s) for i, j, s in zip(neighbors.i, neighbors.j, neighbors.shifts)}
     expected = set()
     for sx in range(-4, 5):
@@ -128,8 +143,6 @@ def test_invalid_neighbor_backend(bad):
     ff = ForceField.zno()
     with pytest.raises(ValueError, match="neighbor_backend"):
         ReaxFFCalculator(ff, neighbor_backend=bad)
-    with pytest.raises(ValueError, match="neighbor_backend"):
-        Calculator(ff).evaluate(["Zn"], [[0, 0, 0]], neighbor_backend=bad)
 
 
 @pytest.mark.parametrize("name", ["small_triclinic_water", "small_partial_pbc_water", "periodic_carbon_chain"])
@@ -137,7 +150,8 @@ def test_neighbor_symmetries(name):
     filename, symbols, x, cell, pbc = CASES[name]
     calc = Calculator(ForceField.bundled(filename))
     def evaluate(s, y, lattice):
-        return calc.evaluate(s, y, cell=lattice, pbc=pbc, neighbor_backend="ase")
+        return calc.evaluate(s, y, cell=lattice, pbc=pbc,
+            neighbors=build_neighbors(s, y, lattice, pbc, calc.force_field.general[12]))
     original = evaluate(symbols, x, cell)
     rng = np.random.default_rng(257)
     shifts = rng.integers(-3, 4, x.shape)*pbc
@@ -169,3 +183,94 @@ def test_neighbor_rebuild_crossing_cutoff():
     assert backend_differences(atoms.calc.evaluation, reference, 2)["passed"]
     atoms.positions[1] = [10.1, 0, 0]
     assert atoms.get_potential_energy() == pytest.approx(distant_energy, abs=1e-12)
+
+
+def test_ase_builds_arrays_before_core_evaluation(monkeypatch):
+    from autograd.tracer import Box
+    from xreac import ase as adapter
+
+    ff = ForceField.bundled("qeq_ff.water")
+    filename, symbols, x, cell, pbc = CASES["small_water_4A"]
+    atoms = Atoms(symbols, positions=x, cell=cell, pbc=pbc, calculator=ReaxFFCalculator(ff))
+    original_builder = adapter.neighbor_list
+    original_evaluate = atoms.calc.core.evaluate
+    calls = []
+
+    def build(quantities, supplied_atoms, cutoff, **kwargs):
+        assert quantities == "ijS"
+        assert not isinstance(supplied_atoms.positions, Box)
+        calls.append("build")
+        return original_builder(quantities, supplied_atoms, cutoff, **kwargs)
+
+    def evaluate(*args, **kwargs):
+        calls.append("evaluate")
+        assert calls == ["build", "evaluate"]
+        assert len(kwargs["neighbors"]) == 3
+        assert all(v.dtype.kind in "iu" for v in kwargs["neighbors"])
+        # No builder call is permitted while evaluating energies or forces.
+        with monkeypatch.context() as patch:
+            def forbidden(*args, **kwargs):
+                raise AssertionError("Neighbor builder called inside core evaluate")
+            patch.setattr(adapter, "neighbor_list", forbidden)
+            patch.setattr("ase.neighborlist.primitive_neighbor_list", forbidden)
+            return original_evaluate(*args, **kwargs)
+
+    monkeypatch.setattr(adapter, "neighbor_list", build)
+    monkeypatch.setattr(atoms.calc.core, "evaluate", evaluate)
+    atoms.get_forces()
+    atoms.get_potential_energy()
+    assert calls == ["build", "evaluate"]
+
+
+def test_supplied_arrays_work_without_importing_ase():
+    code = """
+import sys
+import numpy as np
+from xreac import Calculator, ForceField
+assert 'ase' not in sys.modules
+calc = Calculator(ForceField.zno())
+shifts = np.array([[s, 0, 0] for s in (-4, -3, -2, -1, 1, 2, 3, 4)])
+neighbors = (np.zeros(8, dtype=int), np.zeros(8, dtype=int), shifts)
+actual = calc.evaluate(['Zn'], [[0, 0, 0]], cell=[2.5, 12, 12], pbc=[True, False, False], neighbors=neighbors)
+expected = calc.evaluate(['Zn'], [[0, 0, 0]], cell=[2.5, 12, 12], pbc=[True, False, False])
+assert abs(actual.energy-expected.energy) < 1e-10
+assert actual.bond_counts.tolist() == [2]
+assert 'ase' not in sys.modules
+"""
+    subprocess.run([sys.executable, "-c", code], check=True, capture_output=True, text=True)
+
+
+@pytest.mark.parametrize("neighbors,message", [
+    (([0], [1]), "tuple"),
+    (([0], [1, 0], [[0, 0, 0]]), "shape"),
+    (([0], [1], [[0, 0]]), "shape"),
+    (([0., 1.], [1, 0], [[0, 0, 0], [0, 0, 0]]), "integers"),
+    (([0, 1], [1, 0], [[0., 0, 0], [0, 0, 0]]), "integers"),
+    (([-1, 1], [1, 0], [[0, 0, 0], [0, 0, 0]]), "out of range"),
+    (([0, 1], [2, 0], [[0, 0, 0], [0, 0, 0]]), "out of range"),
+    (([0, 1], [1, 0], [[1, 0, 0], [-1, 0, 0]]), "nonperiodic"),
+    (([0], [0], [[0, 0, 0]]), "self neighbors"),
+    (([0, 0, 1], [1, 1, 0], [[0, 0, 0]]*3), "Duplicate"),
+    (([0], [1], [[0, 0, 0]]), "both directions"),
+])
+def test_supplied_neighbor_validation(neighbors, message):
+    with pytest.raises(ValueError, match=message):
+        Calculator(ForceField.zno()).evaluate(["Zn", "O"], [[0, 0, 0], [1.9, 0, 0]], neighbors=neighbors)
+
+
+def test_reuse_supplied_skin_list_for_displacements():
+    filename, symbols, x, cell, pbc = CASES["small_water_4A"]
+    ff = ForceField.bundled(filename)
+    supplied = build_neighbors(symbols, x, cell, pbc, ff.general[12]+1.)
+    originals = tuple(array.copy() for array in supplied)
+    # The same integer arrays can be reused over small displacements, provided
+    # the caller keeps the list complete. Distances must be recomputed from x.
+    calc = Calculator(ff)
+    for shift in (0., .03, -.02):
+        y = x.copy()
+        y[1, 0] += shift
+        actual = calc.evaluate(symbols, y, cell=cell, pbc=pbc, neighbors=supplied)
+        expected = calc.evaluate(symbols, y, cell=cell, pbc=pbc)
+        assert backend_differences(actual, expected, len(x))["passed"]
+    for original, array in zip(originals, supplied):
+        np.testing.assert_array_equal(original, array)

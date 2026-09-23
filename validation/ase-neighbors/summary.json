@@ -1,5 +1,5 @@
 {
-  "created_utc": "2026-09-23T19:30:04.357298+00:00",
+  "created_utc": "2026-09-23T19:41:21.361540+00:00",
   "full_derivative": false,
   "force_convention": "fixed_charge",
   "reference_convention": "LAMMPS supercells normalized to input cell for small inputs",
@@ -22,8 +22,8 @@
       "force_field_sha256": "b5af5a65573ce60f32405a973e33f7cc89a90bc69e624a8ca89811eb67b1a07b",
       "energy": -0.0005219319065470322,
       "evaluation_seconds": {
-        "replicated": 0.004272582940757275,
-        "ase": 0.27801870834082365
+        "replicated": 0.004220000468194485,
+        "ase": 0.004593249410390854
       },
       "replicated_cell_repetitions": [
         1,
@@ -92,8 +92,8 @@
       "force_field_sha256": "b5af5a65573ce60f32405a973e33f7cc89a90bc69e624a8ca89811eb67b1a07b",
       "energy": -2.5053573100490203,
       "evaluation_seconds": {
-        "replicated": 0.004667541012167931,
-        "ase": 0.0031627919524908066
+        "replicated": 0.0043143341317772865,
+        "ase": 0.0035373754799365997
       },
       "replicated_cell_repetitions": [
         1,
@@ -162,8 +162,8 @@
       "force_field_sha256": "b5af5a65573ce60f32405a973e33f7cc89a90bc69e624a8ca89811eb67b1a07b",
       "energy": -10.597414971160887,
       "evaluation_seconds": {
-        "replicated": 0.0035768747329711914,
-        "ase": 0.003779541701078415
+        "replicated": 0.003895833157002926,
+        "ase": 0.0034263748675584793
       },
       "replicated_cell_repetitions": [
         1,
@@ -232,8 +232,8 @@
       "force_field_sha256": "b5af5a65573ce60f32405a973e33f7cc89a90bc69e624a8ca89811eb67b1a07b",
       "energy": -129.0746931165403,
       "evaluation_seconds": {
-        "replicated": 0.008731666952371597,
-        "ase": 0.003252292051911354
+        "replicated": 0.00353954266756773,
+        "ase": 0.003174583427608013
       },
       "replicated_cell_repetitions": [
         1,
@@ -302,8 +302,8 @@
       "force_field_sha256": "b5af5a65573ce60f32405a973e33f7cc89a90bc69e624a8ca89811eb67b1a07b",
       "energy": -71.97569446369215,
       "evaluation_seconds": {
-        "replicated": 0.003510415554046631,
-        "ase": 0.0030225422233343124
+        "replicated": 0.0038407081738114357,
+        "ase": 0.0034530004486441612
       },
       "replicated_cell_repetitions": [
         1,
@@ -372,8 +372,8 @@
       "force_field_sha256": "b5af5a65573ce60f32405a973e33f7cc89a90bc69e624a8ca89811eb67b1a07b",
       "energy": -113.76449836198867,
       "evaluation_seconds": {
-        "replicated": 0.005450374446809292,
-        "ase": 0.004811915569007397
+        "replicated": 0.0072466665878891945,
+        "ase": 0.005725124850869179
       },
       "replicated_cell_repetitions": [
         1,
@@ -442,8 +442,8 @@
       "force_field_sha256": "b5af5a65573ce60f32405a973e33f7cc89a90bc69e624a8ca89811eb67b1a07b",
       "energy": -114.26743970121544,
       "evaluation_seconds": {
-        "replicated": 0.005214291624724865,
-        "ase": 0.0044819992035627365
+        "replicated": 0.005152625031769276,
+        "ase": 0.004986874759197235
       },
       "replicated_cell_repetitions": [
         1,
@@ -512,8 +512,8 @@
       "force_field_sha256": "b5af5a65573ce60f32405a973e33f7cc89a90bc69e624a8ca89811eb67b1a07b",
       "energy": -79.04834416300662,
       "evaluation_seconds": {
-        "replicated": 0.005261874757707119,
-        "ase": 0.004809250123798847
+        "replicated": 0.00523395836353302,
+        "ase": 0.004622207954525948
       },
       "replicated_cell_repetitions": [
         1,
@@ -582,8 +582,8 @@
       "force_field_sha256": "b5af5a65573ce60f32405a973e33f7cc89a90bc69e624a8ca89811eb67b1a07b",
       "energy": -154.2025460793319,
       "evaluation_seconds": {
-        "replicated": 0.005237499251961708,
-        "ase": 0.005156749859452248
+        "replicated": 0.005299249663949013,
+        "ase": 0.00530525017529726
       },
       "replicated_cell_repetitions": [
         1,
@@ -652,8 +652,8 @@
       "force_field_sha256": "b5af5a65573ce60f32405a973e33f7cc89a90bc69e624a8ca89811eb67b1a07b",
       "energy": -74.48428792006078,
       "evaluation_seconds": {
-        "replicated": 0.005025583319365978,
-        "ase": 0.0047658756375312805
+        "replicated": 0.004875541664659977,
+        "ase": 0.004502542316913605
       },
       "replicated_cell_repetitions": [
         1,
@@ -722,8 +722,8 @@
       "force_field_sha256": "b5af5a65573ce60f32405a973e33f7cc89a90bc69e624a8ca89811eb67b1a07b",
       "energy": -105.05982123985245,
       "evaluation_seconds": {
-        "replicated": 0.007139166817069054,
-        "ase": 0.006453040987253189
+        "replicated": 0.006566332653164864,
+        "ase": 0.0060228751972317696
       },
       "replicated_cell_repetitions": [
         1,
@@ -792,8 +792,8 @@
       "force_field_sha256": "b5af5a65573ce60f32405a973e33f7cc89a90bc69e624a8ca89811eb67b1a07b",
       "energy": -484.9636852814081,
       "evaluation_seconds": {
-        "replicated": 0.007354165427386761,
-        "ase": 0.006128665991127491
+        "replicated": 0.007668082602322102,
+        "ase": 0.006497915834188461
       },
       "replicated_cell_repetitions": [
         1,
@@ -862,8 +862,8 @@
       "force_field_sha256": "b5af5a65573ce60f32405a973e33f7cc89a90bc69e624a8ca89811eb67b1a07b",
       "energy": -1298.4251483304529,
       "evaluation_seconds": {
-        "replicated": 0.0175011670216918,
-        "ase": 0.01480725035071373
+        "replicated": 0.016465207561850548,
+        "ase": 0.014860416762530804
       },
       "replicated_cell_repetitions": [
         1,
@@ -932,8 +932,8 @@
       "force_field_sha256": "b5af5a65573ce60f32405a973e33f7cc89a90bc69e624a8ca89811eb67b1a07b",
       "energy": -7377.824097465351,
       "evaluation_seconds": {
-        "replicated": 0.18175975047051907,
-        "ase": 0.17640204168856144
+        "replicated": 0.17444808408617973,
+        "ase": 0.18132341746240854
       },
       "replicated_cell_repetitions": [
         1,
@@ -1002,8 +1002,8 @@
       "force_field_sha256": "b5af5a65573ce60f32405a973e33f7cc89a90bc69e624a8ca89811eb67b1a07b",
       "energy": -15121.022683498337,
       "evaluation_seconds": {
-        "replicated": 0.4517029579728842,
-        "ase": 0.4705052077770233
+        "replicated": 0.46539087500423193,
+        "ase": 0.48634887486696243
       },
       "replicated_cell_repetitions": [
         1,
@@ -1072,8 +1072,8 @@
       "force_field_sha256": "526dea2d55d748caed94734139dda66064e194f74f46eee9b0f511eead38b7d1",
       "energy": -248.34420920633704,
       "evaluation_seconds": {
-        "replicated": 0.005357874557375908,
-        "ase": 0.004535834304988384
+        "replicated": 0.005659000016748905,
+        "ase": 0.011644874699413776
       },
       "replicated_cell_repetitions": [
         1,
@@ -1142,8 +1142,8 @@
       "force_field_sha256": "526dea2d55d748caed94734139dda66064e194f74f46eee9b0f511eead38b7d1",
       "energy": -502.630151520854,
       "evaluation_seconds": {
-        "replicated": 0.00730433315038681,
-        "ase": 0.006847875192761421
+        "replicated": 0.007654584012925625,
+        "ase": 0.006709207780659199
       },
       "replicated_cell_repetitions": [
         1,
@@ -1212,8 +1212,8 @@
       "force_field_sha256": "526dea2d55d748caed94734139dda66064e194f74f46eee9b0f511eead38b7d1",
       "energy": -498.80720305169757,
       "evaluation_seconds": {
-        "replicated": 0.007209000177681446,
-        "ase": 0.006315708160400391
+        "replicated": 0.007947292178869247,
+        "ase": 0.006802000105381012
       },
       "replicated_cell_repetitions": [
         1,
@@ -1282,8 +1282,8 @@
       "force_field_sha256": "526dea2d55d748caed94734139dda66064e194f74f46eee9b0f511eead38b7d1",
       "energy": -756.9287008727283,
       "evaluation_seconds": {
-        "replicated": 0.014862249605357647,
-        "ase": 0.0071815000846982
+        "replicated": 0.008042708039283752,
+        "ase": 0.007995166815817356
       },
       "replicated_cell_repetitions": [
         1,
@@ -1352,8 +1352,8 @@
       "force_field_sha256": "526dea2d55d748caed94734139dda66064e194f74f46eee9b0f511eead38b7d1",
       "energy": -1524.9610580624617,
       "evaluation_seconds": {
-        "replicated": 0.00983504205942154,
-        "ase": 0.009705166332423687
+        "replicated": 0.01036087516695261,
+        "ase": 0.009882207959890366
       },
       "replicated_cell_repetitions": [
         1,
@@ -1422,8 +1422,8 @@
       "force_field_sha256": "c5240c07e664dde5626fcdb740be1bdbe5e7e34d919902603db0bf962fea9aee",
       "energy": -463.2227026790888,
       "evaluation_seconds": {
-        "replicated": 0.006546957418322563,
-        "ase": 0.005865124985575676
+        "replicated": 0.006959499791264534,
+        "ase": 0.006133167073130608
       },
       "replicated_cell_repetitions": [
         1,
@@ -1492,8 +1492,8 @@
       "force_field_sha256": "c5240c07e664dde5626fcdb740be1bdbe5e7e34d919902603db0bf962fea9aee",
       "energy": -259.60557396945285,
       "evaluation_seconds": {
-        "replicated": 0.004342124797403812,
-        "ase": 0.004481167532503605
+        "replicated": 0.004500125534832478,
+        "ase": 0.003877333365380764
       },
       "replicated_cell_repetitions": [
         1,
@@ -1562,8 +1562,8 @@
       "force_field_sha256": "c5240c07e664dde5626fcdb740be1bdbe5e7e34d919902603db0bf962fea9aee",
       "energy": -165.30485577659817,
       "evaluation_seconds": {
-        "replicated": 0.004168583080172539,
-        "ase": 0.0035750409588217735
+        "replicated": 0.004002749919891357,
+        "ase": 0.0032583745196461678
       },
       "replicated_cell_repetitions": [
         1,
@@ -1632,8 +1632,8 @@
       "force_field_sha256": "c5240c07e664dde5626fcdb740be1bdbe5e7e34d919902603db0bf962fea9aee",
       "energy": -385.1110584463854,
       "evaluation_seconds": {
-        "replicated": 0.007517583668231964,
-        "ase": 0.007358333095908165
+        "replicated": 0.006780916824936867,
+        "ase": 0.006224375218153
       },
       "replicated_cell_repetitions": [
         1,
@@ -1702,8 +1702,8 @@
       "force_field_sha256": "526dea2d55d748caed94734139dda66064e194f74f46eee9b0f511eead38b7d1",
       "energy": -498.8271972077392,
       "evaluation_seconds": {
-        "replicated": 0.010542042553424835,
-        "ase": 0.007345749996602535
+        "replicated": 0.008874500170350075,
+        "ase": 0.007795167155563831
       },
       "replicated_cell_repetitions": [
         1,
@@ -1772,8 +1772,8 @@
       "force_field_sha256": "526dea2d55d748caed94734139dda66064e194f74f46eee9b0f511eead38b7d1",
       "energy": -492.85371080502784,
       "evaluation_seconds": {
-        "replicated": 0.0065361252054572105,
-        "ase": 0.006528041325509548
+        "replicated": 0.006599166430532932,
+        "ase": 0.013453874737024307
       },
       "replicated_cell_repetitions": [
         1,
@@ -1842,8 +1842,8 @@
       "force_field_sha256": "526dea2d55d748caed94734139dda66064e194f74f46eee9b0f511eead38b7d1",
       "energy": -1989.0242124724073,
       "evaluation_seconds": {
-        "replicated": 0.017151542007923126,
-        "ase": 0.02446374949067831
+        "replicated": 0.01564229093492031,
+        "ase": 0.024743624962866306
       },
       "replicated_cell_repetitions": [
         1,
@@ -1912,8 +1912,8 @@
       "force_field_sha256": "526dea2d55d748caed94734139dda66064e194f74f46eee9b0f511eead38b7d1",
       "energy": -1989.4034156743717,
       "evaluation_seconds": {
-        "replicated": 0.013584999367594719,
-        "ase": 0.017084750346839428
+        "replicated": 0.012317082844674587,
+        "ase": 0.01583037432283163
       },
       "replicated_cell_repetitions": [
         1,
@@ -1982,8 +1982,8 @@
       "force_field_sha256": "526dea2d55d748caed94734139dda66064e194f74f46eee9b0f511eead38b7d1",
       "energy": -16017.18929617071,
       "evaluation_seconds": {
-        "replicated": 0.6428756657987833,
-        "ase": 1.1066222926601768
+        "replicated": 0.943405625410378,
+        "ase": 1.1309479577466846
       },
       "replicated_cell_repetitions": [
         1,
@@ -2052,8 +2052,8 @@
       "force_field_sha256": "526dea2d55d748caed94734139dda66064e194f74f46eee9b0f511eead38b7d1",
       "energy": -248.50569309481105,
       "evaluation_seconds": {
-        "replicated": 0.015342041850090027,
-        "ase": 0.008161833509802818
+        "replicated": 0.016941332258284092,
+        "ase": 0.0080720828846097
       },
       "replicated_cell_repetitions": [
         2,
@@ -2122,8 +2122,8 @@
       "force_field_sha256": "526dea2d55d748caed94734139dda66064e194f74f46eee9b0f511eead38b7d1",
       "energy": -249.3393848178727,
       "evaluation_seconds": {
-        "replicated": 0.024519708938896656,
-        "ase": 0.008946208283305168
+        "replicated": 0.017496874555945396,
+        "ase": 0.009381917305290699
       },
       "replicated_cell_repetitions": [
         2,
@@ -2192,8 +2192,8 @@
       "force_field_sha256": "526dea2d55d748caed94734139dda66064e194f74f46eee9b0f511eead38b7d1",
       "energy": -251.22311472078988,
       "evaluation_seconds": {
-        "replicated": 0.12032958399504423,
-        "ase": 0.01838187500834465
+        "replicated": 0.11646670754998922,
+        "ase": 0.018812207505106926
       },
       "replicated_cell_repetitions": [
         3,
@@ -2262,8 +2262,8 @@
       "force_field_sha256": "526dea2d55d748caed94734139dda66064e194f74f46eee9b0f511eead38b7d1",
       "energy": -252.3095671873686,
       "evaluation_seconds": {
-        "replicated": 0.5994702083989978,
-        "ase": 0.03337854240089655
+        "replicated": 0.6045275833457708,
+        "ase": 0.03497433289885521
       },
       "replicated_cell_repetitions": [
         4,
@@ -2332,8 +2332,8 @@
       "force_field_sha256": "526dea2d55d748caed94734139dda66064e194f74f46eee9b0f511eead38b7d1",
       "energy": -501.2217163064048,
       "evaluation_seconds": {
-        "replicated": 0.04627941735088825,
-        "ase": 0.01652937475591898
+        "replicated": 0.04483579192310572,
+        "ase": 0.016217208467423916
       },
       "replicated_cell_repetitions": [
         2,
@@ -2402,8 +2402,8 @@
       "force_field_sha256": "526dea2d55d748caed94734139dda66064e194f74f46eee9b0f511eead38b7d1",
       "energy": -250.05975138911685,
       "evaluation_seconds": {
-        "replicated": 0.05730099976062775,
-        "ase": 0.012799084186553955
+        "replicated": 0.05585195776075125,
+        "ase": 0.01255220826715231
       },
       "replicated_cell_repetitions": [
         3,
@@ -2472,8 +2472,8 @@
       "force_field_sha256": "526dea2d55d748caed94734139dda66064e194f74f46eee9b0f511eead38b7d1",
       "energy": -249.96935024135647,
       "evaluation_seconds": {
-        "replicated": 0.014633458107709885,
-        "ase": 0.007120625115931034
+        "replicated": 0.014533624984323978,
+        "ase": 0.0076364995911717415
       },
       "replicated_cell_repetitions": [
         3,
@@ -2542,8 +2542,8 @@
       "force_field_sha256": "b5af5a65573ce60f32405a973e33f7cc89a90bc69e624a8ca89811eb67b1a07b",
       "energy": -120.3770696188065,
       "evaluation_seconds": {
-        "replicated": 0.05111716687679291,
-        "ase": 0.014224749989807606
+        "replicated": 0.05102658364921808,
+        "ase": 0.013644625432789326
       },
       "replicated_cell_repetitions": [
         3,
@@ -2612,8 +2612,8 @@
       "force_field_sha256": "b5af5a65573ce60f32405a973e33f7cc89a90bc69e624a8ca89811eb67b1a07b",
       "energy": -10.868673983099141,
       "evaluation_seconds": {
-        "replicated": 0.00420533400028944,
-        "ase": 0.0036514587700366974
+        "replicated": 0.004515292122960091,
+        "ase": 0.0037112077698111534
       },
       "replicated_cell_repetitions": [
         5,
@@ -2682,8 +2682,8 @@
       "force_field_sha256": "c5240c07e664dde5626fcdb740be1bdbe5e7e34d919902603db0bf962fea9aee",
       "energy": -266.7064115634587,
       "evaluation_seconds": {
-        "replicated": 0.0074517494067549706,
-        "ase": 0.013327416963875294
+        "replicated": 0.015098165720701218,
+        "ase": 0.006521790288388729
       },
       "replicated_cell_repetitions": [
         3,
@@ -2752,8 +2752,8 @@
       "force_field_sha256": "b5af5a65573ce60f32405a973e33f7cc89a90bc69e624a8ca89811eb67b1a07b",
       "energy": -21.660220019980006,
       "evaluation_seconds": {
-        "replicated": 0.003473624587059021,
-        "ase": 0.003025582991540432
+        "replicated": 0.0035901665687561035,
+        "ase": 0.0031552910804748535
       },
       "replicated_cell_repetitions": [
         1,
@@ -2822,8 +2822,8 @@
       "force_field_sha256": "b5af5a65573ce60f32405a973e33f7cc89a90bc69e624a8ca89811eb67b1a07b",
       "energy": -21.660071703112035,
       "evaluation_seconds": {
-        "replicated": 0.003630291670560837,
-        "ase": 0.0031383344903588295
+        "replicated": 0.0033837081864476204,
+        "ase": 0.0030492087826132774
       },
       "replicated_cell_repetitions": [
         1,
@@ -2892,8 +2892,8 @@
       "force_field_sha256": "b5af5a65573ce60f32405a973e33f7cc89a90bc69e624a8ca89811eb67b1a07b",
       "energy": -21.659923394375518,
       "evaluation_seconds": {
-        "replicated": 0.003929458558559418,
-        "ase": 0.003291875123977661
+        "replicated": 0.003396333195269108,
+        "ase": 0.0030203331261873245
       },
       "replicated_cell_repetitions": [
         1,
@@ -2962,8 +2962,8 @@
       "force_field_sha256": "b5af5a65573ce60f32405a973e33f7cc89a90bc69e624a8ca89811eb67b1a07b",
       "energy": -19.62997161881765,
       "evaluation_seconds": {
-        "replicated": 0.003801249898970127,
-        "ase": 0.0032104579731822014
+        "replicated": 0.0038207918405532837,
+        "ase": 0.003291207365691662
       },
       "replicated_cell_repetitions": [
         1,
@@ -3032,8 +3032,8 @@
       "force_field_sha256": "b5af5a65573ce60f32405a973e33f7cc89a90bc69e624a8ca89811eb67b1a07b",
       "energy": -19.62997161881766,
       "evaluation_seconds": {
-        "replicated": 0.0036329999566078186,
-        "ase": 0.0034971656277775764
+        "replicated": 0.003583625890314579,
+        "ase": 0.0031190840527415276
       },
       "replicated_cell_repetitions": [
         1,
@@ -3102,8 +3102,8 @@
       "force_field_sha256": "b5af5a65573ce60f32405a973e33f7cc89a90bc69e624a8ca89811eb67b1a07b",
       "energy": -19.62997161881766,
       "evaluation_seconds": {
-        "replicated": 0.004117041826248169,
-        "ase": 0.003936499357223511
+        "replicated": 0.003457041457295418,
+        "ase": 0.0030293744057416916
       },
       "replicated_cell_repetitions": [
         1,

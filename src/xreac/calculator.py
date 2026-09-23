@@ -63,7 +63,7 @@ class Calculator:
         self.max_expanded_atoms = max_expanded_atoms
 
     def evaluate(self, symbols, positions, *, total_charge=0, cell=None,
-                 pbc=None, full_derivative=False, neighbor_backend="replicated"):
+                 pbc=None, full_derivative=False, neighbors=None):
         """Return energy, equilibrated charges, and the selected forces.
 
         By default, fixed-charge forces hold the freshly equilibrated charges
@@ -73,25 +73,31 @@ class Calculator:
 
         cell contains three lengths or three row vectors in Angstrom. Supplying
         it enables all periodic directions unless pbc is explicitly set to a
-        boolean or three flags. neighbor_backend="replicated" uses the native
-        dense image search with tied internal copies for small cells. "ase"
-        uses ASE's image-resolved neighbor list without expanding the cell.
+        boolean or three flags. Pass neighbors=(i, j, S) for a full directed
+        image list built by the caller, e.g. ASE neighbor_list("ijS", atoms,
+        cutoff). Each edge has vector x[j]-x[i]+S@cell. Include both directions
+        and all images within the nonbonded cutoff; exclude zero-shift self
+        edges. Extra neighbors beyond the cutoff (a skin) are allowed. The
+        caller is responsible for rebuilding the list when needed. No neighbor
+        search or ASE import occurs when arrays are supplied. Autograd treats
+        i, j, S as constants and differentiates the vectors through x only.
+        Without neighbors, use native dense image search and small-cell replication.
         Energies and properties refer to the input cell. cell_repetitions records
         actual replication. bond_orders sums over images; bond_counts counts each image.
         Dipoles use the supplied coordinate branch and change upon wrapping.
         """
         if not isinstance(full_derivative, bool):
             raise ValueError("full_derivative must be a boolean")
-        if neighbor_backend not in ("replicated", "ase"):
-            raise ValueError("neighbor_backend must be 'replicated' or 'ase'")
         symbols, x = validate_input(symbols, positions, total_charge, cell, pbc)
-        if neighbor_backend == "ase":
+        if neighbors is not None:
             from .neighbor_energy import NeighborEnergyModel
 
-            model = NeighborEnergyModel(self.force_field, symbols, x, cell, pbc)
+            model = NeighborEnergyModel(self.force_field, symbols, neighbors, cell, pbc)
             repetitions = (1, 1, 1)
+            neighbor_backend = "provided"
         else:
             model, repetitions = make_model(self.force_field, symbols, cell, pbc, self.max_expanded_atoms)
+            neighbor_backend = "replicated"
         try:
             components, charges = model.components(x)
             fixed_charges = None if full_derivative else charges

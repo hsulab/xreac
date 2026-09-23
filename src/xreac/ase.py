@@ -1,8 +1,11 @@
 """Optional ASE adapter. Core xreac imports do not require ASE."""
+from dataclasses import replace
+
 import numpy as np
 
 try:
     from ase.calculators.calculator import Calculator as ASECalculator, all_changes
+    from ase.neighborlist import neighbor_list
     from ase.units import kcal, mol
 except ImportError as exc:
     raise ImportError("Install xreac[ase] to use the ASE calculator") from exc
@@ -66,11 +69,20 @@ class ReaxFFCalculator(ASECalculator):
         initial_charges = self.atoms.get_initial_charges()
         if not np.isfinite(initial_charges).all() or abs(initial_charges.sum()) > 1e-8:
             raise ValueError("Initial charges must be finite and sum to zero; only neutral systems are supported")
+        neighbors = None
+        if self.parameters.neighbor_backend == "ase":
+            # Build integer topology here, before entering the core evaluator.
+            # The core only differentiates x[j] - x[i] + S @ cell, never this call.
+            cutoff = np.nextafter(float(self.core.force_field.general[12]), np.inf)
+            i, j, S = neighbor_list("ijS", self.atoms, cutoff, self_interaction=False)
+            neighbors = (i, j, S)
         result = self.core.evaluate(self.atoms.get_chemical_symbols(), self.atoms.positions,
                                     cell=self.atoms.cell.array, pbc=self.atoms.pbc,
                                     total_charge=self.parameters.total_charge,
                                     full_derivative=self.parameters.full_derivative,
-                                    neighbor_backend=self.parameters.neighbor_backend)
+                                    neighbors=neighbors)
+        # Only the adapter knows which builder supplied the core's arrays.
+        result = replace(result, neighbor_backend=self.parameters.neighbor_backend)
         self.evaluation = result
         self.results = {
             "energy": result.energy * KCAL_MOL_TO_EV,

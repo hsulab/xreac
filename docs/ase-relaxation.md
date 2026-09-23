@@ -26,6 +26,9 @@ kcal/mol units, including bond properties and `cell_repetitions`.
 
 ASE neighbor lists are the default (`neighbor_backend="ase"`). They retain
 periodic image shifts and work directly on small input cells without replication.
+The adapter builds `i, j, S = neighbor_list("ijS", atoms, cutoff)` and passes
+`neighbors=(i, j, S)` into the core evaluator. Neighbor construction is outside
+the differentiated calculation; only vectors and distances depend on positions.
 To select the retained native method:
 
 ```python

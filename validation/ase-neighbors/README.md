@@ -4,6 +4,10 @@ The ASE calculator now defaults to `neighbor_backend="ase"`, using ASE's
 image-resolved neighbor list on the input cell. `neighbor_backend="replicated"`
 retains the native dense image search and small-cell replication. The core
 calculator retains the latter as its default. Both use fixed-charge forces.
+The ASE adapter now builds `(i, j, S)` before calling the core and passes them
+as `evaluate(..., neighbors=(i, j, S))`. The core consumes supplied arrays without
+ASE or a neighbor search. Autograd differentiates edge vectors through positions
+while treating indices and image shifts as constants.
 
 **45 single-point cases pass** comparison between the two backends and against
 fresh `lmp_mpi` runs (LAMMPS 22 Jul 2025, Update 4). Small-cell LAMMPS references
@@ -35,12 +39,14 @@ small cells; a one-atom zinc chain with self-image bonds; a carbon chain with
 torsions across repeated images; and cutoff crossings at 5 and 10 Å. These
 are implementation checks, not physically equilibrated structures.
 
-The full suite passes **226 tests**, including 61 new neighbor tests. Additional
+The full suite passes **240 tests**, including 75 neighbor tests. Additional
 checks cover both force derivatives by finite differences, primitive-sized QEq,
 independent explicit enumeration of neighbor shifts, wrapping/rotation/atom
 permutation, backend switching and cache invalidation, list rebuilding across
 cutoffs, no replication on the ASE path, both inner-wall vdW variants, and
-ASE/native fixed-charge relaxation verified with LAMMPS.
+ASE/native fixed-charge relaxation verified with LAMMPS. Explicit-array tests
+also guard the builder/core boundary, verify evaluation without importing ASE,
+reject malformed/duplicate/half lists, and check reuse of supplied skin lists.
 
 ## Retained data
 
@@ -53,7 +59,8 @@ ASE/native fixed-charge relaxation verified with LAMMPS.
 
 The compressed JSON can be read with `json.load(gzip.open(path, "rt"))`.
 Raw LAMMPS inputs and outputs remain locally under
-`validation/runs/ase-neighbors/`; the compact numerical records above are
+`validation/runs/supplied-neighbors/` for the latest explicit-array rerun;
+the compact numerical records above are
 tracked by Git. Per-case timings are single evaluations, not a statistical
 performance benchmark.
 

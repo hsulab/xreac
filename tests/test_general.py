@@ -178,7 +178,13 @@ def test_inner_wall_variants(shield, neighbor_backend, tmp_path):
     ff = altered_water_file(tmp_path/"core.ff", {9: 15. if shield else 0., 29: .8, 30: .2, 31: 3.})
     assert ff.vdw_type == (3 if shield else 2)
     symbols, x = WATER["dimer"]
-    actual = Calculator(ff).evaluate(symbols, x, neighbor_backend=neighbor_backend)
+    neighbors = None
+    if neighbor_backend == "ase":
+        from ase import Atoms
+        from ase.neighborlist import neighbor_list
+
+        neighbors = neighbor_list("ijS", Atoms(symbols, positions=x), ff.general[12])
+    actual = Calculator(ff).evaluate(symbols, x, neighbors=neighbors)
     reference = evaluate_lammps(ff, symbols, x, directory=tmp_path/"reference")
     report = comparison(actual, reference, len(x))
     assert report["passed"], report

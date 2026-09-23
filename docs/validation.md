@@ -67,7 +67,10 @@ replication remains selectable with `neighbor_backend="replicated"`. Across
 **3.23e-13 kcal/mol/atom** in total energy and **1.97e-12 kcal/mol/Å** in forces.
 Charges, dipoles, full bond-order matrices, lone pairs, and bond counts also agree.
 All cases pass fresh LAMMPS checks, with a maximum force difference of
-**2.48e-8 kcal/mol/Å**. The complete suite passes **226 tests** in this run.
+**2.48e-8 kcal/mol/Å**. The complete suite passes **240 tests** in this run.
+The core receives explicit `(i, j, S)` arrays. Tests verify that the builder
+runs before evaluation, no neighbor search occurs inside the core, and supplied
+lists can be used without importing ASE.
 
 Coverage includes all three bundled force fields, molecules and clusters up
 to 200 atoms, 192-atom bulk water, small/triclinic/partially periodic cells,

@@ -1,4 +1,4 @@
-"""ReaxFF on directed, image-resolved edges from ASE's neighbor list.
+"""ReaxFF on caller-supplied directed, image-resolved neighbor arrays.
 
 Uses the same equations and units as energy.py, retaining the dense replicated
 model as an independent reference. Atom reductions sum all neighbor images;
@@ -14,15 +14,15 @@ import numpy as onp
 from .energy import (BOND_CUT, HBOND_CUT, HBOND_THRESHOLD, BOND_GRAPH_CUT,
                      THB_CUT, THB_PRODUCT_CUT, COMPONENTS, C_ELE, QEQ_COULOMB,
                      SELF_CONVERSION, positive_power)
-from .neighbors import ASENeighbors
+from .neighbors import Neighbors
 
 
 class NeighborEnergyModel:
-    def __init__(self, ff, symbols, positions, cell=None, pbc=None):
+    def __init__(self, ff, symbols, neighbors, cell=None, pbc=None):
         ff.validate_model(symbols)
         self.ff, self.symbols, self.n = ff, tuple(symbols), len(symbols)
         self.g, self.vdw_type = ff.general, ff.vdw_type
-        self.edges = ASENeighbors(positions, cell, pbc, self.g[12])
+        self.edges = Neighbors(neighbors, self.n, cell, pbc)
         self.i, self.j = self.edges.i, self.edges.j
         self.a = {k: onp.array([ff.atoms[s][k] for s in symbols]) for k in ff.atoms[symbols[0]]}
         self.p = {k: onp.array([ff.pairs[symbols[i], symbols[j]][k]

@@ -13,8 +13,8 @@ it must be a positive integer. The default core calculation and native FIRE do n
 
 `evaluate` takes atom labels and a finite `(N, 3)` coordinate array. Options are
 `total_charge=0`, `cell=None`, `pbc=None`, `full_derivative=False`, and
-`neighbor_backend="replicated"`. Select `neighbor_backend="ase"` to use ASE's
-image-resolved neighbor list. Only neutral
+`neighbors=None`. Pass `neighbors=(i, j, S)` to use externally built directed
+neighbor arrays; omit it to use native replication. Only neutral
 systems are supported. The return value is an `Evaluation`.
 
 `relax` adds `force_tolerance=1e-4`, `max_iterations=500`, and `backend="ase"`.
@@ -41,7 +41,7 @@ It always uses fixed-charge forces and returns a `Relaxation`.
 | `bond_counts` | Per-atom counts of image bonds with order greater than 0.3 |
 | `dipole` | `(3,)` vector in e Å on the supplied coordinate branch |
 | `cell_repetitions` | Three internal replication factors; `(1, 1, 1)` when unexpanded |
-| `neighbor_backend` | `"replicated"` or `"ase"`; ASE always uses the unexpanded input cell |
+| `neighbor_backend` | `"replicated"`, `"provided"` for explicit arrays, or `"ase"` when the adapter supplies them |
 
 ## Relaxation result
 
