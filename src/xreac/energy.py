@@ -58,9 +58,13 @@ class EnergyModel:
         self.g, self.vdw_type = ff.general, ff.vdw_type
         self.edges = Neighbors(neighbors, self.n, cell, pbc)
         self.i, self.j = self.edges.i, self.edges.j
-        self.a = {k: onp.array([ff.atoms[s][k] for s in symbols]) for k in ff.atoms[symbols[0]]}
+        labels = tuple(dict.fromkeys(symbols))
+        types = {symbol: index for index, symbol in enumerate(labels)}
+        atom_types = onp.array([types[s] for s in symbols])
+        pair_types = atom_types[self.i] * len(labels) + atom_types[self.j]
+        self.a = {k: onp.array([ff.atoms[s][k] for s in labels])[atom_types] for k in ff.atoms[symbols[0]]}
         self.p = {
-            k: onp.array([ff.pairs[symbols[i], symbols[j]][k] for i, j in zip(self.i, self.j)])
+            k: onp.array([ff.pairs[s, t][k] for s in labels for t in labels])[pair_types]
             for k in ff.pairs[symbols[0], symbols[0]]
         }
 
