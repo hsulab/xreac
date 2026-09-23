@@ -37,10 +37,9 @@ validation
 
 ```{toctree}
 :maxdepth: 2
-:caption: Reference and development
+:caption: Reference
 
 api
-development
 ```
 
 ## Scope

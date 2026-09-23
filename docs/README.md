@@ -8,6 +8,5 @@ mamba run -n catorch3 python -m sphinx -n -W --keep-going -b html docs docs/_bui
 mamba run -n catorch3 python -m sphinx -n -W --keep-going -b doctest docs docs/_build/doctest
 ```
 
-The local site starts at `docs/_build/html/index.html`. See
-[development.md](development.md) for local build and authoring instructions.
+The local site starts at `docs/_build/html/index.html`.
 Generated HTML is intentionally not committed.

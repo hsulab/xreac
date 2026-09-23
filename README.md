@@ -17,8 +17,7 @@ mamba run -n catorch3 python -m pip install -e '.[docs]'
 mamba run -n catorch3 python -m sphinx -n -W --keep-going -b html docs docs/_build/html
 ```
 
-Open `docs/_build/html/index.html`. See
-[building and editing the docs](docs/development.md) for more details.
+Open `docs/_build/html/index.html`.
 
 ## Install
 
