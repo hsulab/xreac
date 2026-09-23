@@ -3,7 +3,7 @@
 from dataclasses import dataclass
 
 import autograd.numpy as anp
-from autograd import grad
+from autograd import make_vjp
 import numpy as np
 
 from .energy import COMPONENTS, EnergyModel
@@ -103,9 +103,21 @@ class Calculator:
             neighbor_backend = "replicated"
         model = EnergyModel(self.force_field, symbols, neighbors, cell, pbc)
         try:
-            components, charges = model.components(x)
-            fixed_charges = None if full_derivative else charges
-            force = -grad(lambda y: anp.sum(model.components(y, fixed_charges)[0]))(x)
+            # Solve QEq outside the trace for fixed-charge forces. The traced
+            # energy pass supplies both values and forces, without replaying
+            # all energy terms merely to obtain the reported components.
+            fixed_charges = None
+            if not full_derivative:
+                _, distances = model.edges.geometry(x)
+                fixed_charges = model.electrostatics(distances)[0]
+
+            def values(y):
+                components, charges = model.components(y, fixed_charges)
+                return anp.concatenate((components, charges))
+
+            backward, values_at_x = make_vjp(values)(x)
+            components, charges = values_at_x[: len(COMPONENTS)], values_at_x[len(COMPONENTS) :]
+            force = -backward(np.concatenate((np.ones(len(COMPONENTS)), np.zeros(len(x)))))
         except np.linalg.LinAlgError as exc:
             raise ValueError("Singular QEq system; check the geometry and parameters") from exc
         if not all(np.isfinite(v).all() for v in (components, charges, force)):
