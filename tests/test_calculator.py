@@ -60,10 +60,33 @@ def test_relaxation(calc):
     initial = calc.evaluate(symbols, x)
     result = calc.relax(symbols, x, force_tolerance=1e-5)
     assert result.converged, result.message
+    assert result.evaluation.full_derivative is False
+    assert result.evaluation.force_convention == "fixed_charge"
     assert result.evaluation.energy < initial.energy
     assert np.max(abs(result.evaluation.forces)) <= 1e-5
+    np.testing.assert_array_equal(result.evaluation.forces, calc.evaluate(symbols, result.positions).forces)
     short = calc.relax(symbols, x, force_tolerance=1e-12, max_iterations=1)
     assert not short.converged
+    assert short.iterations == 1
+    assert short.evaluation.full_derivative is False
+    assert np.max(abs(short.evaluation.forces)) > 1e-12
+    np.testing.assert_array_equal(x, [[0, 0, 0], [2.3, .1, .2]])
+
+
+def test_relaxation_already_converged(calc):
+    result = calc.relax(["Zn"], [[1., 2., 3.]], max_iterations=1)
+    assert result.converged and result.iterations == 0
+    assert result.evaluation.full_derivative is False
+    np.testing.assert_array_equal(result.positions, [[1., 2., 3.]])
+
+
+@pytest.mark.parametrize("kwargs", [
+    {"force_tolerance": 0}, {"force_tolerance": float("nan")},
+    {"max_iterations": 0}, {"max_iterations": 1.5}, {"max_iterations": True},
+])
+def test_invalid_relaxation_settings(calc, kwargs):
+    with pytest.raises(ValueError):
+        calc.relax(*CASES["zno"], **kwargs)
 
 
 def test_charge_response_is_explicit(calc):
@@ -78,7 +101,8 @@ def test_charge_response_is_explicit(calc):
     assert np.max(abs(full.forces-fixed.forces)) > .03
 
 
-def test_default_does_not_differentiate_qeq(calc, monkeypatch):
+@pytest.mark.parametrize("operation", ["evaluate", "relax"])
+def test_default_does_not_differentiate_qeq(calc, monkeypatch, operation):
     from autograd.tracer import Box
     from xreac import energy
 
@@ -89,7 +113,10 @@ def test_default_does_not_differentiate_qeq(calc, monkeypatch):
         return original(matrix, rhs)
 
     monkeypatch.setattr(energy.np.linalg, "solve", solve_without_derivative)
-    result = calc.evaluate(*CASES["zno"])
+    result = getattr(calc, operation)(*CASES["zno"])
+    if operation == "relax":
+        assert result.converged
+        result = result.evaluation
     assert np.isfinite(result.forces).all()
 
 

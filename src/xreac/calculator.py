@@ -1,8 +1,8 @@
-"""Public calculator and optional SciPy geometry relaxation."""
+"""Public calculator and force-based geometry relaxation."""
 from dataclasses import dataclass
 
 import autograd.numpy as anp
-from autograd import grad, value_and_grad
+from autograd import grad
 import numpy as np
 
 from .energy import COMPONENTS, EnergyModel
@@ -87,35 +87,49 @@ class Calculator:
 
     def relax(self, symbols, positions, *, force_tolerance=1e-4, max_iterations=500,
               total_charge=0, cell=None):
-        """Minimize energy with charge-response forces (full_derivative=True).
+        """Relax with FIRE using fixed-charge forces, matching LAMMPS.
 
-        Unlike evaluate()'s default, energy minimization requires the full
-        derivative. The returned evaluation records this mode. Force tolerance
-        is in kcal/mol/A.
+        QEq is solved at each geometry, without differentiation through the
+        charge solve. Convergence requires the largest absolute Cartesian force
+        component to be at most force_tolerance (kcal/mol/A). FIRE uses damped
+        fictitious dynamics, not an energy line search or physical time evolution.
         """
-        try:
-            from scipy.optimize import minimize
-        except ImportError as exc:
-            raise ImportError("Install xreac[relax] to use geometry relaxation") from exc
         symbols, x = validate_input(symbols, positions, total_charge, cell)
         if not np.isfinite(force_tolerance) or force_tolerance <= 0:
             raise ValueError("force_tolerance must be positive and finite")
-        if not isinstance(max_iterations, int) or max_iterations < 1:
+        if isinstance(max_iterations, bool) or not isinstance(max_iterations, int) or max_iterations < 1:
             raise ValueError("max_iterations must be a positive integer")
-        model = EnergyModel(self.force_field, symbols)
-        vg = value_and_grad(lambda flat: anp.sum(model.components(flat.reshape(x.shape))[0]))
-
-        def objective(flat):
-            validate_input(symbols, flat.reshape(x.shape))
-            value, derivative = vg(flat)
-            if not np.isfinite(value) or not np.isfinite(derivative).all():
-                raise ValueError("Non-finite energy or gradient during relaxation")
-            return float(value), np.asarray(derivative)
-
-        opt = minimize(objective, x.ravel(), method="L-BFGS-B", jac=True,
-                       options={"gtol": force_tolerance, "ftol": 0.0,
-                                "maxiter": max_iterations, "maxls": 40})
-        positions = opt.x.reshape(x.shape)
-        result = self.evaluate(symbols, positions, full_derivative=True)
-        converged = bool(np.max(np.abs(result.forces)) <= force_tolerance)
-        return Relaxation(positions, result, converged, int(opt.nit), str(opt.message))
+        # FIRE (Bitzek et al., Phys. Rev. Lett. 97, 170201, 2006).
+        # Unit fictitious masses; step parameters are optimizer scales, not fs.
+        velocity = np.zeros_like(x)
+        dt, dt_max, alpha = .02, .2, .1
+        positive_steps = 0
+        result = self.evaluate(symbols, x, full_derivative=False)
+        for iteration in range(max_iterations+1):
+            force = result.forces
+            if np.max(np.abs(force)) <= force_tolerance:
+                return Relaxation(x, result, True, iteration, "Fixed-charge force tolerance reached")
+            if iteration == max_iterations:
+                break
+            power = float(np.sum(velocity*force))
+            if power > 0:
+                velocity = (1-alpha)*velocity + alpha*np.linalg.norm(velocity)/np.linalg.norm(force)*force
+                positive_steps += 1
+                if positive_steps > 5:
+                    dt = min(dt*1.1, dt_max)
+                    alpha *= .99
+            else:
+                velocity.fill(0.)
+                positive_steps = 0
+                alpha = .1
+                if iteration > 0:
+                    dt *= .5
+            velocity += dt*force
+            displacement = dt*velocity
+            # Cap the largest atomic displacement at 0.1 A per iteration.
+            largest_step = np.max(np.linalg.norm(displacement, axis=1))
+            if largest_step > .1:
+                displacement *= .1/largest_step
+            x = x + displacement
+            result = self.evaluate(symbols, x, full_derivative=False)
+        return Relaxation(x, result, False, max_iterations, "Maximum relaxation iterations reached")

@@ -41,8 +41,9 @@ def test_reference_relaxed_geometry(name, tmp_path):
     assert relaxed.converged
     reference = evaluate_lammps(ff, symbols, relaxed.positions, directory=tmp_path / "relaxed")
     assert relaxed.evaluation.energy == pytest.approx(reference.energy, abs=1e-5*len(symbols))
-    fixed = calc.evaluate(symbols, relaxed.positions)
-    np.testing.assert_allclose(fixed.forces, reference.forces, atol=1e-4, rtol=0)
+    assert relaxed.evaluation.full_derivative is False
+    np.testing.assert_allclose(relaxed.evaluation.forces, reference.forces, atol=1e-4, rtol=0)
+    assert np.max(abs(reference.forces)) <= 1e-4 + 1e-7
 
 
 def test_missing_executable(tmp_path):

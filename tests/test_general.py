@@ -192,7 +192,7 @@ def test_water_relaxation(tmp_path):
     assert relaxed.converged, relaxed.message
     assert relaxed.evaluation.energy < calc.evaluate(symbols, x).energy
     reference = evaluate_lammps(ff, symbols, relaxed.positions, directory=tmp_path/"relaxed")
-    # Energy minimization uses the full derivative; reference checks use fixed-charge forces.
-    fixed = calc.evaluate(symbols, relaxed.positions)
-    report = comparison(fixed, reference, len(x))
+    assert relaxed.evaluation.full_derivative is False
+    assert np.max(abs(reference.forces)) <= 1e-5 + 1e-7
+    report = comparison(relaxed.evaluation, reference, len(x))
     assert report["passed"], report

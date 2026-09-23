@@ -3,7 +3,7 @@
 A small NumPy + Autograd ReaxFF calculator for **neutral, isolated molecules
 and clusters**, targeting roughly 1–200 atoms. Elements and interactions come
 from a standard ReaxFF parameter file. It computes energies, charges, forces,
-bond properties, and dipoles, and optionally relaxes geometries using SciPy.
+bond properties, and dipoles, and relaxes geometries using fixed-charge forces.
 No LAMMPS installation is required for calculations; `lmp_mpi` is used for
 independent verification.
 
@@ -11,11 +11,10 @@ independent verification.
 
 ```sh
 python -m pip install .
-python -m pip install '.[relax]'  # optional geometry optimization
 ```
 
 Python 3.10 or newer is required. The core dependencies are NumPy and HIPS
-Autograd; SciPy is only imported when relaxation is requested.
+Autograd, including for relaxation. No SciPy dependency is needed.
 
 Source parameter files live in `data/` at the repository root. Distributions
 bundle them as package data so `ForceField.bundled(name)` also works outside
@@ -47,7 +46,7 @@ print(result.bond_orders)  # symmetric (N, N) corrected bond-order matrix
 full = calc.evaluate(symbols, positions, full_derivative=True)
 print(full.forces)
 
-# Energy minimization uses charge-response forces, the full energy derivative.
+# Relaxation uses fixed-charge forces, with QEq at each geometry.
 relaxed = calc.relax(symbols, positions, force_tolerance=1e-4, max_iterations=500)
 print(relaxed.converged, relaxed.message)
 print(relaxed.positions)
@@ -112,9 +111,18 @@ for its reported energy. For a ZnO dimer at 1.9 Å, the force difference is
 approximately 0.038 kcal/mol/Å. A geometry stationary under charge-response
 forces can have nonzero fixed-charge forces.
 
-`relax()` remains an energy minimizer: it explicitly uses the full derivative
-and returns an evaluation with `full_derivative=True`. To compare forces at
-the relaxed geometry with LAMMPS, call `evaluate(symbols, relaxed.positions)`.
+`relax()` always uses fixed-charge forces and returns an evaluation with
+`full_derivative=False`. At each geometry it equilibrates charges, computes
+fixed-charge forces, and updates positions with the FIRE optimizer (damped
+fictitious dynamics). It does not differentiate through QEq or perform an
+energy line search. Convergence requires the largest absolute Cartesian force
+component to be below `force_tolerance`; reaching `max_iterations` does not
+imply convergence. Reported energies need not decrease at every step.
+
+This uses the same force convention as LAMMPS, but does not promise the same
+optimization trajectory or local minimum. The FIRE algorithm is described in
+[Bitzek et al., Phys. Rev. Lett. 97, 170201 (2006)](https://doi.org/10.1103/PhysRevLett.97.170201).
+See the [fixed-charge relaxation results](validation/relaxation-fixed-charge/summary.json).
 
 The [single-point QEq audit](validation/qeq-audit/README.md) verifies that
 `run 0` equilibrates charges and compares LAMMPS forces against finite

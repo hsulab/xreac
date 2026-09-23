@@ -4,6 +4,36 @@ Verified locally on September 22, 2026 with LAMMPS 22 Jul 2025, Update 4,
 invoked through `/opt/homebrew/bin/lmp_mpi`. The force-field checksums and
 original citations are recorded in [NOTICE](../NOTICE).
 
+## Fixed-charge relaxation (0.3.1)
+
+`relax()` now uses FIRE with fixed-charge forces throughout, including its
+returned evaluation. Charges are re-equilibrated at every geometry, and no
+derivative through QEq is taken. FIRE needs no SciPy dependency. Convergence
+is assessed using the largest absolute Cartesian force component.
+
+**86 tests pass**, including a guard against differentiating the QEq solve
+during relaxation, iteration-limit reporting, already-converged geometries,
+and reference checks of the final forces. The retained September 23, 2026
+[relaxation results](relaxation-fixed-charge/summary.json) all pass:
+
+| System | FIRE iterations | Maximum force (kcal/mol/Å) | Requested tolerance |
+| --- | ---: | ---: | ---: |
+| ZnO dimer | 85 | 6.454e-6 | 1e-5 |
+| 20-atom Zn/O cluster | 209 | 8.903e-5 | 1e-4 |
+| Water monomer | 85 | 8.311e-6 | 1e-5 |
+
+LAMMPS single-point checks at the final geometries confirm each force
+tolerance. Maximum Python/LAMMPS force discrepancy is 2.0e-10 kcal/mol/Å.
+These checks compare forces at the Python-relaxed geometries; they do not
+assert identical optimization paths or minima from separate LAMMPS relaxations.
+The earlier full-derivative relaxation records below remain historical results.
+
+Reproduce in a new output directory:
+
+```sh
+python scripts/validate_relaxation.py --output validation/runs/relaxation-check
+```
+
 ## Force selection (0.3)
 
 The default `evaluate()` now returns fixed-charge forces, matching LAMMPS,

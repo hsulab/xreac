@@ -1,0 +1,112 @@
+{
+  "optimizer": "FIRE",
+  "full_derivative": false,
+  "force_convention": "fixed_charge",
+  "energy_units": "kcal/mol",
+  "force_units": "kcal/mol/Angstrom",
+  "cases": {
+    "zno": {
+      "maximum_absolute_errors": {
+        "energy_per_atom": 1.1368683772161603e-13,
+        "components_per_atom": 1.1191048088221578e-13,
+        "forces": 1.1102230246251565e-13,
+        "charges": 5.551115123125783e-17,
+        "dipole": 0.0,
+        "total_bond_orders": 0.0,
+        "lone_pairs": 0.0,
+        "bond_counts": 0.0
+      },
+      "limits": {
+        "energy_per_atom": 1e-05,
+        "components_per_atom": 1e-05,
+        "forces": 0.0001,
+        "charges": 1e-06,
+        "dipole": 1e-06,
+        "total_bond_orders": 1e-08,
+        "lone_pairs": 1e-08,
+        "bond_counts": 0
+      },
+      "passed": true,
+      "iterations": 85,
+      "converged": true,
+      "message": "Fixed-charge force tolerance reached",
+      "force_tolerance": 1e-05,
+      "max_iterations": 500,
+      "initial_energy": -55.38374348670503,
+      "final_energy": -71.9768037456475,
+      "max_force": 6.453990306631852e-06,
+      "reference_max_force": 6.453990195609549e-06,
+      "reference_version": "LAMMPS (22 Jul 2025 - Update 4)",
+      "force_field_sha256": "b5af5a65573ce60f32405a973e33f7cc89a90bc69e624a8ca89811eb67b1a07b"
+    },
+    "cluster20": {
+      "maximum_absolute_errors": {
+        "energy_per_atom": 1.5916157281026243e-13,
+        "components_per_atom": 1.4222223398974165e-11,
+        "forces": 1.9918999782930769e-10,
+        "charges": 4.029665490179468e-12,
+        "dipole": 6.113110018191037e-12,
+        "total_bond_orders": 8.881784197001252e-16,
+        "lone_pairs": 3.618915179919496e-25,
+        "bond_counts": 0.0
+      },
+      "limits": {
+        "energy_per_atom": 1e-05,
+        "components_per_atom": 1e-05,
+        "forces": 0.0001,
+        "charges": 1e-06,
+        "dipole": 1e-06,
+        "total_bond_orders": 1e-08,
+        "lone_pairs": 1e-08,
+        "bond_counts": 0
+      },
+      "passed": true,
+      "iterations": 209,
+      "converged": true,
+      "message": "Fixed-charge force tolerance reached",
+      "force_tolerance": 0.0001,
+      "max_iterations": 500,
+      "initial_energy": -1298.4251483304529,
+      "final_energy": -1415.4585193941828,
+      "max_force": 8.90283630461397e-05,
+      "reference_max_force": 8.902836649582468e-05,
+      "reference_version": "LAMMPS (22 Jul 2025 - Update 4)",
+      "force_field_sha256": "b5af5a65573ce60f32405a973e33f7cc89a90bc69e624a8ca89811eb67b1a07b"
+    },
+    "water_monomer": {
+      "maximum_absolute_errors": {
+        "energy_per_atom": 2.842170943040401e-14,
+        "components_per_atom": 2.3684757858670007e-14,
+        "forces": 1.5148854393132183e-10,
+        "charges": 1.6844303729612875e-12,
+        "dipole": 1.9669266215771586e-12,
+        "total_bond_orders": 0.0,
+        "lone_pairs": 0.0,
+        "bond_counts": 0.0
+      },
+      "limits": {
+        "energy_per_atom": 1e-05,
+        "components_per_atom": 1e-05,
+        "forces": 0.0001,
+        "charges": 1e-06,
+        "dipole": 1e-06,
+        "total_bond_orders": 1e-08,
+        "lone_pairs": 1e-08,
+        "bond_counts": 0
+      },
+      "passed": true,
+      "iterations": 85,
+      "converged": true,
+      "message": "Fixed-charge force tolerance reached",
+      "force_tolerance": 1e-05,
+      "max_iterations": 500,
+      "initial_energy": -248.34420920633704,
+      "final_energy": -248.92723449566265,
+      "max_force": 8.31111853116795e-06,
+      "reference_max_force": 8.311089948698225e-06,
+      "reference_version": "LAMMPS (22 Jul 2025 - Update 4)",
+      "force_field_sha256": "526dea2d55d748caed94734139dda66064e194f74f46eee9b0f511eead38b7d1"
+    }
+  },
+  "passed": true
+}
