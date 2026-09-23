@@ -1,0 +1,135 @@
+{
+  "scope": "Primitive LAMMPS representation diagnostic; supercells are the reference",
+  "energy_units": "kcal/mol",
+  "force_units": "kcal/mol/Angstrom",
+  "charge_units": "e",
+  "lammps_qeq_restriction": "https://docs.lammps.org/fix_qeq_reaxff.html#restrictions",
+  "python": "3.10.13 | packaged by conda-forge | (main, Dec 23 2023, 15:35:25) [Clang 16.0.6 ]",
+  "cases": {
+    "water_4A": {
+      "primitive_atoms": 3,
+      "cell": [
+        [
+          4.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          4.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          4.0
+        ]
+      ],
+      "repeats": [
+        3,
+        3,
+        3
+      ],
+      "expanded_atoms": 81,
+      "force_field_sha256": "526dea2d55d748caed94734139dda66064e194f74f46eee9b0f511eead38b7d1",
+      "python_primitive_status": "supported",
+      "explicit_image_qeq": {
+        "charges": [
+          -0.6478117735200312,
+          0.32434668175524634,
+          0.32346509176478483
+        ],
+        "coupling": [
+          [
+            2.0113901734394366,
+            2.822970803786196,
+            2.822024321847271
+          ],
+          [
+            2.8229708037861982,
+            2.0041505116740543,
+            2.6432797028574666
+          ],
+          [
+            2.8220243218472714,
+            2.643279702857466,
+            2.0041505116740543
+          ]
+        ],
+        "qeq_self_image_diagonal": [
+          28.96401849752789,
+          28.859767368106382,
+          28.859767368106382
+        ],
+        "self_images_within_nonbonded_cutoff": [
+          80,
+          80,
+          80
+        ],
+        "maximum_images_per_atom_pair": 80,
+        "maximum_bond_candidate_images_per_atom_pair": 8,
+        "self_images_within_bond_cutoff": [
+          6,
+          6,
+          6
+        ],
+        "maximum_active_bond_images_per_atom_pair": 1,
+        "maximum_integer_shift_within_nonbonded_cutoff": 3
+      },
+      "supercell_python_lammps": {
+        "maximum_absolute_errors": {
+          "energy_per_atom": 4.244308608273665e-12,
+          "components_per_atom": 7.040162691501555e-12,
+          "forces": 5.126565838509123e-12,
+          "charges": 6.861178292183467e-14,
+          "dipole": 9.130474154517287e-13,
+          "total_bond_orders": 1.1102230246251565e-15,
+          "lone_pairs": 7.599721877830942e-24,
+          "bond_counts": 0.0
+        },
+        "limits": {
+          "energy_per_atom": 1e-05,
+          "components_per_atom": 1e-05,
+          "forces": 0.0001,
+          "charges": 1e-06,
+          "dipole": 1e-06,
+          "total_bond_orders": 1e-08,
+          "lone_pairs": 1e-08,
+          "bond_counts": 0
+        },
+        "passed": true
+      },
+      "explicit_qeq_supercell_charge_difference": 6.394884621840902e-14,
+      "reference_version": "LAMMPS (22 Jul 2025 - Update 4)",
+      "primitive_lammps_status": "completed",
+      "primitive_vs_supercell": {
+        "energy_difference_per_primitive_cell": 0.3700520183020899,
+        "component_differences_per_primitive_cell": {
+          "bond": 0.0,
+          "atom": -5.329070518200751e-15,
+          "lone_pair": 1.6543612251060553e-24,
+          "molecule": 0.0,
+          "angle": -1.9095836023552692e-14,
+          "penalty": 0.0,
+          "angle_conjugation": 0.0,
+          "hydrogen_bond": 0.37005201831144147,
+          "torsion": 0.0,
+          "conjugation": 0.0,
+          "vdw": 3.197442310920451e-13,
+          "coulomb": 2.2026824808563106e-12,
+          "electric_field": 0.0,
+          "qeq": -1.1652900866465643e-12
+        },
+        "max_forces_difference": 1.052413361595944,
+        "max_charges_difference": 6.5503158452884236e-15,
+        "max_total_bond_orders_difference": 1.1102230246251565e-15,
+        "max_lone_pairs_difference": 7.599721877830942e-24,
+        "max_bond_counts_difference": 0.0,
+        "consistent": false
+      },
+      "explicit_qeq_primitive_charge_difference": 6.561418075534675e-14
+    }
+  },
+  "supported_supercells_passed": true,
+  "explicit_qeq_supercells_passed": true
+}

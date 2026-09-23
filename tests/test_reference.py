@@ -1,49 +1,17 @@
+import json
+
+from ase import Atoms
 import numpy as np
 import pytest
 
-from xreac import Calculator, ForceField
-from xreac.reference import evaluate_lammps
 from cases import CASES
+from validate import validation_cases, backend_differences
+from water_cluster import comparison
+from xreac import Calculator, ForceField
+from xreac.ase import ReaxFFCalculator
+from xreac.reference import evaluate_lammps
 
 pytestmark = pytest.mark.reference
-
-
-@pytest.mark.parametrize("name", list(CASES))
-def test_reference(name, tmp_path):
-    ff = ForceField.bundled("ffield.reax.ZnOH.2010")
-    symbols, x = CASES[name]
-    actual = Calculator(ff).evaluate(symbols, x)
-    reference = evaluate_lammps(ff, symbols, x, directory=tmp_path / name)
-    n = len(symbols)
-    assert actual.energy == pytest.approx(reference.energy, abs=1e-5 * n)
-    for term in actual.components:
-        assert actual.components[term] == pytest.approx(reference.components[term], abs=1e-5 * n), term
-    np.testing.assert_allclose(actual.charges, reference.charges, atol=1e-6, rtol=0)
-    np.testing.assert_allclose(actual.forces, reference.forces, atol=1e-4, rtol=0)
-
-
-@pytest.mark.parametrize("distance", [1.5, 2.5, 3.0, 3.5, 4.0, 4.9999, 5.0001, 9.999, 10.0, 10.001])
-def test_stretch_and_cutoffs(distance, tmp_path):
-    ff = ForceField.bundled("ffield.reax.ZnOH.2010")
-    symbols, x = ["Zn", "O"], [[0, 0, 0], [distance, 0, 0]]
-    actual = Calculator(ff).evaluate(symbols, x)
-    reference = evaluate_lammps(ff, symbols, x, directory=tmp_path / "scan")
-    assert actual.energy == pytest.approx(reference.energy, abs=2e-5)
-    np.testing.assert_allclose(actual.forces, reference.forces, atol=1e-4, rtol=0)
-
-
-@pytest.mark.parametrize("name", ["zno", "cluster20"])
-def test_reference_relaxed_geometry(name, tmp_path):
-    ff = ForceField.bundled("ffield.reax.ZnOH.2010")
-    calc = Calculator(ff)
-    symbols, x = CASES[name]
-    relaxed = calc.relax(symbols, x)
-    assert relaxed.converged
-    reference = evaluate_lammps(ff, symbols, relaxed.positions, directory=tmp_path / "relaxed")
-    assert relaxed.evaluation.energy == pytest.approx(reference.energy, abs=1e-5 * len(symbols))
-    assert relaxed.evaluation.full_derivative is False
-    np.testing.assert_allclose(relaxed.evaluation.forces, reference.forces, atol=1e-4, rtol=0)
-    assert np.max(abs(reference.forces)) <= 1e-4 + 1e-7
 
 
 def test_missing_executable(tmp_path):
@@ -56,7 +24,7 @@ def test_missing_executable(tmp_path):
         )
 
 
-@pytest.mark.parametrize("name", ["monomer", "dimer"])
+@pytest.mark.parametrize("name", ["monomer"])
 def test_lammps_reequilibrated_energy_derivative(name, tmp_path):
     """Differentiate LAMMPS energies, with fresh QEq at each displacement."""
     from water_cluster import water_cases
@@ -76,3 +44,44 @@ def test_lammps_reequilibrated_energy_derivative(name, tmp_path):
     assert numerical_force == pytest.approx(full.forces[0, 1], abs=1e-6, rel=0)
     assert reference.forces[0, 1] == pytest.approx(actual.forces[0, 1], abs=1e-8, rel=0)
     assert abs(numerical_force - reference.forces[0, 1]) > 0.1
+
+
+@pytest.mark.parametrize("name", validation_cases())
+def test_system_reference(name, case_results, tmp_path):
+    filename, symbols, x, cell, pbc = validation_cases()[name]
+    results = case_results(name)
+    reference = evaluate_lammps(results.force_field, symbols, x, cell=cell, pbc=pbc, directory=tmp_path / name)
+    for actual in (results.native, results.ase):
+        report = comparison(actual, reference, len(x))
+        assert report["passed"], report
+    if name.startswith("small_"):
+        metadata = json.loads((reference.directory / "metadata.json").read_text())
+        assert metadata["within_validated_cell_limits"] is True
+        assert metadata["energy_divisor"] == np.prod(reference.cell_repetitions)
+        assert metadata["input_atoms"] == len(x)
+        assert np.loadtxt(reference.directory / "energy.txt")[0] / metadata["energy_divisor"] == reference.energy
+    if name == "small_water_4A":
+        assert results.native.components["hydrogen_bond"] == pytest.approx(-0.3700520183, abs=1e-9)
+    if name == "carbon_dimer":
+        assert results.native.components["lone_pair"] > 50  # C2 correction
+    if name == "periodic_carbon_chain":
+        assert abs(results.native.components["torsion"]) > 0.1
+    if name == "small_zinc_chain":
+        assert results.native.bond_counts.tolist() == [2]
+        assert results.native.bond_orders[0, 0] > 1.0
+        assert results.native.total_bond_orders[0] == results.native.bond_orders[0, 0]
+        np.testing.assert_allclose(results.native.forces, 0, atol=1e-12)
+
+
+@pytest.mark.parametrize("distance", [4.9999, 5.0, 5.0001, 9.9999, 10.0, 10.0001])
+def test_cutoff_perturbations(distance, tmp_path):
+    ff = ForceField.bundled("ffield.reax.ZnOH.2010")
+    symbols, x = CASES["zno"]
+    x = np.array(x, dtype=float)
+    x[1, 0] = distance
+    native = Calculator(ff).evaluate(symbols, x)
+    atoms = Atoms(symbols, positions=x, calculator=ReaxFFCalculator(ff))
+    atoms.get_forces()
+    assert backend_differences(native, atoms.calc.evaluation, len(x))["passed"]
+    reference = evaluate_lammps(ff, symbols, x, directory=tmp_path / "cutoff")
+    assert comparison(native, reference, len(x))["passed"]

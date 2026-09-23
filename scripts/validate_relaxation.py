@@ -28,8 +28,7 @@ def main():
         args.output = ROOT / "validation" / "runs" / f"relaxation-{args.backend}"
     args.output.mkdir(parents=True, exist_ok=False)
     cases = [
-        ("zno", ForceField.bundled("ffield.reax.ZnOH.2010"), (["Zn", "O"], [[0, 0, 0], [2.3, 0.1, 0.2]]), 1e-5),
-        ("cluster20", ForceField.bundled("ffield.reax.ZnOH.2010"), CASES["cluster20"], 1e-4),
+        ("zno", ForceField.bundled("ffield.reax.ZnOH.2010"), CASES["zno"], 1e-5),
         ("water_monomer", ForceField.bundled("ffield.reax.HO.2015"), water_cases()["monomer"], 1e-5),
     ]
     report = {

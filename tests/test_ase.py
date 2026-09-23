@@ -12,7 +12,6 @@ from ase.units import kcal, mol
 from water_cluster import water_cases
 from xreac import Calculator, ForceField
 from xreac.ase import ReaxFFCalculator
-from xreac.reference import evaluate_lammps
 
 
 @pytest.fixture
@@ -121,18 +120,6 @@ def test_ase_optimizers_and_constraints(atoms, optimizer_class, monkeypatch):
     np.testing.assert_array_equal(atoms.positions[0], oxygen)
     assert np.max(np.linalg.norm(atoms.get_forces(), axis=1)) < 1e-5
     assert atoms.calc.evaluation.full_derivative is False
-
-
-@pytest.mark.reference
-def test_ase_lammps_reference(tmp_path):
-    ff = ForceField.bundled("ffield.reax.HO.2015")
-    symbols, positions = water_cases()["dimer"]
-    atoms = Atoms(symbols, positions=positions, calculator=ReaxFFCalculator(ff))
-    reference = evaluate_lammps(ff, symbols, positions, directory=tmp_path / "lammps")
-    assert atoms.get_potential_energy() == pytest.approx(reference.energy * kcal / mol, abs=1e-8)
-    np.testing.assert_allclose(atoms.get_forces(), reference.forces * kcal / mol, atol=1e-8, rtol=0)
-    np.testing.assert_allclose(atoms.get_charges(), reference.charges, atol=1e-9, rtol=0)
-    np.testing.assert_allclose(atoms.get_dipole_moment(), reference.dipole, atol=1e-9, rtol=0)
 
 
 def test_native_backend_does_not_import_ase():

@@ -1,6 +1,6 @@
 """Calculate water clusters and optionally verify energies, forces, and properties.
 
-Run: python examples/water_cluster.py --verify --output validation/water
+Run: python examples/water_cluster.py --verify --output validation/runs/water
 The output directory must not already exist. LAMMPS is only needed with --verify.
 """
 
@@ -30,33 +30,10 @@ def water_cases():
             [0.97 * np.cos(half), -0.97 * np.sin(half), 0.0],
         ]
     ) + [2.85, 0.15, 0.12]
-    cases = {"monomer": (["O", "H", "H"], monomer), "dimer": (["O", "H", "H"] * 2, np.vstack((monomer, acceptor)))}
-    distorted = cases["dimer"][1].copy()
+    distorted = np.vstack((monomer, acceptor))
     distorted[1] += [0.09, 0.04, -0.02]
     distorted[4] += [-0.04, 0.03, 0.06]
-    cases["distorted_dimer"] = (cases["dimer"][0], distorted)
-    for n, name in ((3, "trimer"), (6, "hexamer")):
-        phi = np.arange(n) * 2 * np.pi / n
-        radius = 2.85 / (2 * np.sin(np.pi / n))
-        oxygens = np.column_stack((radius * np.cos(phi), radius * np.sin(phi), 0.1 * np.cos(2 * phi)))
-        positions = []
-        for i in range(n):
-            direction = oxygens[(i + 1) % n] - oxygens[i]
-            direction /= np.linalg.norm(direction)
-            transverse = np.cross(direction, [0.0, 0.0, 1.0])
-            transverse /= np.linalg.norm(transverse)
-            # Tilt the donor O-H bond away from exact O-H...O collinearity:
-            # weak intermolecular bonds otherwise activate singular dihedrals.
-            tilt = np.deg2rad(4.0)
-            direction, transverse = (
-                np.cos(tilt) * direction + np.sin(tilt) * transverse,
-                -np.sin(tilt) * direction + np.cos(tilt) * transverse,
-            )
-            angle = np.deg2rad(104.5)
-            second = np.cos(angle) * direction + np.sin(angle) * transverse
-            positions.extend((oxygens[i], oxygens[i] + 0.97 * direction, oxygens[i] + 0.97 * second))
-        cases[name] = (["O", "H", "H"] * n, np.array(positions))
-    return cases
+    return {"monomer": (["O", "H", "H"], monomer), "distorted_dimer": (["O", "H", "H"] * 2, distorted)}
 
 
 def serialize(result):

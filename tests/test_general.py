@@ -5,15 +5,14 @@ from xreac import Calculator, ForceField
 from xreac.reference import evaluate_lammps
 from water_cluster import comparison, water_cases
 
+from validate import validation_cases
+
 WATER = water_cases()
+
 CARBON = {
-    "methane": (
-        ["C"] + ["H"] * 4,
-        np.vstack(([0, 0, 0], 0.63 * np.array([[1, 1, 1], [1, -1, -1], [-1, 1, -1], [-1, -1, 1]]))),
-    ),
-    "carbon_monoxide": (["C", "O"], [[0, 0, 0], [1.15, 0, 0]]),
-    "carbon_dimer": (["C", "C"], [[0, 0, 0], [1.2, 0, 0]]),
-    "carbon_torsion": (["C"] * 4, [[0, 0, 0], [1.5, 0.1, 0], [2.3, 1.2, 0.2], [3.7, 0.9, 0.8]]),
+    name: (symbols, x)
+    for name, (filename, symbols, x, cell, pbc) in validation_cases().items()
+    if filename == "ffield.reax.CHO.2008" and cell is None
 }
 
 
@@ -117,32 +116,6 @@ def test_water_symmetries():
     np.testing.assert_allclose(permuted.bond_orders, result.bond_orders[np.ix_(order, order)], atol=1e-13)
 
 
-@pytest.mark.reference
-@pytest.mark.parametrize("name", WATER)
-def test_water_reference(name, tmp_path):
-    ff = ForceField.bundled("ffield.reax.HO.2015")
-    symbols, x = WATER[name]
-    actual = Calculator(ff).evaluate(symbols, x)
-    reference = evaluate_lammps(ff, symbols, x, directory=tmp_path / name)
-    report = comparison(actual, reference, len(x))
-    assert report["passed"], report
-
-
-@pytest.mark.reference
-@pytest.mark.parametrize("name", CARBON)
-def test_carbon_reference(name, tmp_path):
-    ff = ForceField.bundled("ffield.reax.CHO.2008")
-    symbols, x = CARBON[name]
-    actual = Calculator(ff).evaluate(symbols, x)
-    reference = evaluate_lammps(ff, symbols, x, directory=tmp_path / name)
-    report = comparison(actual, reference, len(x))
-    assert report["passed"], report
-    if name == "carbon_dimer":
-        assert actual.components["lone_pair"] > 50  # exercises the C2 correction
-    if name == "carbon_torsion":
-        assert abs(actual.components["torsion"]) > 0.1
-
-
 @pytest.mark.parametrize("name", CARBON)
 def test_carbon_gradients(name):
     symbols, x = CARBON[name]
@@ -184,7 +157,7 @@ def test_inner_wall_variants(shield, neighbor_backend, tmp_path):
     # These synthetic files test the equations against LAMMPS, not physical models.
     ff = altered_water_file(tmp_path / "core.ff", {9: 15.0 if shield else 0.0, 29: 0.8, 30: 0.2, 31: 3.0})
     assert ff.vdw_type == (3 if shield else 2)
-    symbols, x = WATER["dimer"]
+    symbols, x = WATER["distorted_dimer"]
     neighbors = None
     if neighbor_backend == "ase":
         from ase import Atoms

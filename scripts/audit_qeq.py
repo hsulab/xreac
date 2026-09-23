@@ -55,7 +55,7 @@ def control(baseline, directory, *, repeat=False):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--output", type=Path, default=ROOT / "validation/qeq-audit")
+    parser.add_argument("--output", type=Path, default=ROOT / "validation/runs/water/qeq-audit")
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=False)
     ff = ForceField.bundled("ffield.reax.HO.2015")
@@ -69,7 +69,7 @@ def main():
         "qeq_tolerance": 1e-12,
         "cases": {},
     }
-    for name in ("monomer", "dimer"):
+    for name in ("monomer",):
         symbols, x = water_cases()[name]
         directory = args.output / name
         actual = calc.evaluate(symbols, x, full_derivative=True)

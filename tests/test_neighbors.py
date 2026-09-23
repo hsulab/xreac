@@ -11,21 +11,24 @@ from ase import Atoms
 from ase.neighborlist import neighbor_list
 from autograd import grad
 
-from validate_neighbors import neighbor_cases, backend_differences
+from validate import validation_cases, backend_differences
 from xreac import Calculator, ForceField
 from xreac.ase import ReaxFFCalculator
 from xreac.neighbors import Neighbors, scatter_sum, replicated_neighbors
 from xreac.energy import EnergyModel
 
-CASES = neighbor_cases()
+CASES = validation_cases()
 
 
 @pytest.fixture(scope="module")
 def archived_results():
     # Preserve an independent regression target from before model unification.
-    path = Path(__file__).resolve().parents[1] / "validation/ase-neighbors/results.json.gz"
-    with gzip.open(path, "rt") as stream:
-        return json.load(stream)
+    root = Path(__file__).resolve().parents[1] / "validation"
+    results = {}
+    for system in ("water", "zno", "cho"):
+        with gzip.open(root / system / "baseline.json.gz", "rt") as stream:
+            results.update(json.load(stream))
+    return results
 
 
 def build_neighbors(symbols, x, cell, pbc, cutoff):
@@ -33,7 +36,7 @@ def build_neighbors(symbols, x, cell, pbc, cutoff):
 
 
 @pytest.mark.parametrize("name", CASES)
-def test_neighbor_backends(name, archived_results):
+def test_neighbor_backends(name, archived_results, case_results):
     filename, symbols, x, cell, pbc = CASES[name]
     ff = ForceField.bundled(filename)
     native_list, _ = replicated_neighbors(x, ff.general[12], cell, pbc)
@@ -42,10 +45,8 @@ def test_neighbor_backends(name, archived_results):
     ase_edges = Neighbors(ase_list, len(x), cell, pbc)
     for key in ("i", "j", "shifts"):
         np.testing.assert_array_equal(getattr(native_edges, key), getattr(ase_edges, key))
-    expected = Calculator(ff).evaluate(symbols, x, cell=cell, pbc=pbc)
-    atoms = Atoms(symbols, positions=x, cell=cell, pbc=pbc, calculator=ReaxFFCalculator(ff))
-    atoms.get_forces()
-    actual = atoms.calc.evaluation
+    expected = case_results(name).native
+    actual = case_results(name).ase
     assert actual.neighbor_backend == "ase"
     assert actual.cell_repetitions == (1, 1, 1)
     report = backend_differences(actual, expected, len(x))
@@ -53,7 +54,7 @@ def test_neighbor_backends(name, archived_results):
     archived = SimpleNamespace(
         **{
             key: np.asarray(value) if isinstance(value, list) else value
-            for key, value in archived_results[name]["replicated"].items()
+            for key, value in archived_results[name].items()
         }
     )
     report = backend_differences(expected, archived, len(x))
@@ -177,7 +178,7 @@ def test_invalid_neighbor_backend(bad):
         ReaxFFCalculator(ff, neighbor_backend=bad)
 
 
-@pytest.mark.parametrize("name", ["small_triclinic_water", "small_partial_pbc_water", "periodic_carbon_chain"])
+@pytest.mark.parametrize("name", ["small_partial_pbc_water", "periodic_carbon_chain"])
 def test_neighbor_symmetries(name):
     filename, symbols, x, cell, pbc = CASES[name]
     calc = Calculator(ForceField.bundled(filename))

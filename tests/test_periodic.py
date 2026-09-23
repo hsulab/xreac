@@ -8,7 +8,6 @@ from water_cluster import comparison, water_cases
 from xreac import Calculator, ForceField
 from xreac.ase import ReaxFFCalculator
 from xreac.energy import EnergyModel
-from xreac.geometry import Boundary
 from xreac.neighbors import replicated_neighbors
 from xreac.reference import evaluate_lammps
 
@@ -20,27 +19,7 @@ def calc():
     return Calculator(ForceField.bundled("ffield.reax.HO.2015"))
 
 
-@pytest.mark.reference
-@pytest.mark.parametrize("name", CASES)
-def test_periodic_reference(calc, name, tmp_path):
-    symbols, x, cell, pbc = CASES[name]
-    actual = calc.evaluate(symbols, x, cell=cell, pbc=pbc)
-    ref = evaluate_lammps(calc.force_field, symbols, x, cell=cell, pbc=pbc, directory=tmp_path / name)
-    report = comparison(actual, ref, len(x))
-    assert report["passed"], report
-    if name == "multiple_images":
-        boundary = Boundary(cell, pbc)
-        distances = np.linalg.norm(boundary.image_displacements(x), axis=-1)
-        # Both acceptor images contribute HB; more than one image also enters QEq/vdW.
-        assert np.count_nonzero(distances[:, 1, 3] < 7.5) == 2
-        isolated = calc.evaluate(symbols, x)
-        assert abs(actual.energy - isolated.energy) > 0.01
-    if name == "bulk_water_192":
-        assert actual.components["hydrogen_bond"] < -10
-        assert abs(actual.components["torsion"]) > 0.01
-
-
-@pytest.mark.parametrize("name", ["boundary_dimer", "triclinic_water", "partial_pbc_water"])
+@pytest.mark.parametrize("name", ["partial_pbc_water"])
 def test_wrapping_translation_rotation_and_permutation(calc, name):
     symbols, x, cell, pbc = CASES[name]
     original = calc.evaluate(symbols, x, cell=cell, pbc=pbc)
@@ -67,7 +46,7 @@ def test_wrapping_translation_rotation_and_permutation(calc, name):
 
 
 def test_supercell_extensivity(calc):
-    symbols, x, cell, pbc = CASES["multiple_images"]
+    symbols, x, cell, pbc = CASES["boundary_dimer"]
     original = calc.evaluate(symbols, x, cell=cell)
     supercell = cell.copy()
     supercell[0] *= 2
@@ -80,7 +59,7 @@ def test_supercell_extensivity(calc):
 
 
 @pytest.mark.parametrize("full_derivative", [False, True])
-@pytest.mark.parametrize("name", ["boundary_dimer", "multiple_images", "triclinic_water"])
+@pytest.mark.parametrize("name", ["boundary_dimer"])
 def test_periodic_derivative(calc, name, full_derivative):
     symbols, x, cell, pbc = CASES[name]
     result = calc.evaluate(symbols, x, cell=cell, pbc=pbc, full_derivative=full_derivative)
@@ -129,7 +108,7 @@ def test_periodic_input_semantics(calc):
 
 
 def test_ase_cell_and_pbc_cache(calc, monkeypatch):
-    symbols, x, cell, pbc = CASES["multiple_images"]
+    symbols, x, cell, pbc = CASES["boundary_dimer"]
     atoms = Atoms(symbols, positions=x, cell=cell, pbc=pbc, calculator=ReaxFFCalculator(calc.force_field))
     calls = []
     evaluate = atoms.calc.core.evaluate
@@ -174,25 +153,6 @@ def test_periodic_relaxation(calc, backend, tmp_path, monkeypatch):
     report = comparison(relaxed.evaluation, ref, len(x))
     assert report["passed"], report
     assert np.max(abs(ref.forces)) < 1.01e-5
-
-
-@pytest.mark.reference
-@pytest.mark.parametrize(
-    "ffield,symbols,x",
-    [
-        ("ffield.reax.CHO.2008", ["C"] * 4, [[0, 0, 0], [1.5, 0.1, 0], [2.3, 1.2, 0.2], [3.7, 0.9, 0.8]]),
-        ("ffield.reax.ZnOH.2010", ["Zn", "O"], [[0.0, 0, 0], [1.9, 0.1, 0.2]]),
-    ],
-)
-def test_other_force_fields(ffield, symbols, x, tmp_path):
-    ff = ForceField.bundled(ffield)
-    x = (np.asarray(x) + [11.5, 11.5, 11.5]) % 12
-    result = Calculator(ff).evaluate(symbols, x, cell=[12.0] * 3)
-    ref = evaluate_lammps(ff, symbols, x, cell=[12.0] * 3, directory=tmp_path / "reference")
-    report = comparison(result, ref, len(x))
-    assert report["passed"], report
-    if ffield.endswith("cho"):
-        assert abs(result.components["torsion"]) > 0.1
 
 
 @pytest.mark.reference

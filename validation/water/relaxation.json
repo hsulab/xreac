@@ -1,0 +1,100 @@
+{
+  "ase": {
+    "optimizer": "FIRE",
+    "backend": "ase",
+    "python": "3.10.13 | packaged by conda-forge | (main, Dec 23 2023, 15:35:25) [Clang 16.0.6 ]",
+    "numpy": "2.0.2",
+    "autograd": "1.9.1",
+    "ase": "3.27.0",
+    "full_derivative": false,
+    "force_convention": "fixed_charge",
+    "energy_units": "kcal/mol",
+    "force_units": "kcal/mol/Angstrom",
+    "cases": {
+      "water_monomer": {
+        "maximum_absolute_errors": {
+          "energy_per_atom": 3.789561257387201e-14,
+          "components_per_atom": 5.684341886080802e-14,
+          "forces": 7.416289804496046e-14,
+          "charges": 2.220446049250313e-16,
+          "dipole": 1.6653345369377348e-16,
+          "total_bond_orders": 0.0,
+          "lone_pairs": 0.0,
+          "bond_counts": 0.0
+        },
+        "limits": {
+          "energy_per_atom": 1e-05,
+          "components_per_atom": 1e-05,
+          "forces": 0.0001,
+          "charges": 1e-06,
+          "dipole": 1e-06,
+          "total_bond_orders": 1e-08,
+          "lone_pairs": 1e-08,
+          "bond_counts": 0
+        },
+        "passed": true,
+        "iterations": 75,
+        "converged": true,
+        "message": "Fixed-charge force tolerance reached",
+        "force_tolerance": 1e-05,
+        "max_iterations": 500,
+        "initial_energy": -248.34420920633704,
+        "final_energy": -248.92723449312913,
+        "max_force": 2.8033646337632945e-06,
+        "reference_max_force": 2.8033647079261925e-06,
+        "reference_version": "LAMMPS (22 Jul 2025 - Update 4)",
+        "force_field_sha256": "526dea2d55d748caed94734139dda66064e194f74f46eee9b0f511eead38b7d1"
+      }
+    },
+    "passed": true
+  },
+  "native": {
+    "optimizer": "FIRE",
+    "backend": "native",
+    "python": "3.10.13 | packaged by conda-forge | (main, Dec 23 2023, 15:35:25) [Clang 16.0.6 ]",
+    "numpy": "2.0.2",
+    "autograd": "1.9.1",
+    "ase": null,
+    "full_derivative": false,
+    "force_convention": "fixed_charge",
+    "energy_units": "kcal/mol",
+    "force_units": "kcal/mol/Angstrom",
+    "cases": {
+      "water_monomer": {
+        "maximum_absolute_errors": {
+          "energy_per_atom": 3.789561257387201e-14,
+          "components_per_atom": 2.842170943040401e-14,
+          "forces": 1.5144352438767328e-10,
+          "charges": 1.6844858841125188e-12,
+          "dipole": 1.9669543771527742e-12,
+          "total_bond_orders": 0.0,
+          "lone_pairs": 0.0,
+          "bond_counts": 0.0
+        },
+        "limits": {
+          "energy_per_atom": 1e-05,
+          "components_per_atom": 1e-05,
+          "forces": 0.0001,
+          "charges": 1e-06,
+          "dipole": 1e-06,
+          "total_bond_orders": 1e-08,
+          "lone_pairs": 1e-08,
+          "bond_counts": 0
+        },
+        "passed": true,
+        "iterations": 85,
+        "converged": true,
+        "message": "Fixed-charge force tolerance reached",
+        "force_tolerance": 1e-05,
+        "max_iterations": 500,
+        "initial_energy": -248.34420920633704,
+        "final_energy": -248.9272344956627,
+        "max_force": 8.31111850274624e-06,
+        "reference_max_force": 8.311089946477779e-06,
+        "reference_version": "LAMMPS (22 Jul 2025 - Update 4)",
+        "force_field_sha256": "526dea2d55d748caed94734139dda66064e194f74f46eee9b0f511eead38b7d1"
+      }
+    },
+    "passed": true
+  }
+}

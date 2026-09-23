@@ -54,77 +54,67 @@ python -m pytest -q -m 'not reference'
 python -m pytest -q -m reference
 ```
 
-The 0.6 implementation passed **163 tests** in the recorded run.
-This is a historical validation count, not a dynamically executed docs build.
-LAMMPS tests are not run while building documentation.
+## Results by system
 
-## Single energy model and neighbor equivalence
+The default suite reuses **16 representative structures**: six water cases,
+six Zn/O cases, and four C/H/O cases. Each structure checks both neighbor
+builders, all energy components, charges, forces, dipoles, and bond properties.
+Independent pre-consolidation baselines are retained for those same structures.
+The 192-atom water box is an optional seventeenth case.
 
-The ASE calculator defaults to ASE's image-resolved neighbor list. Native
-replication remains selectable with `neighbor_backend="replicated"`. Both supply
-`(i, j, S)` to one `EnergyModel`; all energy equations and derivatives are shared.
-Across 45 retained geometries, the builders produce identical neighbor arrays
-and **exactly identical** energies, forces, charges, dipoles, bond-order matrices,
-lone pairs, and bond counts in this run.
-All cases pass fresh LAMMPS checks, with a maximum force difference of
-**2.48e-8 kcal/mol/Å**. The complete suite passes **240 tests** in this run.
-Tests also compare against archived results from before consolidation, so
-sharing equations cannot hide a regression in those equations. The prior
-{download}`two-model summary <../validation/ase-neighbors/summary.json>` and
-{download}`numerical baseline <../validation/ase-neighbors/results.json.gz>` remain available.
-Tests verify that supplied lists trigger no neighbor search or ASE import in
-the core and that the ASE builder runs before evaluation.
+| System | Retained results | Coverage |
+| --- | --- | --- |
+| Water | {download}`summary <../validation/water/summary.json>` | Monomer, distorted dimer, boundary crossing, rotated triclinic/partial PBC, small-cell hydrogen bonds, optional bulk |
+| Zn/O | {download}`summary <../validation/zno/summary.json>` | Isolated atom, dimer, O-only many-body terms, 20-atom cluster, small cell, zinc self-image chain |
+| C/H/O | {download}`summary <../validation/cho/summary.json>` | Methane, CO, C2 correction, periodic carbon torsions |
 
-Coverage includes all three bundled force fields, molecules and clusters up
-to 200 atoms, 192-atom bulk water, small/triclinic/partially periodic cells,
-self-image bonds, hydrogen bonds, image-spanning torsions, and cutoff crossings.
-Derivative tests check both force conventions; LAMMPS comparisons use only
-fixed-charge forces. Small-cell references keep the supercell convention below.
-
-Download the {download}`comparison summary <../validation/unified-energy/summary.json>`,
-{download}`structures <../validation/unified-energy/structures.json>`, and
-{download}`full numerical results (gzipped JSON) <../validation/unified-energy/results.json.gz>`.
-The numerical results are keyed by case and then `ase`, `replicated`, or
-`reference` and can be read with `json.load(gzip.open(path, "rt"))`.
+Reproduce all cases or select a system. The output path must be new:
 
 ```sh
-python scripts/validate_neighbors.py --verify
+python scripts/validate.py --verify
+python scripts/validate.py --verify --system water --include-bulk
 ```
 
-## Small-cell verification
+Each system directory contains `structures.json`, `summary.json`, full numerical
+results in `results.json.gz`, and complete LAMMPS inputs/outputs in
+`reference.tar.gz`. The results are keyed by case and then `ase`, `replicated`,
+or `reference`. Read them with `json.load(gzip.open(path, "rt"))`.
+Fresh runs default to ignored `validation/runs/` directories. The tracked
+system folders contain the selected reproducible records.
 
-Nine retained cases cover 3.12–9 Å water cells, a water dimer, tilted and partially
-periodic cells, Zn/O, and a one-atom zinc chain with bonds to its own images.
-The maximum fixed-charge force discrepancy is **4.2e-12 kcal/mol/Å** against
-normalized LAMMPS supercells; the maximum energy discrepancy per input atom is
-**4.3e-12 kcal/mol**. Download the
-{download}`small-cell summary <../validation/small-cell-support/summary.json>`.
+Download the water {download}`structures <../validation/water/structures.json>`,
+{download}`results <../validation/water/results.json.gz>`, and
+{download}`illustrated monomer/dimer report <../validation/water/report.pdf>`.
+The {download}`water relaxation summary <../validation/water/relaxation.json>` and
+{download}`Zn/O relaxation summary <../validation/zno/relaxation.json>` compare
+ASE and native FIRE on the same monomer and dimer used by the single-point checks.
 
-The earlier primitive-cell audit found that the pinned LAMMPS hydrogen-bond
-implementation excludes donor/acceptor images sharing an original atom ID.
-At a 4 Å water cell, that omits a -0.370052 kcal/mol/cell contribution present in
-the equivalent supercell. The Python small-cell implementation includes it.
-QEq charges agreed in the audited single-rank cases; this does not supersede
-the [LAMMPS QEq small-cell restriction](https://docs.lammps.org/fix_qeq_reaxff.html#restrictions).
-Download the {download}`original diagnostic <../validation/small-cells/summary.json>`.
-
-## Other retained results
-
-- {download}`Periodic water, including 192 atoms <../validation/periodic-water/summary.json>`.
-- {download}`Water clusters with fixed-charge forces <../validation/water-fixed-charge/summary.json>`.
-- {download}`Illustrated water report (PDF) <../validation/water-fixed-charge/report.pdf>`.
-- {download}`ASE FIRE relaxation <../validation/relaxation-ase/summary.json>`.
-- {download}`Native FIRE relaxation <../validation/relaxation-native/summary.json>`.
+Cutoff tests perturb the ZnO dimer around 5 and 10 Å. Symmetry, finite-difference,
+cache, neighbor-list reuse, and relaxation tests reuse the shared structures.
+Large Zn/O clusters belong to the optional benchmark script, not the routine
+reference suite. Input validation and targeted edge-case tests remain separate.
 
 These are deterministic verification geometries, not equilibrated liquid
 snapshots or predictions of physical stability. Agreement establishes
 implementation consistency, not agreement with quantum chemistry.
 
+## Small-cell verification
+
+The shared 4 Å water cell tests interactions between multiple images of the
+same input atom. Python agrees with normalized larger LAMMPS supercells.
+The pinned LAMMPS primitive-cell implementation excludes hydrogen-bond
+acceptors sharing the donor's original atom ID. This omits a contribution of
+-0.370052 kcal/mol/cell present in the equivalent supercell. QEq charges agree.
+The retained {download}`hydrogen-bond diagnostic <../validation/water/hbond-images.json>`
+uses only this cell; the full-cell/partial-cell symmetry tests reuse the same
+small triclinic monomer. See the
+[LAMMPS QEq restriction](https://docs.lammps.org/fix_qeq_reaxff.html#restrictions).
+
 ## QEq audit
 
-The retained {download}`QEq audit <../validation/qeq-audit/summary.json>`
-compares LAMMPS forces with finite differences of its own energies, solving QEq
-again at each displaced geometry. Controls repeat QEq at fixed coordinates
-and change the initial neutral charge guess. The charge-response difference
-persists and follows the conversion-constant mismatch described in
+The {download}`QEq audit <../validation/water/qeq.json>` reuses the isolated
+monomer. It compares LAMMPS forces with finite differences of its energies,
+solving QEq again at each displaced geometry. Controls repeat QEq at fixed
+coordinates and change the initial neutral charge guess. The charge-response
+difference persists and follows the conversion-constant mismatch described in
 [force conventions](calculations.md#force-convention).

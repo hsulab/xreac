@@ -10,7 +10,7 @@ def calc():
     return Calculator(ForceField.bundled("ffield.reax.ZnOH.2010"))
 
 
-@pytest.mark.parametrize("name", ["zno", "o2", "ozno", "znozn", "o3", "o4", "cube8"])
+@pytest.mark.parametrize("name", ["zno", "o4", "cluster20"])
 def test_gradient(calc, name):
     symbols, positions = CASES[name]
     x = np.array(positions, dtype=float)
@@ -30,14 +30,14 @@ def test_gradient(calc, name):
 
 @pytest.mark.parametrize("full_derivative", [False, True])
 def test_symmetries(calc, full_derivative):
-    symbols, x = CASES["cube8"]
+    symbols, x = CASES["cluster20"]
     x = np.array(x)
     rotation, _ = np.linalg.qr(np.random.default_rng(33).normal(size=(3, 3)))
     r = calc.evaluate(symbols, x, full_derivative=full_derivative)
     moved = calc.evaluate(symbols, x @ rotation + [4.2, -3.1, 7], full_derivative=full_derivative)
     assert moved.energy == pytest.approx(r.energy, abs=1e-10)
     np.testing.assert_allclose(moved.forces, r.forces @ rotation, atol=1e-9)
-    order = [7, 3, 1, 6, 2, 5, 4, 0]
+    order = np.random.default_rng(33).permutation(len(x))
     perm = calc.evaluate([symbols[i] for i in order], x[order], full_derivative=full_derivative)
     assert perm.energy == pytest.approx(r.energy, abs=1e-10)
     np.testing.assert_allclose(perm.charges, r.charges[order], atol=1e-12)
@@ -65,7 +65,7 @@ def test_invalid_input(calc, symbols, x, kwargs):
 
 @pytest.mark.parametrize("backend", ["ase", "native"])
 def test_relaxation(calc, backend):
-    symbols, x = ["Zn", "O"], [[0, 0, 0], [2.3, 0.1, 0.2]]
+    symbols, x = CASES["zno"]
     initial = calc.evaluate(symbols, x)
     result = calc.relax(symbols, x, force_tolerance=1e-5, backend=backend)
     assert result.converged, result.message
@@ -79,7 +79,7 @@ def test_relaxation(calc, backend):
     assert short.iterations == 1
     assert short.evaluation.full_derivative is False
     assert np.max(abs(short.evaluation.forces)) > 1e-12
-    np.testing.assert_array_equal(x, [[0, 0, 0], [2.3, 0.1, 0.2]])
+    np.testing.assert_array_equal(x, [[0, 0, 0], [1.9, 0, 0]])
 
 
 @pytest.mark.parametrize("backend", ["ase", "native"])

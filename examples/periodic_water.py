@@ -42,30 +42,29 @@ def water_box(counts=(4, 4, 4), cell=None, pbc=(True, True, True)):
     return ["O", "H", "H"] * int(np.prod(counts)), positions
 
 
-def periodic_cases():
+def periodic_cases(include_bulk=False):
     cell = np.diag([12.0] * 3)
     symbols, dimer = water_cases()["distorted_dimer"]
     boundary = (dimer + [11.5, 11.6, 11.8]) % 12
-    separated = dimer.copy()
-    separated[3:] += [3.15, 0.2, 0.3]
     tilted = np.array([[12.0, 0, 0], [3.0, 12.0, 0], [1.0, 2.0, 12.0]])
     rotation, _ = np.linalg.qr(np.random.default_rng(81).normal(size=(3, 3)))
     tilted = tilted @ rotation
-    sparse_symbols, sparse = water_box((2, 2, 2), tilted)
-    _, slab = water_box((2, 2, 2), tilted, pbc=(True, True, False))
-    bulk_symbols, bulk = water_box()
-    return {
+    sparse_symbols, slab = water_box((2, 2, 2), tilted, pbc=(True, True, False))
+    cases = {
         "boundary_dimer": (symbols, boundary, cell, [True] * 3),
-        "multiple_images": (symbols, separated, cell, [True] * 3),
-        "triclinic_water": (sparse_symbols, sparse, tilted, [True] * 3),
         "partial_pbc_water": (sparse_symbols, slab, tilted, [True, True, False]),
-        "bulk_water_192": (bulk_symbols, bulk, np.diag([12.48] * 3), [True] * 3),
     }
+
+    if include_bulk:
+        bulk_symbols, bulk = water_box()
+        cases["bulk_water_192"] = (bulk_symbols, bulk, np.diag([12.48] * 3), [True] * 3)
+    return cases
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--verify", action="store_true")
+    parser.add_argument("--include-bulk", action="store_true", help="Also check the 192-atom water box")
     parser.add_argument("--executable", help="Override lmp_mpi executable")
     parser.add_argument(
         "--output",
@@ -92,7 +91,7 @@ def main():
         "reference_verified": args.verify,
         "cases": {},
     }
-    for name, (symbols, positions, cell, pbc) in periodic_cases().items():
+    for name, (symbols, positions, cell, pbc) in periodic_cases(args.include_bulk).items():
         directory = args.output / name
         directory.mkdir()
         structure = dict(symbols=symbols, positions=positions.tolist(), cell=cell.tolist(), pbc=pbc)

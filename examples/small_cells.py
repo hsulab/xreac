@@ -24,13 +24,9 @@ from xreac.reference import evaluate_lammps
 def small_cell_cases():
     water = "ffield.reax.HO.2015"
     symbols, x = water_cases()["monomer"]
-    cases = {f"water_{side:g}A": (water, symbols, x, np.diag([side] * 3), [True] * 3) for side in (9.0, 6.0, 4.0)}
+    cases = {"water_4A": (water, symbols, x, np.diag([4.0] * 3), [True] * 3)}
     rotation, _ = np.linalg.qr(np.random.default_rng(81).normal(size=(3, 3)))
-    cases["water_3.12A"] = (water, symbols, x @ rotation, np.diag([3.12] * 3), [True] * 3)
-    ds, dx = water_cases()["distorted_dimer"]
-    cases["water_dimer_6A"] = (water, ds, dx, np.diag([6.0] * 3), [True] * 3)
     tilted = np.array([[4.5, 0, 0], [1.0, 5.0, 0], [0.6, 0.4, 5.5]]) @ rotation
-    cases["triclinic_water"] = (water, symbols, x @ rotation, tilted, [True] * 3)
     cases["partial_pbc_water"] = (water, symbols, x @ rotation, tilted, [True, True, False])
     cases["zno_4A"] = (
         "ffield.reax.ZnOH.2010",

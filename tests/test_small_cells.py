@@ -72,30 +72,6 @@ def test_lammps_small_cell_hydrogen_bond_exclusion(tmp_path):
     assert metadata["within_validated_cell_limits"] is True
 
 
-@pytest.mark.reference
-@pytest.mark.parametrize("name", CASES)
-def test_supported_small_cells(name, tmp_path):
-    filename, symbols, x, cell, pbc = CASES[name]
-    ff = ForceField.bundled(filename)
-    result = Calculator(ff).evaluate(symbols, x, cell=cell, pbc=pbc)
-    ref = evaluate_lammps(ff, symbols, x, cell=cell, pbc=pbc, directory=tmp_path / name)
-    report = comparison(result, ref, len(x))
-    assert report["passed"], report
-    assert ref.cell_repetitions == result.cell_repetitions
-    metadata = json.loads((ref.directory / "metadata.json").read_text())
-    assert metadata["within_validated_cell_limits"] is True
-    assert metadata["energy_divisor"] == np.prod(result.cell_repetitions)
-    assert metadata["input_atoms"] == len(x)
-    assert np.loadtxt(ref.directory / "energy.txt")[0] / metadata["energy_divisor"] == ref.energy
-    if name == "water_4A":
-        assert result.components["hydrogen_bond"] == pytest.approx(-0.3700520183, abs=1e-9)
-    if name == "zinc_chain":
-        assert result.bond_orders[0, 0] > 1.0
-        assert result.bond_counts.tolist() == [2]
-        assert result.total_bond_orders[0] == result.bond_orders[0, 0]
-        np.testing.assert_allclose(result.forces, 0.0, atol=1e-12)
-
-
 @pytest.mark.parametrize("name", ["water_4A", "partial_pbc_water"])
 @pytest.mark.parametrize("full_derivative", [False, True])
 def test_small_cell_derivatives_and_reduced_qeq(name, full_derivative, monkeypatch):
@@ -126,9 +102,9 @@ def test_small_cell_derivatives_and_reduced_qeq(name, full_derivative, monkeypat
     assert (plus - minus) / (2 * h) == pytest.approx(-np.sum(result.forces * direction), abs=2e-5, rel=1e-6)
 
 
-@pytest.mark.parametrize("name", ["zno_4A", "triclinic_water", "partial_pbc_water"])
-def test_small_cell_symmetries(name):
-    filename, symbols, x, cell, pbc = CASES[name]
+@pytest.mark.parametrize("pbc", [[True, True, True], [True, True, False]])
+def test_small_cell_symmetries(pbc):
+    filename, symbols, x, cell, _ = CASES["partial_pbc_water"]
     calc = Calculator(ForceField.bundled(filename))
     original = calc.evaluate(symbols, x, cell=cell, pbc=pbc)
     rng = np.random.default_rng(7)
@@ -171,7 +147,8 @@ def test_small_cell_relaxation(backend, tmp_path, monkeypatch):
     from autograd.tracer import Box
     from xreac import energy
 
-    filename, symbols, x, cell, pbc = CASES["water_6A"]
+    filename, symbols, x, cell, pbc = CASES["water_4A"]
+    cell = np.diag([6.0] * 3)  # Same monomer; larger cell makes relaxation fast.
     ff = ForceField.bundled(filename)
     solve = energy.np.linalg.solve
 
@@ -200,7 +177,7 @@ def test_small_cell_relaxation(backend, tmp_path, monkeypatch):
 
 @pytest.mark.parametrize("backend", ["ase", "native"])
 def test_small_cell_relaxation_iteration_limit(backend):
-    filename, symbols, x, cell, pbc = CASES["water_6A"]
+    filename, symbols, x, cell, pbc = CASES["water_4A"]
     calc = Calculator(ForceField.bundled(filename))
     result = calc.relax(symbols, x, cell=cell, backend=backend, max_iterations=3)
     assert not result.converged and result.iterations == 3

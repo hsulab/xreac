@@ -9,7 +9,7 @@ python examples/water_cluster.py
 To also verify against the pinned `lmp_mpi` executable:
 
 ```sh
-python examples/water_cluster.py --verify --output validation/my-water-check
+python examples/water_cluster.py --verify --output validation/runs/my-water-check
 ```
 
 Choose a new output directory. The script saves structures in XYZ format,
@@ -18,11 +18,9 @@ explicit tolerances. Nonmatching reference results cause a nonzero exit status.
 The default data source is the bundled LAMMPS QEq water parameter file; it
 does not depend on the ZnOH example or on any Zn-specific calculator logic.
 
-The example includes nonoptimized monomer, dimer, distorted dimer, trimer,
-and hexamer geometries. Ring donor bonds are tilted by 4 degrees away from
-exact O-H...O collinearity to avoid undefined dihedral derivatives in weak
-intermolecular torsions. These are validation fixtures, not proposed
-equilibrium structures or benchmark predictions of water-cluster stability.
+The example uses a monomer and a distorted dimer. The same geometries support
+single-point energy, force, charge, property, symmetry, and derivative checks.
+These are unoptimized validation fixtures.
 
 Verified properties are charges, dipole vectors (e Å), per-atom total bond
 orders, lone-pair counts, and bond counts at the LAMMPS default threshold of
@@ -55,27 +53,32 @@ remains available through `backend="native"` and in the native relaxation benchm
 
 ```sh
 python examples/periodic_water.py --verify
+python examples/periodic_water.py --verify --include-bulk
 ```
 
-It covers wrapped molecules, multiple images within the interaction cutoffs,
-rotated triclinic cells, partial periodicity, and a 192-atom bulk water box.
-Structures are deterministic test fixtures, not equilibrated liquid snapshots.
-The output includes cell/PBC metadata, extended XYZ structures, fixed-charge
-results, timings, and complete LAMMPS reference runs. See
-[saved results](../validation/periodic-water/summary.json). Small periodic cells
-are replicated internally to exceed the interaction cutoffs. The dipole follows the
-supplied coordinate branch; wrapping atoms can change it.
+It covers a boundary-crossing dimer and a rotated triclinic water slab.
+The optional `--include-bulk` adds the 192-atom box. Structures are deterministic
+fixtures, not equilibrated liquid snapshots. See the
+[water results](../validation/water/README.md).
 
-`small_cells.py` demonstrates automatic replication and verification against
-normalized larger LAMMPS cells:
+`small_cells.py` demonstrates repeated images and verification against normalized
+larger LAMMPS supercells:
 
 ```sh
 python examples/small_cells.py --verify
 ```
 
-Nine cases include 3.12–9 Å water cells, a water dimer, rotated triclinic and
-partially periodic cells, Zn/O, and a one-atom zinc chain bonded to its own
-images. Results use the input cell and atom count. `cell_repetitions` records
-the internal expansion; QEq solves only for the input atoms. The default limit
-is 512 internal atoms, configurable with `max_expanded_atoms`. See the
-[retained results](../validation/small-cell-support/summary.json).
+Four cases cover the 4 Å water monomer, a small triclinic water slab, periodic
+ZnO, and a zinc atom bonded to its own images. Both neighbor builders feed one
+energy model; QEq solves for input-cell charges. The native builder uses
+replicated search cells; ASE builds image-resolved neighbors directly.
+
+The shared system validation runner combines these structures with the C/H/O
+and Zn/O checks, retaining each structure only once:
+
+```sh
+python scripts/validate.py --verify
+python scripts/validate.py --verify --system cho
+```
+
+See [validation](../validation/README.md) for the coverage and retained records.

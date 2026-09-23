@@ -117,17 +117,8 @@ def main():
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=False)
     water = ForceField.bundled("ffield.reax.HO.2015")
-    zno = ForceField.bundled("ffield.reax.ZnOH.2010")
     symbols, x = water_cases()["monomer"]
-    cases = [(f"water_{side:g}A", water, symbols, x, np.diag([side] * 3)) for side in (12.0, 9.0, 6.0, 4.0, 3.12)]
-    # Avoid a bond aligned exactly with a lattice vector, which activates an
-    # undefined collinear dihedral in the densest replicated geometry.
-    rotation, _ = np.linalg.qr(np.random.default_rng(81).normal(size=(3, 3)))
-    name, ff, labels, positions, cell = cases[-1]
-    cases[-1] = (name, ff, labels, positions @ rotation, cell)
-    ds, dx = water_cases()["distorted_dimer"]
-    cases.append(("water_dimer_6A", water, ds, dx, np.diag([6.0] * 3)))
-    cases.append(("zno_4A", zno, ["Zn", "O"], np.array([[0.0, 0, 0], [1.9, 0.1, 0.2]]), np.diag([4.0] * 3)))
+    cases = [("water_4A", water, symbols, x, np.diag([4.0] * 3))]
     report = {
         "scope": "Primitive LAMMPS representation diagnostic; supercells are the reference",
         "energy_units": "kcal/mol",

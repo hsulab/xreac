@@ -1,92 +1,182 @@
-"""Retain lmp_mpi comparisons and fail if the declared tolerances are exceeded."""
+"""Validate energies, forces, charges, and properties by chemical system."""
 
 import argparse
 from datetime import datetime, timezone
+from importlib.metadata import version
+import gzip
 import json
+import shutil
+import tarfile
 from pathlib import Path
 import sys
-
-ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / "src"))
-sys.path.insert(0, str(ROOT / "tests"))
+from time import perf_counter
 
 import numpy as np
+
+ROOT = Path(__file__).resolve().parents[1]
+for path in ("src", "examples", "tests"):
+    sys.path.insert(0, str(ROOT / path))
+
+from ase import Atoms
 from cases import CASES
-from xreac import Calculator, ForceField
+from periodic_water import periodic_cases
+from small_cells import small_cell_cases
+from water_cluster import comparison, serialize, water_cases
+from xreac import ForceField
+from xreac.ase import ReaxFFCalculator
 from xreac.reference import evaluate_lammps
+
+
+def validation_cases(include_bulk=False):
+    cases = {
+        "zno_" + name: ("ffield.reax.ZnOH.2010", s, np.asarray(x, dtype=float), None, False)
+        for name, (s, x) in CASES.items()
+    }
+    cases.update(
+        {"cluster_water_" + name: ("ffield.reax.HO.2015", s, x, None, False) for name, (s, x) in water_cases().items()}
+    )
+    carbon = {
+        "methane": (
+            ["C"] + ["H"] * 4,
+            np.vstack(([0, 0, 0], 0.63 * np.array([[1, 1, 1], [1, -1, -1], [-1, 1, -1], [-1, -1, 1]]))),
+        ),
+        "carbon_monoxide": (["C", "O"], [[0, 0, 0], [1.15, 0, 0]]),
+        "carbon_dimer": (["C", "C"], [[0, 0, 0], [1.2, 0, 0]]),
+    }
+    cases.update(
+        {name: ("ffield.reax.CHO.2008", s, np.asarray(x, dtype=float), None, False) for name, (s, x) in carbon.items()}
+    )
+    cases.update(
+        {"periodic_" + name: ("ffield.reax.HO.2015", *values) for name, values in periodic_cases(include_bulk).items()}
+    )
+    cases.update({"small_" + name: values for name, values in small_cell_cases().items()})
+    cases["periodic_carbon_chain"] = (
+        "ffield.reax.CHO.2008",
+        ["C"] * 3,
+        np.array([[0.0, 0, 0], [1.5, 0.4, 0.2], [3.0, -0.2, 0.8]]),
+        np.diag([4.5, 12.0, 12.0]),
+        [True, False, False],
+    )
+    return cases
+
+
+def backend_differences(actual, expected, atoms):
+    """Strict floating-point equivalence, independently of LAMMPS tolerances."""
+    errors = {
+        "energy_per_atom": abs(actual.energy - expected.energy) / atoms,
+        "components_per_atom": max(abs(actual.components[k] - expected.components[k]) for k in actual.components)
+        / atoms,
+    }
+    for key in ("forces", "charges", "bond_orders", "total_bond_orders", "lone_pairs", "bond_counts", "dipole"):
+        errors[key] = float(np.max(np.abs(getattr(actual, key) - getattr(expected, key))))
+    tolerances = {
+        "energy_per_atom": 1e-9,
+        "components_per_atom": 1e-9,
+        "forces": 2e-8,
+        "charges": 1e-10,
+        "bond_orders": 1e-10,
+        "total_bond_orders": 1e-10,
+        "lone_pairs": 1e-10,
+        "bond_counts": 0,
+        "dipole": 1e-9,
+    }
+    return {
+        "max_absolute_differences": errors,
+        "tolerances": tolerances,
+        "passed": all(errors[k] <= tolerance for k, tolerance in tolerances.items()),
+    }
+
+
+SYSTEMS = {
+    "ffield.reax.HO.2015": "water",
+    "ffield.reax.ZnOH.2010": "zno",
+    "ffield.reax.CHO.2008": "cho",
+}
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--verify", action="store_true", help="Also run fresh LAMMPS single points")
+    parser.add_argument("--executable", help="Override lmp_mpi executable")
+    parser.add_argument("--system", choices=tuple(SYSTEMS.values()), help="Validate one chemical system")
+    parser.add_argument("--include-bulk", action="store_true", help="Also check the 192-atom water box")
     parser.add_argument(
         "--output",
         type=Path,
         default=ROOT / "validation" / "runs" / datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ"),
     )
-    parser.add_argument("--executable", default=None)
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=False)
-    ff = ForceField.bundled("ffield.reax.ZnOH.2010")
-    calc = Calculator(ff)
-    cases = dict(CASES)
-    for r in (1.5, 2.5, 3.0, 3.5, 4.0, 4.9999, 5.0001, 9.999, 10.0, 10.001):
-        cases[f"stretch_{r}"] = (["Zn", "O"], [[0, 0, 0], [r, 0, 0]])
-    relaxed = calc.relax(["Zn", "O"], [[0, 0, 0], [2.3, 0.1, 0.2]], force_tolerance=1e-5)
-    cases["relaxed_zno"] = (["Zn", "O"], relaxed.positions)
-    symbols20, x20 = CASES["cluster20"]
-    relaxed20 = calc.relax(symbols20, x20)
-    cases["relaxed_cluster20"] = (symbols20, relaxed20.positions)
-    report = {
-        "force_field_sha256": ff.checksum,
-        "reference_version": None,
-        "energy_tolerance_per_atom": 1e-5,
-        "charge_tolerance": 1e-6,
-        "force_tolerance": 1e-4,
-        "relaxation_converged": relaxed.converged and relaxed20.converged,
-        "cluster20_relaxation_iterations": relaxed20.iterations,
-        "cluster20_relaxation_max_force": float(np.max(abs(relaxed20.evaluation.forces))),
-        "force_comparison": "fixed_charge",
-        "full_derivative": False,
-        "cases": {},
-    }
-    for name, (symbols, positions) in cases.items():
-        actual = calc.evaluate(symbols, positions)
-        ref = evaluate_lammps(ff, symbols, positions, directory=args.output / name, executable=args.executable)
-        report["reference_version"] = ref.version
-        errors = {k: abs(actual.components[k] - ref.components[k]) for k in actual.components}
-        row = {
-            "atoms": len(symbols),
-            "energy_error_per_atom": abs(actual.energy - ref.energy) / len(symbols),
-            "component_errors": errors,
-            "max_charge_error": float(np.max(abs(actual.charges - ref.charges))),
-            "max_force_error": float(np.max(abs(actual.forces - ref.forces))),
+    all_passed = True
+    cases = validation_cases(args.include_bulk)
+    for system in (args.system,) if args.system else SYSTEMS.values():
+        destination = args.output / system
+        destination.mkdir()
+        summary = {
+            "created_utc": datetime.now(timezone.utc).isoformat(),
+            "system": system,
+            "full_derivative": False,
+            "force_convention": "fixed_charge",
+            "reference_convention": "LAMMPS supercells normalized to input cell for small inputs",
+            "units": {"energy": "kcal/mol/input-cell", "forces": "kcal/mol/Angstrom", "charges": "e"},
+            "environment": {key: version(key) for key in ("numpy", "autograd", "ase")},
+            "python": sys.version,
+            "reference_verified": args.verify,
+            "cases": {},
         }
-        row["passed"] = bool(
-            row["energy_error_per_atom"] <= 1e-5
-            and max(errors.values()) / len(symbols) <= 1e-5
-            and row["max_charge_error"] <= 1e-6
-            and row["max_force_error"] <= 1e-4
-        )
-        report["cases"][name] = row
-        (args.output / name / "python.json").write_text(
-            json.dumps(
-                {
-                    "energy": actual.energy,
-                    "components": actual.components,
-                    "charges": actual.charges.tolist(),
-                    "forces": actual.forces.tolist(),
-                    "full_derivative": actual.full_derivative,
-                    "force_convention": actual.force_convention,
-                },
-                indent=2,
+        structures, numerical = {}, {}
+        for name, (filename, symbols, x, cell, pbc) in cases.items():
+            if SYSTEMS[filename] != system:
+                continue
+            ff = ForceField.bundled(filename)
+            structures[name] = dict(
+                symbols=symbols, positions=x.tolist(), cell=None if cell is None else cell.tolist(), pbc=pbc
             )
-            + "\n"
-        )
-        print(f"{name}: {'PASS' if row['passed'] else 'FAIL'}, force error {row['max_force_error']:.3g}", flush=True)
-    report["passed"] = bool(report["relaxation_converged"] and all(row["passed"] for row in report["cases"].values()))
-    (args.output / "summary.json").write_text(json.dumps(report, indent=2) + "\n")
-    print(f"Report: {args.output / 'summary.json'}")
-    if not report["passed"]:
+            results, timings = {}, {}
+            atoms = Atoms(symbols, positions=x, cell=cell, pbc=pbc)
+            for backend in ("replicated", "ase"):
+                atoms.calc = ReaxFFCalculator(ff, neighbor_backend=backend)
+                start = perf_counter()
+                atoms.get_forces()
+                timings[backend] = perf_counter() - start
+                results[backend] = atoms.calc.evaluation
+            numerical[name] = {backend: serialize(result) for backend, result in results.items()}
+            row = {
+                "atoms": len(x),
+                "force_field": filename,
+                "force_field_sha256": ff.checksum,
+                "optional": name == "periodic_bulk_water_192",
+                "energy": results["ase"].energy,
+                "evaluation_seconds": timings,
+                "backend_comparison": backend_differences(results["ase"], results["replicated"], len(x)),
+            }
+            row["passed"] = row["backend_comparison"]["passed"]
+            if args.verify:
+                ref = evaluate_lammps(
+                    ff,
+                    symbols,
+                    x,
+                    cell=cell,
+                    pbc=pbc,
+                    directory=destination / "reference" / name,
+                    executable=args.executable,
+                )
+                numerical[name]["reference"] = serialize(ref)
+                row["lammps_comparison"] = comparison(results["ase"], ref, len(x))
+                row["reference_version"] = ref.version
+                row["passed"] &= row["lammps_comparison"]["passed"]
+            summary["cases"][name] = row
+            print(f"{system}/{name}: {'PASS' if row['passed'] else 'FAIL'}", flush=True)
+        summary["passed"] = all(row["passed"] for row in summary["cases"].values())
+        all_passed &= summary["passed"]
+        for filename, data in (("summary.json", summary), ("structures.json", structures)):
+            (destination / filename).write_text(json.dumps(data, indent=2) + "\n")
+        (destination / "results.json.gz").write_bytes(gzip.compress(json.dumps(numerical).encode(), mtime=0))
+        if args.verify:
+            with tarfile.open(destination / "reference.tar.gz", "w:gz") as archive:
+                archive.add(destination / "reference", arcname="reference")
+            shutil.rmtree(destination / "reference")
+    if not all_passed:
         raise SystemExit(1)
 
 

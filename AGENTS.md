@@ -40,3 +40,13 @@ python -m ruff format --check .
 
 Run the formatting check before committing Python changes. Generated documentation
 under `docs/_build` is excluded.
+
+## Validation records
+
+Organize retained results by system under `validation/water`, `validation/zno`,
+and `validation/cho`. Reuse the shared cases in `scripts/validate.py` across
+energy, force, charge, property, and neighbor checks. Add a new structure only
+when an existing one cannot exercise the required behavior. Keep large-system
+performance checks optional. Fresh runs belong in ignored `validation/runs/`;
+retain compact summaries, structures, numerical results, and archived raw inputs
+and outputs instead of duplicate feature-specific result trees.

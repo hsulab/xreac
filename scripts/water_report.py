@@ -5,6 +5,7 @@ Install the optional ASE extra, then run python scripts/water_report.py.
 
 import argparse
 import csv
+import gzip
 import json
 import os
 from pathlib import Path
@@ -34,37 +35,22 @@ plt.rcParams.update(
 )
 
 
-def read_case(source, name):
-    directory = source / name
-    lines = (directory / "structure.xyz").read_text().splitlines()
-    atoms = [line.split() for line in lines[2:] if line.strip()]
-    symbols = [row[0] for row in atoms]
-    xyz = np.array([[float(v) for v in row[1:4]] for row in atoms])
-    actual = json.loads((directory / "python.json").read_text())
-    reference = json.loads((directory / "reference.json").read_text())
-    assert len(atoms) == int(lines[0])
-    # Read archived v0.2 results as well as the single-force-array v0.3 schema.
-    if "lammps_forces" in actual:
-        delta = np.asarray(actual["lammps_forces"]) - reference["forces"]
-        full_delta = np.asarray(actual["forces"]) - reference["forces"]
-    elif actual.get("full_derivative") is False:
-        delta = np.asarray(actual["forces"]) - reference["forces"]
-        full_delta = None
-    else:
+def read_case(name, structure_data, result_data):
+    symbols = structure_data["symbols"]
+    xyz = np.asarray(structure_data["positions"])
+    actual, reference = result_data["ase"], result_data["reference"]
+    if actual.get("full_derivative") is not False:
         raise ValueError("Reference report requires fixed-charge forces")
+    delta = np.asarray(actual["forces"]) - reference["forces"]
     assert delta.shape == xyz.shape
     values = {
         "case": name,
-        "atoms": len(atoms),
+        "atoms": len(symbols),
         "python_energy_kcal_mol": actual["energy"],
         "lammps_energy_kcal_mol": reference["energy"],
         "delta_energy_kcal_mol": actual["energy"] - reference["energy"],
         "max_force_component_error_kcal_mol_A": float(np.max(abs(delta))),
         "rms_force_component_error_kcal_mol_A": float(np.sqrt(np.mean(delta**2))),
-        "max_charge_response_difference_kcal_mol_A": None if full_delta is None else float(np.max(abs(full_delta))),
-        "rms_charge_response_difference_kcal_mol_A": None
-        if full_delta is None
-        else float(np.sqrt(np.mean(full_delta**2))),
     }
     assert all(np.isfinite(v) for k, v in values.items() if k != "case" and v is not None)
     return dict(
@@ -74,13 +60,8 @@ def read_case(source, name):
         actual=actual,
         reference=reference,
         delta=delta,
-        full_delta=full_delta,
         values=values,
     )
-
-
-def optional_number(value, precision=3):
-    return "Not evaluated" if value is None else f"{value:.{precision}e}"
 
 
 def page(title, subtitle, number):
@@ -148,11 +129,11 @@ def structure(ax, case, side=False, labels=True):
 def overview(pdf, cases, summary):
     fig = page(
         "Water clusters | Python vs LAMMPS",
-        "Five isolated, neutral, unoptimized geometries · single-point energies and forces",
+        f"{len(cases)} isolated, neutral, unoptimized geometries · single-point energies and forces",
         1,
     )
     for i, case in enumerate(cases):
-        ax = fig.add_axes([0.045 + i * 0.184, 0.65, 0.18, 0.225])
+        ax = fig.add_axes([0.055 + i * 0.89 / len(cases), 0.65, 0.85 / len(cases), 0.225])
         structure(ax, case, labels=False)
         ax.set_title(case["name"].replace("_", " ").title(), fontsize=10)
     fig.text(0.055, 0.627, "TOTAL ENERGIES   /   kcal/mol; ΔE = Python − LAMMPS", fontsize=10, weight="bold")
@@ -176,24 +157,22 @@ def overview(pdf, cases, summary):
     table(
         fig,
         [0.055, 0.187, 0.89, 0.185],
-        ["Structure", "Fixed-charge max |ΔF|", "Fixed-charge RMS ΔF", "Charge-response max |ΔF|"],
+        ["Structure", "Fixed-charge max |ΔF|", "Fixed-charge RMS ΔF"],
         [
             [
                 c["name"].replace("_", " "),
                 f"{c['values']['max_force_component_error_kcal_mol_A']:.3e}",
                 f"{c['values']['rms_force_component_error_kcal_mol_A']:.3e}",
-                optional_number(c["values"]["max_charge_response_difference_kcal_mol_A"]),
             ]
             for c in cases
         ],
-        [0.25, 0.23, 0.23, 0.29],
+        [0.34, 0.33, 0.33],
     )
     fig.text(
         0.055,
         0.15,
         "Fixed-charge forces: QEq at each structure; charges held constant only during differentiation (default).\n"
-        "Charge-response forces: full derivative through QEq (optional). All differences subtract LAMMPS forces.\n"
-        "RMS averages all 3N components. Force conventions differ because 14.4 × 23.02 ≠ 332.06371 in the reference.",
+        "All differences subtract LAMMPS forces. RMS averages all 3N Cartesian components.",
         fontsize=8.5,
         linespacing=1.5,
         va="top",
@@ -231,8 +210,6 @@ def detail(pdf, case, number):
             ["ΔE (kcal/mol)", f"{v['delta_energy_kcal_mol']:+.6e}"],
             ["Fixed-charge max |ΔF|", f"{v['max_force_component_error_kcal_mol_A']:.6e}"],
             ["Fixed-charge RMS ΔF", f"{v['rms_force_component_error_kcal_mol_A']:.6e}"],
-            ["Charge-response max |ΔF|", optional_number(v["max_charge_response_difference_kcal_mol_A"], 6)],
-            ["Charge-response RMS ΔF", optional_number(v["rms_charge_response_difference_kcal_mol_A"], 6)],
         ],
         [0.54, 0.46],
         size=8.5,
@@ -254,15 +231,6 @@ def detail(pdf, case, number):
         color=BLUE,
         label="Fixed-charge forces",
     )
-    if case["full_delta"] is not None:
-        ax.semilogy(
-            indices,
-            np.maximum(np.max(abs(case["full_delta"]), axis=1), floor),
-            "s-",
-            ms=4,
-            color=RED,
-            label="Charge-response forces",
-        )
     ax.set_xticks(indices)
     ax.tick_params(axis="x", labelsize=7)
     ax.set_xlabel("Atom index (XYZ order)")
@@ -283,13 +251,24 @@ def detail(pdf, case, number):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--input", type=Path, default=ROOT / "validation/water-fixed-charge")
-    parser.add_argument("--output", type=Path, default=ROOT / "validation/water-fixed-charge/report.pdf")
+    parser.add_argument("--input", type=Path, default=ROOT / "validation/water")
+    parser.add_argument("--output", type=Path, default=ROOT / "validation/water/report.pdf")
     args = parser.parse_args()
     summary = json.loads((args.input / "summary.json").read_text())
     if not summary.get("reference_verified"):
         parser.error("Input must contain verified LAMMPS reference results")
-    cases = [read_case(args.input, name) for name in summary["cases"]]
+    structures = json.loads((args.input / "structures.json").read_text())
+    with gzip.open(args.input / "results.json.gz", "rt") as stream:
+        results = json.load(stream)
+    cases = [
+        read_case(name.removeprefix("cluster_water_"), structures[name], results[name])
+        for name in summary["cases"]
+        if structures[name]["cell"] is None
+    ]
+    if not cases:
+        parser.error("Input contains no isolated water structures")
+    first = next(iter(summary["cases"].values()))
+    summary["force_field"], summary["sha256"] = first["force_field"], first["force_field_sha256"]
     args.output.parent.mkdir(parents=True, exist_ok=True)
     with PdfPages(
         args.output,

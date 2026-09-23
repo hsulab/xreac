@@ -1,6 +1,6 @@
 {
-  "created_utc": "2026-09-23T20:35:55.412364+00:00",
-  "system": "water",
+  "created_utc": "2026-09-23T20:35:58.715546+00:00",
+  "system": "zno",
   "full_derivative": false,
   "force_convention": "fixed_charge",
   "reference_convention": "LAMMPS supercells normalized to input cell for small inputs",
@@ -17,15 +17,15 @@
   "python": "3.10.13 | packaged by conda-forge | (main, Dec 23 2023, 15:35:25) [Clang 16.0.6 ]",
   "reference_verified": true,
   "cases": {
-    "cluster_water_monomer": {
-      "atoms": 3,
-      "force_field": "ffield.reax.HO.2015",
-      "force_field_sha256": "526dea2d55d748caed94734139dda66064e194f74f46eee9b0f511eead38b7d1",
+    "zno_zn_atom": {
+      "atoms": 1,
+      "force_field": "ffield.reax.ZnOH.2010",
+      "force_field_sha256": "b5af5a65573ce60f32405a973e33f7cc89a90bc69e624a8ca89811eb67b1a07b",
       "optional": false,
-      "energy": -248.34420920633704,
+      "energy": -0.0005219319065470322,
       "evaluation_seconds": {
-        "replicated": 0.006691625341773033,
-        "ase": 0.0064872922375798225
+        "replicated": 0.00340195931494236,
+        "ase": 0.003427875228226185
       },
       "backend_comparison": {
         "max_absolute_differences": {
@@ -55,11 +55,11 @@
       "passed": true,
       "lammps_comparison": {
         "maximum_absolute_errors": {
-          "energy_per_atom": 4.7369515717340014e-14,
-          "components_per_atom": 3.315866100213801e-14,
-          "forces": 4.085620730620576e-14,
-          "charges": 5.551115123125783e-17,
-          "dipole": 5.551115123125783e-17,
+          "energy_per_atom": 1.1828645701816853e-16,
+          "components_per_atom": 1.1822343752136487e-16,
+          "forces": 0.0,
+          "charges": 2.540028510601375e-18,
+          "dipole": 0.0,
           "total_bond_orders": 0.0,
           "lone_pairs": 0.0,
           "bond_counts": 0.0
@@ -78,15 +78,15 @@
       },
       "reference_version": "LAMMPS (22 Jul 2025 - Update 4)"
     },
-    "cluster_water_distorted_dimer": {
-      "atoms": 6,
-      "force_field": "ffield.reax.HO.2015",
-      "force_field_sha256": "526dea2d55d748caed94734139dda66064e194f74f46eee9b0f511eead38b7d1",
+    "zno_zno": {
+      "atoms": 2,
+      "force_field": "ffield.reax.ZnOH.2010",
+      "force_field_sha256": "b5af5a65573ce60f32405a973e33f7cc89a90bc69e624a8ca89811eb67b1a07b",
       "optional": false,
-      "energy": -498.80720305169757,
+      "energy": -71.97569446369215,
       "evaluation_seconds": {
-        "replicated": 0.007440624758601189,
-        "ase": 0.007027542218565941
+        "replicated": 0.003498166799545288,
+        "ase": 0.0032167918980121613
       },
       "backend_comparison": {
         "max_absolute_differences": {
@@ -116,11 +116,11 @@
       "passed": true,
       "lammps_comparison": {
         "maximum_absolute_errors": {
-          "energy_per_atom": 5.684341886080802e-14,
-          "components_per_atom": 2.1789977229976407e-13,
-          "forces": 4.241051954068098e-13,
-          "charges": 4.551914400963142e-15,
-          "dipole": 1.27675647831893e-15,
+          "energy_per_atom": 9.947598300641403e-14,
+          "components_per_atom": 1.1723955140041653e-13,
+          "forces": 1.2778667013435552e-13,
+          "charges": 1.1102230246251565e-16,
+          "dipole": 2.220446049250313e-16,
           "total_bond_orders": 0.0,
           "lone_pairs": 0.0,
           "bond_counts": 0.0
@@ -139,15 +139,15 @@
       },
       "reference_version": "LAMMPS (22 Jul 2025 - Update 4)"
     },
-    "periodic_boundary_dimer": {
-      "atoms": 6,
-      "force_field": "ffield.reax.HO.2015",
-      "force_field_sha256": "526dea2d55d748caed94734139dda66064e194f74f46eee9b0f511eead38b7d1",
+    "zno_o4": {
+      "atoms": 4,
+      "force_field": "ffield.reax.ZnOH.2010",
+      "force_field_sha256": "b5af5a65573ce60f32405a973e33f7cc89a90bc69e624a8ca89811eb67b1a07b",
       "optional": false,
-      "energy": -498.8271972077392,
+      "energy": -105.05982123985245,
       "evaluation_seconds": {
-        "replicated": 0.009286916814744473,
-        "ase": 0.011848374269902706
+        "replicated": 0.006692375056445599,
+        "ase": 0.006038791500031948
       },
       "backend_comparison": {
         "max_absolute_differences": {
@@ -177,13 +177,13 @@
       "passed": true,
       "lammps_comparison": {
         "maximum_absolute_errors": {
-          "energy_per_atom": 6.631732200427602e-14,
-          "components_per_atom": 3.836930773104541e-13,
-          "forces": 1.588063014423824e-12,
-          "charges": 9.43689570931383e-15,
-          "dipole": 9.325873406851315e-14,
-          "total_bond_orders": 9.992007221626409e-16,
-          "lone_pairs": 1.0288058868628282e-23,
+          "energy_per_atom": 1.7763568394002505e-14,
+          "components_per_atom": 4.481261362358282e-15,
+          "forces": 4.973799150320701e-13,
+          "charges": 5.463857371215803e-16,
+          "dipole": 4.919639700307851e-16,
+          "total_bond_orders": 0.0,
+          "lone_pairs": 0.0,
           "bond_counts": 0.0
         },
         "limits": {
@@ -200,15 +200,15 @@
       },
       "reference_version": "LAMMPS (22 Jul 2025 - Update 4)"
     },
-    "periodic_partial_pbc_water": {
-      "atoms": 24,
-      "force_field": "ffield.reax.HO.2015",
-      "force_field_sha256": "526dea2d55d748caed94734139dda66064e194f74f46eee9b0f511eead38b7d1",
+    "zno_cluster20": {
+      "atoms": 20,
+      "force_field": "ffield.reax.ZnOH.2010",
+      "force_field_sha256": "b5af5a65573ce60f32405a973e33f7cc89a90bc69e624a8ca89811eb67b1a07b",
       "optional": false,
-      "energy": -1989.4034156743717,
+      "energy": -1298.4251483304529,
       "evaluation_seconds": {
-        "replicated": 0.015005916357040405,
-        "ase": 0.016741332598030567
+        "replicated": 0.014432542026042938,
+        "ase": 0.01436375081539154
       },
       "backend_comparison": {
         "max_absolute_differences": {
@@ -238,13 +238,13 @@
       "passed": true,
       "lammps_comparison": {
         "maximum_absolute_errors": {
-          "energy_per_atom": 9.473903143468003e-14,
-          "components_per_atom": 2.0565475248683167e-11,
-          "forces": 3.8344349917451837e-10,
-          "charges": 4.332534331297211e-12,
-          "dipole": 2.574918056552633e-11,
-          "total_bond_orders": 3.552713678800501e-15,
-          "lone_pairs": 2.4660322011737138e-23,
+          "energy_per_atom": 2.955857780762017e-13,
+          "components_per_atom": 1.3301360013429075e-12,
+          "forces": 1.5051515589448172e-10,
+          "charges": 4.317102231254921e-12,
+          "dipole": 2.605339555206143e-12,
+          "total_bond_orders": 4.440892098500626e-16,
+          "lone_pairs": 3.75547988439051e-43,
           "bond_counts": 0.0
         },
         "limits": {
@@ -261,15 +261,15 @@
       },
       "reference_version": "LAMMPS (22 Jul 2025 - Update 4)"
     },
-    "periodic_bulk_water_192": {
-      "atoms": 192,
-      "force_field": "ffield.reax.HO.2015",
-      "force_field_sha256": "526dea2d55d748caed94734139dda66064e194f74f46eee9b0f511eead38b7d1",
-      "optional": true,
-      "energy": -16017.18929617071,
+    "small_zno_4A": {
+      "atoms": 2,
+      "force_field": "ffield.reax.ZnOH.2010",
+      "force_field_sha256": "b5af5a65573ce60f32405a973e33f7cc89a90bc69e624a8ca89811eb67b1a07b",
+      "optional": false,
+      "energy": -120.3770696188065,
       "evaluation_seconds": {
-        "replicated": 0.7275268752127886,
-        "ase": 1.0726189175620675
+        "replicated": 0.008156625553965569,
+        "ase": 0.01457200013101101
       },
       "backend_comparison": {
         "max_absolute_differences": {
@@ -299,13 +299,13 @@
       "passed": true,
       "lammps_comparison": {
         "maximum_absolute_errors": {
-          "energy_per_atom": 2.5674277518798285e-12,
-          "components_per_atom": 9.563905223330949e-12,
-          "forces": 7.940732515976379e-10,
-          "charges": 1.1340817174243512e-11,
-          "dipole": 1.6910917111090384e-10,
-          "total_bond_orders": 2.9976021664879227e-15,
-          "lone_pairs": 1.8042877111312916e-23,
+          "energy_per_atom": 1.0018652574217413e-12,
+          "components_per_atom": 9.265477274311706e-12,
+          "forces": 8.597567102697212e-13,
+          "charges": 5.706546346573305e-14,
+          "dipole": 1.0835776720341528e-13,
+          "total_bond_orders": 2.220446049250313e-16,
+          "lone_pairs": 4.440892098500626e-16,
           "bond_counts": 0.0
         },
         "limits": {
@@ -322,15 +322,15 @@
       },
       "reference_version": "LAMMPS (22 Jul 2025 - Update 4)"
     },
-    "small_water_4A": {
-      "atoms": 3,
-      "force_field": "ffield.reax.HO.2015",
-      "force_field_sha256": "526dea2d55d748caed94734139dda66064e194f74f46eee9b0f511eead38b7d1",
+    "small_zinc_chain": {
+      "atoms": 1,
+      "force_field": "ffield.reax.ZnOH.2010",
+      "force_field_sha256": "b5af5a65573ce60f32405a973e33f7cc89a90bc69e624a8ca89811eb67b1a07b",
       "optional": false,
-      "energy": -251.22311472078988,
+      "energy": -10.868673983099141,
       "evaluation_seconds": {
-        "replicated": 0.011572707444429398,
-        "ase": 0.025512750260531902
+        "replicated": 0.003893165849149227,
+        "ase": 0.003606041893362999
       },
       "backend_comparison": {
         "max_absolute_differences": {
@@ -360,74 +360,13 @@
       "passed": true,
       "lammps_comparison": {
         "maximum_absolute_errors": {
-          "energy_per_atom": 4.282204220847537e-12,
-          "components_per_atom": 6.674364764573208e-12,
-          "forces": 4.371614181764016e-12,
-          "charges": 6.150635556423367e-14,
-          "dipole": 2.892130979148533e-14,
-          "total_bond_orders": 1.1102230246251565e-15,
-          "lone_pairs": 1.3322676295501878e-15,
-          "bond_counts": 0.0
-        },
-        "limits": {
-          "energy_per_atom": 1e-05,
-          "components_per_atom": 1e-05,
-          "forces": 0.0001,
-          "charges": 1e-06,
-          "dipole": 1e-06,
-          "total_bond_orders": 1e-08,
-          "lone_pairs": 1e-08,
-          "bond_counts": 0
-        },
-        "passed": true
-      },
-      "reference_version": "LAMMPS (22 Jul 2025 - Update 4)"
-    },
-    "small_partial_pbc_water": {
-      "atoms": 3,
-      "force_field": "ffield.reax.HO.2015",
-      "force_field_sha256": "526dea2d55d748caed94734139dda66064e194f74f46eee9b0f511eead38b7d1",
-      "optional": false,
-      "energy": -249.96935024135647,
-      "evaluation_seconds": {
-        "replicated": 0.006694749929010868,
-        "ase": 0.0072663333266973495
-      },
-      "backend_comparison": {
-        "max_absolute_differences": {
-          "energy_per_atom": 0.0,
-          "components_per_atom": 0.0,
-          "forces": 0.0,
-          "charges": 0.0,
-          "bond_orders": 0.0,
+          "energy_per_atom": 5.329070518200751e-15,
+          "components_per_atom": 5.329070518200751e-15,
+          "forces": 8.090824452262752e-16,
+          "charges": 5.2983586259006494e-18,
+          "dipole": 0.0,
           "total_bond_orders": 0.0,
-          "lone_pairs": 0.0,
-          "bond_counts": 0.0,
-          "dipole": 0.0
-        },
-        "tolerances": {
-          "energy_per_atom": 1e-09,
-          "components_per_atom": 1e-09,
-          "forces": 2e-08,
-          "charges": 1e-10,
-          "bond_orders": 1e-10,
-          "total_bond_orders": 1e-10,
-          "lone_pairs": 1e-10,
-          "bond_counts": 0,
-          "dipole": 1e-09
-        },
-        "passed": true
-      },
-      "passed": true,
-      "lammps_comparison": {
-        "maximum_absolute_errors": {
-          "energy_per_atom": 4.452734477429961e-13,
-          "components_per_atom": 2.0368891758456206e-13,
-          "forces": 2.611244553918368e-13,
-          "charges": 1.887379141862766e-15,
-          "dipole": 7.771561172376096e-16,
-          "total_bond_orders": 3.3306690738754696e-16,
-          "lone_pairs": 1.137373342260413e-24,
+          "lone_pairs": 4.743384504624082e-20,
           "bond_counts": 0.0
         },
         "limits": {
