@@ -10,11 +10,14 @@ independent verification.
 ## Install
 
 ```sh
-python -m pip install .
+mamba run -n catorch3 python -m pip install -e '.[ase,test]'
 ```
 
-Python 3.10 or newer is required. The core dependencies are NumPy and HIPS
-Autograd, including for relaxation. No SciPy dependency is needed.
+Development uses the existing `catorch3` mamba environment; there is no local
+virtual environment. Python 3.10 or newer is required. Core calculations and
+the native FIRE optimizer need only NumPy and HIPS Autograd. ASE is an optional
+dependency for the adapter and default relaxation backend; install `.[ase]`
+or `.[relax]` to enable it. A minimal installation is `python -m pip install .`.
 
 Source parameter files live in `data/` at the repository root. Distributions
 bundle them as package data so `ForceField.bundled(name)` also works outside
@@ -46,10 +49,13 @@ print(result.bond_orders)  # symmetric (N, N) corrected bond-order matrix
 full = calc.evaluate(symbols, positions, full_derivative=True)
 print(full.forces)
 
-# Relaxation uses fixed-charge forces, with QEq at each geometry.
+# Default relaxation reuses ASE FIRE with fixed-charge forces.
 relaxed = calc.relax(symbols, positions, force_tolerance=1e-4, max_iterations=500)
 print(relaxed.converged, relaxed.message)
 print(relaxed.positions)
+
+# Keep the original NumPy FIRE implementation available for benchmarks.
+native = calc.relax(symbols, positions, backend="native")
 ```
 
 Coordinates and forces have shape `(N, 3)`; charges have shape `(N,)`.
@@ -67,11 +73,50 @@ matching the default LAMMPS bond-graph cutoff). They have shape `(N,)`.
 independent of the coordinate origin. Dummy labels such as `X` remain in
 parameter metadata; they do not denote an additional chemical element.
 
+## ASE calculator and optimizers
+
+```python
+from ase import Atoms
+from ase.optimize import FIRE  # BFGS and other ASE optimizers can also use the adapter
+from xreac import ForceField
+from xreac.ase import ReaxFFCalculator
+
+atoms = Atoms("OH2", positions=[[0, 0, 0], [0.97, 0, 0], [-0.243, 0.94, 0]])
+atoms.calc = ReaxFFCalculator(ForceField.bundled("qeq_ff.water"))
+print(atoms.get_potential_energy())  # eV
+print(atoms.get_forces())           # eV/Angstrom, fixed-charge convention
+print(atoms.get_charges())          # elementary charge
+print(atoms.get_dipole_moment())    # e Angstrom
+with FIRE(atoms, logfile="relax.log", trajectory="relax.traj") as optimizer:
+    converged = optimizer.run(fmax=1e-5, steps=500)
+```
+
+The adapter caches results and recalculates after geometry or parameter changes.
+It supports ASE position constraints, neutral initial charge guesses, and
+nonperiodic display boxes. Periodic systems, net charges, and stress are not
+supported. ASE chemical symbols must match parameter-file atom labels; use
+the core API and `backend="native"` for nonstandard labels.
+`atoms.calc.evaluation` retains the last core result, including
+bond properties, in **kcal/mol units**, while ASE energy/force methods use
+**eV units**. Single-point charge-response forces can be selected explicitly
+with `ReaxFFCalculator(ff, full_derivative=True)` or
+`atoms.calc.set(full_derivative=True)`; relaxation examples use the default False.
+
+Direct ASE optimizers stop on the largest atomic **force-vector norm** in
+eV/Angstrom. The `Calculator.relax()` convenience method retains the existing
+maximum **Cartesian component** criterion in kcal/mol/Angstrom for both backends.
+Use the adapter directly for optimizer selection, constraints, and trajectories.
+
+```sh
+mamba run -n catorch3 python examples/ase_water.py --verify
+mamba run -n catorch3 python examples/ase_water.py --optimizer BFGS --verify
+```
+
 ## Water-cluster example
 
 ```sh
-python examples/water_cluster.py
-python examples/water_cluster.py --verify --output validation/my-water-check
+mamba run -n catorch3 python examples/water_cluster.py
+mamba run -n catorch3 python examples/water_cluster.py --verify --output validation/my-water-check
 ```
 
 The example evaluates a monomer, dimer, distorted dimer, trimer, and hexamer
@@ -113,8 +158,10 @@ forces can have nonzero fixed-charge forces.
 
 `relax()` always uses fixed-charge forces and returns an evaluation with
 `full_derivative=False`. At each geometry it equilibrates charges, computes
-fixed-charge forces, and updates positions with the FIRE optimizer (damped
-fictitious dynamics). It does not differentiate through QEq or perform an
+fixed-charge forces, and updates positions with ASE FIRE (`backend="ase"`,
+the default). `backend="native"` selects our retained FIRE implementation
+without importing ASE. Both use damped fictitious dynamics, do not
+differentiate through QEq, and do not perform an
 energy line search. Convergence requires the largest absolute Cartesian force
 component to be below `force_tolerance`; reaching `max_iterations` does not
 imply convergence. Reported energies need not decrease at every step.
@@ -122,7 +169,8 @@ imply convergence. Reported energies need not decrease at every step.
 This uses the same force convention as LAMMPS, but does not promise the same
 optimization trajectory or local minimum. The FIRE algorithm is described in
 [Bitzek et al., Phys. Rev. Lett. 97, 170201 (2006)](https://doi.org/10.1103/PhysRevLett.97.170201).
-See the [fixed-charge relaxation results](validation/relaxation-fixed-charge/summary.json).
+See the [ASE relaxation results](validation/relaxation-ase-catorch3/summary.json)
+and [native FIRE results](validation/relaxation-native-catorch3/summary.json).
 
 The [single-point QEq audit](validation/qeq-audit/README.md) verifies that
 `run 0` equilibrates charges and compares LAMMPS forces against finite
@@ -133,15 +181,14 @@ charges; it is not caused by missing charge equilibration.
 ## Verify with lmp_mpi
 
 ```sh
-python -m pip install '.[test]'
-python -m pytest -q
+mamba run -n catorch3 python -m pytest -q
 ```
 
 Reference tests require `lmp_mpi` on PATH, or an explicit override:
 
 ```sh
-XREAC_LAMMPS=/opt/homebrew/bin/lmp_mpi python -m pytest -q -m reference
-python -m pytest -q -m 'not reference'  # checks without LAMMPS
+XREAC_LAMMPS=/opt/homebrew/bin/lmp_mpi mamba run -n catorch3 python -m pytest -q -m reference
+mamba run -n catorch3 python -m pytest -q -m 'not reference'  # checks without LAMMPS
 ```
 
 The reference harness invokes one MPI rank directly, without `mpirun` or
@@ -162,14 +209,18 @@ Reference tests use temporary directories. The original Zn/O regression and
 benchmark scripts remain available:
 
 ```sh
-python scripts/validate.py
-python scripts/benchmark.py
+mamba run -n catorch3 python scripts/validate.py
+mamba run -n catorch3 python scripts/benchmark.py
+# Optional timing of our retained FIRE optimizer:
+mamba run -n catorch3 python scripts/benchmark.py --relax-iterations 20 --output validation/benchmark-native-fire-catorch3.json
 ```
 
-Benchmarks compute only fixed-charge forces (`full_derivative=False`), without
-relaxation or charge-response evaluation. Results are written to
-`validation/benchmark-fixed-charge.json`; the previous benchmark is retained
-as a historical record with its original methodology.
+Benchmarks compute only fixed-charge forces (`full_derivative=False`). Default
+runs exclude relaxation; `--relax-iterations N` adds timings for **native FIRE**,
+also with fixed-charge forces. Default results go to
+`validation/benchmark-catorch3.json`. Environment metadata is recorded, and
+previous benchmarks remain historical records. Iteration-capped relaxation
+timings are not claims of convergence.
 
 Acceptance targets are 1e-5 kcal/mol/atom for total/component energy,
 1e-6 e for charges, and 1e-4 kcal/mol/Å for default fixed-charge `forces`.

@@ -1,0 +1,44 @@
+{
+  "date": "2026-09-23T05:14:23.200899+00:00",
+  "python": "3.10.13 | packaged by conda-forge | (main, Dec 23 2023, 15:35:25) [Clang 16.0.6 ]",
+  "platform": "macOS-26.6-arm64-arm-64bit",
+  "numpy": "2.0.2",
+  "autograd": "1.9.1",
+  "force_field_sha256": "b5af5a65573ce60f32405a973e33f7cc89a90bc69e624a8ca89811eb67b1a07b",
+  "environment": "catorch3",
+  "executable": "/opt/homebrew/Caskroom/miniforge/base/envs/catorch3/bin/python",
+  "full_derivative": false,
+  "force_convention": "fixed_charge",
+  "relaxation_backend": null,
+  "relaxation_max_iterations": 0,
+  "note": "Three timed repeats; fixed-charge forces only. Optional relaxation uses native FIRE. RSS includes interpreter, numerical libraries, and any requested relaxation.",
+  "results": [
+    {
+      "atoms": 20,
+      "first_evaluation_seconds": 0.01227749977260828,
+      "median_energy_seconds": 0.0028842920437455177,
+      "median_evaluation_seconds": 0.011273125186562538,
+      "full_derivative": false,
+      "force_convention": "fixed_charge",
+      "peak_process_rss_mib": 43.375
+    },
+    {
+      "atoms": 100,
+      "first_evaluation_seconds": 0.13029700051993132,
+      "median_energy_seconds": 0.04058229178190231,
+      "median_evaluation_seconds": 0.1261214166879654,
+      "full_derivative": false,
+      "force_convention": "fixed_charge",
+      "peak_process_rss_mib": 68.9375
+    },
+    {
+      "atoms": 200,
+      "first_evaluation_seconds": 0.37266862485557795,
+      "median_energy_seconds": 0.10810083337128162,
+      "median_evaluation_seconds": 0.37141745910048485,
+      "full_derivative": false,
+      "force_convention": "fixed_charge",
+      "peak_process_rss_mib": 132.28125
+    }
+  ]
+}

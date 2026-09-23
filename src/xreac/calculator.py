@@ -86,19 +86,30 @@ class Calculator:
                           dict(zip(COMPONENTS, map(float, components))), full_derivative, **properties)
 
     def relax(self, symbols, positions, *, force_tolerance=1e-4, max_iterations=500,
-              total_charge=0, cell=None):
-        """Relax with FIRE using fixed-charge forces, matching LAMMPS.
+              total_charge=0, cell=None, backend="ase"):
+        """Relax with fixed-charge forces, using ASE FIRE by default.
 
         QEq is solved at each geometry, without differentiation through the
         charge solve. Convergence requires the largest absolute Cartesian force
         component to be at most force_tolerance (kcal/mol/A). FIRE uses damped
         fictitious dynamics, not an energy line search or physical time evolution.
+        Set backend="native" to use the original NumPy FIRE implementation
+        without ASE, including for benchmarks.
         """
         symbols, x = validate_input(symbols, positions, total_charge, cell)
         if not np.isfinite(force_tolerance) or force_tolerance <= 0:
             raise ValueError("force_tolerance must be positive and finite")
         if isinstance(max_iterations, bool) or not isinstance(max_iterations, int) or max_iterations < 1:
             raise ValueError("max_iterations must be a positive integer")
+        if backend not in ("ase", "native"):
+            raise ValueError("backend must be 'ase' or 'native'")
+        if backend == "ase":
+            from .ase import relax_with_ase
+
+            x, result, converged, iterations = relax_with_ase(
+                self, symbols, x, force_tolerance, max_iterations)
+            message = "Fixed-charge force tolerance reached" if converged else "Maximum relaxation iterations reached"
+            return Relaxation(x, result, converged, iterations, message)
         # FIRE (Bitzek et al., Phys. Rev. Lett. 97, 170201, 2006).
         # Unit fictitious masses; step parameters are optimizer scales, not fs.
         velocity = np.zeros_like(x)

@@ -1,0 +1,59 @@
+{
+  "date": "2026-09-23T05:16:58.602503+00:00",
+  "python": "3.10.13 | packaged by conda-forge | (main, Dec 23 2023, 15:35:25) [Clang 16.0.6 ]",
+  "platform": "macOS-26.6-arm64-arm-64bit",
+  "numpy": "2.0.2",
+  "autograd": "1.9.1",
+  "force_field_sha256": "b5af5a65573ce60f32405a973e33f7cc89a90bc69e624a8ca89811eb67b1a07b",
+  "environment": "catorch3",
+  "executable": "/opt/homebrew/Caskroom/miniforge/base/envs/catorch3/bin/python",
+  "full_derivative": false,
+  "force_convention": "fixed_charge",
+  "relaxation_backend": "native",
+  "relaxation_max_iterations": 20,
+  "note": "Three timed repeats; fixed-charge forces only. Optional relaxation uses native FIRE. RSS includes interpreter, numerical libraries, and any requested relaxation.",
+  "results": [
+    {
+      "atoms": 20,
+      "first_evaluation_seconds": 0.013274249620735645,
+      "median_energy_seconds": 0.002903332933783531,
+      "median_evaluation_seconds": 0.011540000326931477,
+      "full_derivative": false,
+      "force_convention": "fixed_charge",
+      "relaxation_backend": "native",
+      "relaxation_seconds": 0.2415705844759941,
+      "relaxation_iterations": 20,
+      "relaxation_converged": false,
+      "relaxation_max_force": 13.728866137966614,
+      "peak_process_rss_mib": 44.78125
+    },
+    {
+      "atoms": 100,
+      "first_evaluation_seconds": 0.13576929178088903,
+      "median_energy_seconds": 0.042969709262251854,
+      "median_evaluation_seconds": 0.1252979999408126,
+      "full_derivative": false,
+      "force_convention": "fixed_charge",
+      "relaxation_backend": "native",
+      "relaxation_seconds": 2.6328802090138197,
+      "relaxation_iterations": 20,
+      "relaxation_converged": false,
+      "relaxation_max_force": 11.681451904107815,
+      "peak_process_rss_mib": 89.671875
+    },
+    {
+      "atoms": 200,
+      "first_evaluation_seconds": 0.3658760003745556,
+      "median_energy_seconds": 0.105103375390172,
+      "median_evaluation_seconds": 0.36409483291208744,
+      "full_derivative": false,
+      "force_convention": "fixed_charge",
+      "relaxation_backend": "native",
+      "relaxation_seconds": 7.829490582458675,
+      "relaxation_iterations": 20,
+      "relaxation_converged": false,
+      "relaxation_max_force": 10.461431637018938,
+      "peak_process_rss_mib": 168.421875
+    }
+  ]
+}

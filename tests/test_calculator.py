@@ -55,17 +55,18 @@ def test_invalid_input(calc, symbols, x, kwargs):
         calc.evaluate(symbols, x, **kwargs)
 
 
-def test_relaxation(calc):
+@pytest.mark.parametrize("backend", ["ase", "native"])
+def test_relaxation(calc, backend):
     symbols, x = ["Zn", "O"], [[0, 0, 0], [2.3, .1, .2]]
     initial = calc.evaluate(symbols, x)
-    result = calc.relax(symbols, x, force_tolerance=1e-5)
+    result = calc.relax(symbols, x, force_tolerance=1e-5, backend=backend)
     assert result.converged, result.message
     assert result.evaluation.full_derivative is False
     assert result.evaluation.force_convention == "fixed_charge"
     assert result.evaluation.energy < initial.energy
     assert np.max(abs(result.evaluation.forces)) <= 1e-5
     np.testing.assert_array_equal(result.evaluation.forces, calc.evaluate(symbols, result.positions).forces)
-    short = calc.relax(symbols, x, force_tolerance=1e-12, max_iterations=1)
+    short = calc.relax(symbols, x, force_tolerance=1e-12, max_iterations=1, backend=backend)
     assert not short.converged
     assert short.iterations == 1
     assert short.evaluation.full_derivative is False
@@ -73,8 +74,9 @@ def test_relaxation(calc):
     np.testing.assert_array_equal(x, [[0, 0, 0], [2.3, .1, .2]])
 
 
-def test_relaxation_already_converged(calc):
-    result = calc.relax(["Zn"], [[1., 2., 3.]], max_iterations=1)
+@pytest.mark.parametrize("backend", ["ase", "native"])
+def test_relaxation_already_converged(calc, backend):
+    result = calc.relax(["Zn"], [[1., 2., 3.]], max_iterations=1, backend=backend)
     assert result.converged and result.iterations == 0
     assert result.evaluation.full_derivative is False
     np.testing.assert_array_equal(result.positions, [[1., 2., 3.]])
@@ -83,6 +85,7 @@ def test_relaxation_already_converged(calc):
 @pytest.mark.parametrize("kwargs", [
     {"force_tolerance": 0}, {"force_tolerance": float("nan")},
     {"max_iterations": 0}, {"max_iterations": 1.5}, {"max_iterations": True},
+    {"backend": "unknown"},
 ])
 def test_invalid_relaxation_settings(calc, kwargs):
     with pytest.raises(ValueError):
@@ -101,7 +104,7 @@ def test_charge_response_is_explicit(calc):
     assert np.max(abs(full.forces-fixed.forces)) > .03
 
 
-@pytest.mark.parametrize("operation", ["evaluate", "relax"])
+@pytest.mark.parametrize("operation", ["evaluate", "relax", "relax_native"])
 def test_default_does_not_differentiate_qeq(calc, monkeypatch, operation):
     from autograd.tracer import Box
     from xreac import energy
@@ -113,8 +116,8 @@ def test_default_does_not_differentiate_qeq(calc, monkeypatch, operation):
         return original(matrix, rhs)
 
     monkeypatch.setattr(energy.np.linalg, "solve", solve_without_derivative)
-    result = getattr(calc, operation)(*CASES["zno"])
-    if operation == "relax":
+    result = calc.relax(*CASES["zno"], backend="native") if operation == "relax_native" else getattr(calc, operation)(*CASES["zno"])
+    if operation.startswith("relax"):
         assert result.converged
         result = result.evaluation
     assert np.isfinite(result.forces).all()

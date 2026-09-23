@@ -1,0 +1,50 @@
+{
+  "optimizer": "ASE BFGS",
+  "ase_version": "3.27.0",
+  "force_field_sha256": "526dea2d55d748caed94734139dda66064e194f74f46eee9b0f511eead38b7d1",
+  "full_derivative": false,
+  "force_convention": "fixed_charge",
+  "energy_units": "eV",
+  "force_units": "eV/Angstrom",
+  "initial_energy": -10.769224091134259,
+  "energy": -10.794506459592395,
+  "charges": [
+    -0.6194953170583114,
+    0.30974765638419127,
+    0.30974766067412013
+  ],
+  "dipole_e_A": [
+    0.22531877739524042,
+    0.29085128941493976,
+    -1.6583859227631594e-18
+  ],
+  "max_atomic_force_norm": 3.1322824015157834e-06,
+  "fmax": 1e-05,
+  "converged": true,
+  "steps": 6,
+  "reference": {
+    "maximum_absolute_errors": {
+      "energy_per_atom": 9.473903143468002e-15,
+      "components_per_atom": 5.684341886080802e-14,
+      "forces": 5.3235194030776256e-14,
+      "charges": 2.220446049250313e-16,
+      "dipole": 2.220446049250313e-16,
+      "total_bond_orders": 0.0,
+      "lone_pairs": 0.0,
+      "bond_counts": 0.0
+    },
+    "limits": {
+      "energy_per_atom": 1e-05,
+      "components_per_atom": 1e-05,
+      "forces": 0.0001,
+      "charges": 1e-06,
+      "dipole": 1e-06,
+      "total_bond_orders": 1e-08,
+      "lone_pairs": 1e-08,
+      "bond_counts": 0
+    },
+    "passed": true,
+    "units": "Core units: kcal/mol, kcal/mol/Angstrom, e, e Angstrom"
+  },
+  "passed": true
+}

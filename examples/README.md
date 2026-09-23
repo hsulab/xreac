@@ -3,13 +3,13 @@
 `water_cluster.py` runs entirely from the repository with NumPy and Autograd:
 
 ```sh
-python examples/water_cluster.py
+mamba run -n catorch3 python examples/water_cluster.py
 ```
 
 To also verify against the pinned `lmp_mpi` executable:
 
 ```sh
-python examples/water_cluster.py --verify --output validation/my-water-check
+mamba run -n catorch3 python examples/water_cluster.py --verify --output validation/my-water-check
 ```
 
 Choose a new output directory. The script saves structures in XYZ format,
@@ -34,3 +34,19 @@ separately by finite differences in the tests.
 
 See [saved results](../validation/water/summary.json) and the
 [package README](../README.md) for supported formats and limitations.
+
+`ase_water.py` uses the optional `ReaxFFCalculator` adapter with ASE optimizers:
+
+```sh
+mamba run -n catorch3 python examples/ase_water.py --verify
+mamba run -n catorch3 python examples/ase_water.py --optimizer BFGS --verify
+```
+
+It writes the initial/final XYZ structures, an ASE trajectory, optimizer log,
+and results in a fresh directory. ASE energies/forces and optimizer tolerance
+use eV and eV/Angstrom; the saved core `python.json` and reference comparison
+use kcal/mol and kcal/mol/Angstrom. Both optimizers use fixed-charge forces
+and equilibrate charges at every evaluated geometry.
+
+`Calculator.relax()` uses ASE FIRE by default. The original FIRE implementation
+remains available through `backend="native"` and in the native relaxation benchmark.

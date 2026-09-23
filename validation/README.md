@@ -4,6 +4,50 @@ Verified locally on September 22, 2026 with LAMMPS 22 Jul 2025, Update 4,
 invoked through `/opt/homebrew/bin/lmp_mpi`. The force-field checksums and
 original citations are recorded in [NOTICE](../NOTICE).
 
+## ASE and catorch3 (0.4)
+
+The local virtual environment was removed. Development and validation now use
+`mamba run -n catorch3`, with Python 3.10.13, NumPy 2.0.2, Autograd 1.9.1,
+and ASE 3.27.0. **102 tests pass**, including adapter units, result caching,
+parameter changes, unsupported inputs, ASE constraints, FIRE/BFGS integration,
+and both relaxation backends. Tests confirm that neither relaxation backend
+differentiates through QEq and that native FIRE does not import ASE.
+
+`ReaxFFCalculator` exposes energy (eV), forces (eV/Å), charges (e), and dipole
+(e Å) to ASE. `Calculator.relax()` reuses ASE FIRE by default; the original
+implementation remains available with `backend="native"`. The convenience
+method retains the max Cartesian component stopping criterion in kcal/mol/Å,
+while direct ASE optimizers use max atomic vector norm in eV/Å.
+
+Both backends pass final-geometry comparisons with `lmp_mpi`:
+
+| System | ASE FIRE iterations | Native FIRE iterations | Force tolerance (kcal/mol/Å) |
+| --- | ---: | ---: | ---: |
+| ZnO dimer | 76 | 85 | 1e-5 |
+| 20-atom Zn/O cluster | 205 | 209 | 1e-4 |
+| Water monomer | 75 | 85 | 1e-5 |
+
+See the retained [ASE results](relaxation-ase-catorch3/summary.json) and
+[native results](relaxation-native-catorch3/summary.json). Direct ASE examples
+also pass: [FIRE](ase-water-fire/summary.json) converges in 61 steps and
+[BFGS](ase-water-bfgs/summary.json) in 6 steps, with a 1e-5 eV/Å vector-norm
+tolerance. Their directories contain trajectories, optimizer logs, structures,
+and raw LAMMPS verification inputs/outputs.
+
+The [catorch3 calculation benchmark](benchmark-catorch3.json) records fixed-charge
+evaluations only. The [native FIRE benchmark](benchmark-native-fire-catorch3.json)
+adds 20-step relaxation timings using our retained implementation. These runs
+use a different interpreter/NumPy environment from the archived benchmarks;
+do not attribute timing differences solely to code changes. Capped relaxation
+timings do not imply convergence.
+
+```sh
+mamba run -n catorch3 python -m pytest -q
+mamba run -n catorch3 python scripts/validate_relaxation.py --backend ase --output validation/runs/ase-check
+mamba run -n catorch3 python scripts/validate_relaxation.py --backend native --output validation/runs/native-check
+mamba run -n catorch3 python examples/ase_water.py --verify
+```
+
 ## Fixed-charge relaxation (0.3.1)
 
 `relax()` now uses FIRE with fixed-charge forces throughout, including its
@@ -31,7 +75,7 @@ The earlier full-derivative relaxation records below remain historical results.
 Reproduce in a new output directory:
 
 ```sh
-python scripts/validate_relaxation.py --output validation/runs/relaxation-check
+python scripts/validate_relaxation.py --backend native --output validation/runs/relaxation-check
 ```
 
 ## Force selection (0.3)

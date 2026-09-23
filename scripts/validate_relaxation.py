@@ -1,8 +1,10 @@
 """Retain fixed-charge FIRE relaxations and verify final forces with lmp_mpi."""
 import argparse
 import json
+import os
 from pathlib import Path
 import sys
+from importlib.metadata import version
 
 import numpy as np
 
@@ -19,15 +21,22 @@ from xreac.reference import evaluate_lammps
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--output", type=Path, default=ROOT / "validation/relaxation-fixed-charge")
+    parser.add_argument("--backend", choices=("ase", "native"), default="ase")
+    parser.add_argument("--output", type=Path)
     args = parser.parse_args()
+    if args.output is None:
+        args.output = ROOT / "validation" / f"relaxation-{args.backend}-catorch3"
     args.output.mkdir(parents=True, exist_ok=False)
     cases = [
         ("zno", ForceField.zno(), (["Zn", "O"], [[0, 0, 0], [2.3, .1, .2]]), 1e-5),
         ("cluster20", ForceField.zno(), CASES["cluster20"], 1e-4),
         ("water_monomer", ForceField.bundled("qeq_ff.water"), water_cases()["monomer"], 1e-5),
     ]
-    report = {"optimizer": "FIRE", "full_derivative": False, "force_convention": "fixed_charge",
+    report = {"optimizer": "FIRE", "backend": args.backend,
+              "environment": os.environ.get("CONDA_DEFAULT_ENV"), "python": sys.version,
+              "numpy": np.__version__, "autograd": version("autograd"),
+              "ase": version("ase") if args.backend == "ase" else None,
+              "full_derivative": False, "force_convention": "fixed_charge",
               "energy_units": "kcal/mol", "force_units": "kcal/mol/Angstrom", "cases": {}}
     for name, ff, (symbols, x), tolerance in cases:
         directory = args.output / name
@@ -35,7 +44,7 @@ def main():
         (directory / "initial.json").write_text(json.dumps({"symbols": symbols, "positions": np.asarray(x).tolist()}, indent=2)+"\n")
         calculator = Calculator(ff)
         initial = calculator.evaluate(symbols, x)
-        relaxed = calculator.relax(symbols, x, force_tolerance=tolerance)
+        relaxed = calculator.relax(symbols, x, force_tolerance=tolerance, backend=args.backend)
         ref = evaluate_lammps(ff, symbols, relaxed.positions, directory=directory / "lammps")
         (directory / "python.json").write_text(json.dumps(serialize(relaxed.evaluation), indent=2)+"\n")
         (directory / "reference.json").write_text(json.dumps(serialize(ref), indent=2)+"\n")
