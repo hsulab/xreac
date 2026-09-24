@@ -137,3 +137,23 @@ python examples/cuo_surface.py
 This example also times ASE neighbors by default. Its untimed native evaluation
 checks backend agreement. `--neighbor-backend replicated` is available only
 for reproducing the older native-neighbor benchmark records.
+
+## Experimental QEq history reuse
+
+```sh
+python scripts/benchmark_water_qeq.py --steps 4000 --warmup 100
+```
+
+This experiment reruns the same bulk-water Berendsen example. It retains the
+previous two QEq solutions and an LU factorization, predicts the next solution,
+and refines against the **newly rebuilt** QEq matrix. It refactors when six
+corrections fail to reach an absolute KKT residual of `1e-12`. Charges are
+converged at every geometry; no force or charge update is skipped.
+
+Every step is also solved directly on the identical matrix, with alternating
+solver order. Charge differences must stay below `1e-10` e. Cached charges
+drive the trajectory, and three sampled states are checked against fresh
+LAMMPS calculations. The full experimental timer includes both solvers and
+verification overhead. The report separates their costs and gives an estimated
+fraction of MD time that caching could save; this is not an independently
+measured production speedup. The production calculator keeps its direct solver.
