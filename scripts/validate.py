@@ -27,7 +27,33 @@ from xreac.ase import ReaxFFCalculator
 from xreac.reference import evaluate_lammps
 
 
-def validation_cases(include_bulk=False):
+CUO_FORCE_FIELD = "ffield.reax.CuOHCl.2010"
+
+
+def cuo_surface_case():
+    """One slightly perturbed, unrelaxed 96-atom tenorite (010) slab.
+
+    Conventional C2/c cell: Yang et al., Phys. Rev. B 39, 4343 (1989),
+    doi:10.1103/PhysRevB.39.4343. ASE places c then a in the surface plane.
+    Two layers and a 2x3 surface repeat keep both periodic heights above 10 A.
+    """
+    from ase.build import surface
+    from ase.spacegroup import crystal
+
+    bulk = crystal(
+        ["Cu", "O"],
+        basis=[(0.25, 0.25, 0), (0, 0.416, 0.25)],
+        spacegroup=15,
+        cellpar=[4.6837, 3.4226, 5.1288, 90, 99.54, 90],
+    )
+    slab = surface(bulk, (0, 1, 0), layers=2, vacuum=12).repeat((2, 3, 1))
+    # Break exact geometric degeneracies without introducing another fixture.
+    slab.positions += np.random.default_rng(260923).normal(0, 0.01, slab.positions.shape)
+    slab.wrap()
+    return CUO_FORCE_FIELD, slab.get_chemical_symbols(), slab.positions, slab.cell.array, slab.pbc.tolist()
+
+
+def validation_cases(include_bulk=False, *, include_cuo=False):
     cases = {
         "zno_" + name: ("ffield.reax.ZnOH.2010", s, np.asarray(x, dtype=float), None, False)
         for name, (s, x) in CASES.items()
@@ -57,6 +83,8 @@ def validation_cases(include_bulk=False):
         np.diag([4.5, 12.0, 12.0]),
         [True, False, False],
     )
+    if include_cuo:
+        cases["surface_cuo_010"] = cuo_surface_case()
     return cases
 
 
@@ -91,6 +119,7 @@ SYSTEMS = {
     "ffield.reax.HO.2015": "water",
     "ffield.reax.ZnOH.2010": "zno",
     "ffield.reax.CHO.2008": "cho",
+    CUO_FORCE_FIELD: "cuo",
 }
 
 
@@ -101,15 +130,23 @@ def main():
     parser.add_argument("--system", choices=tuple(SYSTEMS.values()), help="Validate one chemical system")
     parser.add_argument("--include-bulk", action="store_true", help="Also check the 192-atom water box")
     parser.add_argument(
+        "--cuo-force-field", type=Path, help="Include the CuO slab using an external Cu/O parameter file"
+    )
+    parser.add_argument(
         "--output",
         type=Path,
         default=ROOT / "validation" / "runs" / datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ"),
     )
     args = parser.parse_args()
+    if args.system == "cuo" and args.cuo_force_field is None:
+        parser.error("--system cuo requires --cuo-force-field")
+    if args.cuo_force_field is not None and not args.verify:
+        parser.error("CuO validation requires --verify for a fresh LAMMPS comparison")
     args.output.mkdir(parents=True, exist_ok=False)
     all_passed = True
-    cases = validation_cases(args.include_bulk)
-    for system in (args.system,) if args.system else SYSTEMS.values():
+    cases = validation_cases(args.include_bulk, include_cuo=args.cuo_force_field is not None)
+    systems = tuple(dict.fromkeys(SYSTEMS[case[0]] for case in cases.values()))
+    for system in (args.system,) if args.system else systems:
         destination = args.output / system
         destination.mkdir()
         summary = {
@@ -128,7 +165,11 @@ def main():
         for name, (filename, symbols, x, cell, pbc) in cases.items():
             if SYSTEMS[filename] != system:
                 continue
-            ff = ForceField.bundled(filename)
+            ff = (
+                ForceField.from_file(args.cuo_force_field)
+                if filename == CUO_FORCE_FIELD
+                else ForceField.bundled(filename)
+            )
             structures[name] = dict(
                 symbols=symbols, positions=x.tolist(), cell=None if cell is None else cell.tolist(), pbc=pbc
             )
@@ -145,7 +186,7 @@ def main():
                 "atoms": len(x),
                 "force_field": filename,
                 "force_field_sha256": ff.checksum,
-                "optional": name == "periodic_bulk_water_192",
+                "optional": name in ("periodic_bulk_water_192", "surface_cuo_010"),
                 "energy": results["ase"].energy,
                 "evaluation_seconds": timings,
                 "backend_comparison": backend_differences(results["ase"], results["replicated"], len(x)),

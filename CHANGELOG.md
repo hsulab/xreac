@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Add one optional CuO(010) surface example with mandatory LAMMPS verification
+  and a before/after performance comparison using an external published parameter file.
+- Match LAMMPS's use of `valency_val` in uncorrected bond-order corrections,
+  fixing Cu/O energies and forces when it differs from `valency_boc`.
 - Speed up evaluations with array-based parameter lookup and neighbor
   bookkeeping, early filtering of unsupported torsions, and a single energy
   pass for reported values and forces. Force conventions and parameter

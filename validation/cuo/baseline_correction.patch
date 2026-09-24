@@ -1,0 +1,14 @@
+--- a/src/xreac/energy.py
++++ b/src/xreac/energy.py
+@@ -96,7 +96,10 @@
+         bo = np.where(mask, raw - cutoff, 0)
+         pi, pp = np.where(mask, pi, 0), np.where(mask, pp, 0)
+         total = self.edges.atom_sum(bo)
+-        d, db = total - a["valency"], total - a["valency_boc"]
++        # LAMMPS uses valency_val for the *uncorrected* bond-order correction.
++        # The corrected coordination below instead uses valency_boc; the two
++        # parameters can differ for heavy elements such as Cu.
++        d, db = total - a["valency"], total - a["valency_val"]
+         f2 = np.exp(-g[0] * d[i]) + np.exp(-g[0] * d[j])
+         f3 = -np.log(0.5 * (np.exp(-g[1] * d[i]) + np.exp(-g[1] * d[j]))) / g[1]
+         vi, vj = a["valency"][i], a["valency"][j]

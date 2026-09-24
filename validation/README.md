@@ -3,6 +3,9 @@
 Results are organized by chemical system. The default suite uses **16 structures**
 for energy, forces, QEq charges, dipoles, bond properties, and neighbor-list
 agreement. Each structure is stored once. The 192-atom water box is optional.
+An additional optional [96-atom CuO(010) slab](cuo/README.md) checks transfer
+of the performance improvements to a copper-oxide surface, always with fresh
+LAMMPS verification and an external published Cu/O parameter file.
 
 | System | Default cases | Purpose |
 | --- | ---: | --- |
@@ -21,7 +24,7 @@ Use `--output PATH` for a new output directory. Fresh runs go under ignored
 Omit `--verify` for a comparison of the two Python neighbor backends alone.
 Reference checks require `lmp_mpi` (LAMMPS 22 Jul 2025, Update 4).
 
-Every system has the same compact files:
+The three default systems have the same compact files:
 
 - `structures.json`: coordinates, atom labels, cell, and PBC for each case.
 - `summary.json`: tolerances, discrepancies, timings, versions, and checksums.

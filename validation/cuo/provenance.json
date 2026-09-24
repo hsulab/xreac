@@ -1,0 +1,18 @@
+{
+  "paper": "https://doi.org/10.1021/jp102272z",
+  "supplement": "https://doi.org/10.1021/jp102272z.s001",
+  "metadata": "https://api.figshare.com/v2/articles/2732188",
+  "download": "https://ndownloader.figshare.com/files/4408471",
+  "original_filename": "jp102272z_si_001.txt",
+  "elements": [
+    "H",
+    "O",
+    "Cu",
+    "Cl",
+    "X"
+  ],
+  "sha256": "8b1a57a6945be8b1d9df3b69df8f329dc32561393ed1f02221a5ef0c21e8c07e",
+  "license": "CC BY-NC 4.0 (ACS Figshare metadata)",
+  "distribution": "External download; parameter file excluded from the repository and retained archive",
+  "crystal_reference": "https://doi.org/10.1103/PhysRevB.39.4343"
+}

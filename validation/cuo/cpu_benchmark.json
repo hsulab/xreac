@@ -1,0 +1,354 @@
+{
+  "baseline": {
+    "created_utc": "2026-09-23T23:57:29.656874+00:00",
+    "case": "surface_cuo_010",
+    "atoms": 96,
+    "description": "Unrelaxed, stoichiometric 96-atom CuO(010) slab; 12 A vacuum; 0.01 A seeded displacement",
+    "structure_source": "https://doi.org/10.1103/PhysRevB.39.4343",
+    "force_field": "/Users/jyxu/Documents/repository/xreac/validation/runs/cuo-input/jp102272z_si_001.txt",
+    "force_field_sha256": "8b1a57a6945be8b1d9df3b69df8f329dc32561393ed1f02221a5ef0c21e8c07e",
+    "source_root": "/Users/jyxu/Documents/repository/xreac/validation/runs/cuo-baseline",
+    "source_sha256": {
+      "xreac/__init__.py": "042f04a1863f7c98a8704683a71099794097c97fc48574fb07bfdfa8ccfa0ad5",
+      "xreac/ase.py": "57eb4b680720350ec1f93bdd0b23a8f4320fb51e87f18f42b4e9320e6eea4fc4",
+      "xreac/calculator.py": "6144732bc531545548c9361c737c9ede7b7a02c363d7ef90aaf80cded2ddd9f7",
+      "xreac/energy.py": "83391b943b905a9b626b998a0048dc174e8d8588f1626231e08f948b32fad0c3",
+      "xreac/forcefield.py": "f214ce7f30d0a8d07acfaef1f45c8d1b0545430f051153aa710ee8c4e218b6e8",
+      "xreac/geometry.py": "179db73ce1385f55d938e791ac75014fb696e79979a4bad89affdac279c7e75c",
+      "xreac/neighbors.py": "10db0864f305f2a0de6b197b05967cda55ff4167cb8e16210a2eb4617a6cd722",
+      "xreac/reference.py": "29209294faa2711df6b57f8785e964c07b8f61d446e8a8046a8bcf638779dddd"
+    },
+    "driver_revision": "7cefbb1abe054e5197fb6f920fa624e61b432f7c",
+    "platform": "macOS-26.6-arm64-arm-64bit",
+    "python": "3.10.13 | packaged by conda-forge | (main, Dec 23 2023, 15:35:25) [Clang 16.0.6 ]",
+    "environment": {
+      "numpy": "2.0.2",
+      "autograd": "1.9.1",
+      "ase": "3.27.0"
+    },
+    "thread_environment": {
+      "OMP_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1",
+      "MKL_NUM_THREADS": "1",
+      "VECLIB_MAXIMUM_THREADS": "1",
+      "BLIS_NUM_THREADS": "1",
+      "NUMEXPR_NUM_THREADS": "1"
+    },
+    "full_derivative": false,
+    "force_convention": "fixed_charge",
+    "xreac": {
+      "calls_per_batch": 2,
+      "batch_seconds": [
+        0.47832162491977215,
+        0.47040395718067884,
+        0.4708225838840008,
+        0.4760980410501361,
+        0.4696367494761944
+      ],
+      "median_seconds": 0.2354112919420004,
+      "min_seconds": 0.2348183747380972,
+      "max_seconds": 0.23916081245988607,
+      "first_seconds": 0.24101954139769077,
+      "cpu_to_wall_ratio": 0.9937910360913237
+    },
+    "lammps_comparison": {
+      "native": {
+        "maximum_absolute_errors": {
+          "energy_per_atom": 3.789561257387201e-14,
+          "components_per_atom": 4.926429634603361e-13,
+          "forces": 4.594209457309262e-10,
+          "charges": 5.204947584047659e-12,
+          "dipole": 7.888534270250602e-11,
+          "total_bond_orders": 1.2434497875801753e-14,
+          "lone_pairs": 2.220446049250313e-16,
+          "bond_counts": 0.0
+        },
+        "limits": {
+          "energy_per_atom": 1e-05,
+          "components_per_atom": 1e-05,
+          "forces": 0.0001,
+          "charges": 1e-06,
+          "dipole": 1e-06,
+          "total_bond_orders": 1e-08,
+          "lone_pairs": 1e-08,
+          "bond_counts": 0
+        },
+        "passed": true
+      },
+      "ase": {
+        "maximum_absolute_errors": {
+          "energy_per_atom": 3.789561257387201e-14,
+          "components_per_atom": 4.926429634603361e-13,
+          "forces": 4.594209457309262e-10,
+          "charges": 5.204947584047659e-12,
+          "dipole": 7.888534270250602e-11,
+          "total_bond_orders": 1.2434497875801753e-14,
+          "lone_pairs": 2.220446049250313e-16,
+          "bond_counts": 0.0
+        },
+        "limits": {
+          "energy_per_atom": 1e-05,
+          "components_per_atom": 1e-05,
+          "forces": 0.0001,
+          "charges": 1e-06,
+          "dipole": 1e-06,
+          "total_bond_orders": 1e-08,
+          "lone_pairs": 1e-08,
+          "bond_counts": 0
+        },
+        "passed": true
+      }
+    },
+    "neighbor_comparison": {
+      "max_absolute_differences": {
+        "energy_per_atom": 0.0,
+        "components_per_atom": 0.0,
+        "forces": 0.0,
+        "charges": 0.0,
+        "bond_orders": 0.0,
+        "total_bond_orders": 0.0,
+        "lone_pairs": 0.0,
+        "bond_counts": 0.0,
+        "dipole": 0.0
+      },
+      "tolerances": {
+        "energy_per_atom": 1e-09,
+        "components_per_atom": 1e-09,
+        "forces": 2e-08,
+        "charges": 1e-10,
+        "bond_orders": 1e-10,
+        "total_bond_orders": 1e-10,
+        "lone_pairs": 1e-10,
+        "bond_counts": 0,
+        "dipole": 1e-09
+      },
+      "passed": true
+    },
+    "reference_version": "LAMMPS (22 Jul 2025 - Update 4)",
+    "reference_cell_repetitions": [
+      1,
+      1,
+      1
+    ],
+    "passed": true,
+    "implementation_revision": "c21c74bfe48b6df96be0dc31e818b416abde2aaf",
+    "baseline_adjustment": "Apply baseline_correction.patch: use valency_val for uncorrected bond-order correction, matching LAMMPS. No performance optimizations included."
+  },
+  "optimized": {
+    "created_utc": "2026-09-23T23:56:47.273745+00:00",
+    "case": "surface_cuo_010",
+    "atoms": 96,
+    "description": "Unrelaxed, stoichiometric 96-atom CuO(010) slab; 12 A vacuum; 0.01 A seeded displacement",
+    "structure_source": "https://doi.org/10.1103/PhysRevB.39.4343",
+    "force_field": "/Users/jyxu/Documents/repository/xreac/validation/runs/cuo-input/jp102272z_si_001.txt",
+    "force_field_sha256": "8b1a57a6945be8b1d9df3b69df8f329dc32561393ed1f02221a5ef0c21e8c07e",
+    "source_root": "/Users/jyxu/Documents/repository/xreac",
+    "source_sha256": {
+      "xreac/__init__.py": "042f04a1863f7c98a8704683a71099794097c97fc48574fb07bfdfa8ccfa0ad5",
+      "xreac/ase.py": "57eb4b680720350ec1f93bdd0b23a8f4320fb51e87f18f42b4e9320e6eea4fc4",
+      "xreac/calculator.py": "8bd8929a06e7a586b20eeee634b494673528daa72c768d64cb6a469aafeee805",
+      "xreac/energy.py": "3bc30193548cfe08f931eded80b0ca17f5f73754d08b6675e2da084c069c76bc",
+      "xreac/forcefield.py": "f214ce7f30d0a8d07acfaef1f45c8d1b0545430f051153aa710ee8c4e218b6e8",
+      "xreac/geometry.py": "179db73ce1385f55d938e791ac75014fb696e79979a4bad89affdac279c7e75c",
+      "xreac/neighbors.py": "4ee6bd8567eba58da3b66c0bb73bb76461dfca466ed4fc84050c63c5e62b139d",
+      "xreac/reference.py": "29209294faa2711df6b57f8785e964c07b8f61d446e8a8046a8bcf638779dddd"
+    },
+    "driver_revision": "7cefbb1abe054e5197fb6f920fa624e61b432f7c",
+    "platform": "macOS-26.6-arm64-arm-64bit",
+    "python": "3.10.13 | packaged by conda-forge | (main, Dec 23 2023, 15:35:25) [Clang 16.0.6 ]",
+    "environment": {
+      "numpy": "2.0.2",
+      "autograd": "1.9.1",
+      "ase": "3.27.0"
+    },
+    "thread_environment": {
+      "OMP_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1",
+      "MKL_NUM_THREADS": "1",
+      "VECLIB_MAXIMUM_THREADS": "1",
+      "BLIS_NUM_THREADS": "1",
+      "NUMEXPR_NUM_THREADS": "1"
+    },
+    "full_derivative": false,
+    "force_convention": "fixed_charge",
+    "xreac": {
+      "calls_per_batch": 7,
+      "batch_seconds": [
+        0.27989545837044716,
+        0.29745358414947987,
+        0.29301004111766815,
+        0.28519450034946203,
+        0.2905912911519408
+      ],
+      "median_seconds": 0.0415130415931344,
+      "min_seconds": 0.03998506548149245,
+      "max_seconds": 0.04249336916421141,
+      "first_seconds": 0.049279709346592426,
+      "cpu_to_wall_ratio": 0.9941922311634299
+    },
+    "lammps_comparison": {
+      "native": {
+        "maximum_absolute_errors": {
+          "energy_per_atom": 3.789561257387201e-14,
+          "components_per_atom": 4.926429634603361e-13,
+          "forces": 4.594209457309262e-10,
+          "charges": 5.204947584047659e-12,
+          "dipole": 7.888534270250602e-11,
+          "total_bond_orders": 1.2434497875801753e-14,
+          "lone_pairs": 2.220446049250313e-16,
+          "bond_counts": 0.0
+        },
+        "limits": {
+          "energy_per_atom": 1e-05,
+          "components_per_atom": 1e-05,
+          "forces": 0.0001,
+          "charges": 1e-06,
+          "dipole": 1e-06,
+          "total_bond_orders": 1e-08,
+          "lone_pairs": 1e-08,
+          "bond_counts": 0
+        },
+        "passed": true
+      },
+      "ase": {
+        "maximum_absolute_errors": {
+          "energy_per_atom": 3.789561257387201e-14,
+          "components_per_atom": 4.926429634603361e-13,
+          "forces": 4.594209457309262e-10,
+          "charges": 5.204947584047659e-12,
+          "dipole": 7.888534270250602e-11,
+          "total_bond_orders": 1.2434497875801753e-14,
+          "lone_pairs": 2.220446049250313e-16,
+          "bond_counts": 0.0
+        },
+        "limits": {
+          "energy_per_atom": 1e-05,
+          "components_per_atom": 1e-05,
+          "forces": 0.0001,
+          "charges": 1e-06,
+          "dipole": 1e-06,
+          "total_bond_orders": 1e-08,
+          "lone_pairs": 1e-08,
+          "bond_counts": 0
+        },
+        "passed": true
+      }
+    },
+    "neighbor_comparison": {
+      "max_absolute_differences": {
+        "energy_per_atom": 0.0,
+        "components_per_atom": 0.0,
+        "forces": 0.0,
+        "charges": 0.0,
+        "bond_orders": 0.0,
+        "total_bond_orders": 0.0,
+        "lone_pairs": 0.0,
+        "bond_counts": 0.0,
+        "dipole": 0.0
+      },
+      "tolerances": {
+        "energy_per_atom": 1e-09,
+        "components_per_atom": 1e-09,
+        "forces": 2e-08,
+        "charges": 1e-10,
+        "bond_orders": 1e-10,
+        "total_bond_orders": 1e-10,
+        "lone_pairs": 1e-10,
+        "bond_counts": 0,
+        "dipole": 1e-09
+      },
+      "passed": true
+    },
+    "reference_version": "LAMMPS (22 Jul 2025 - Update 4)",
+    "reference_cell_repetitions": [
+      1,
+      1,
+      1
+    ],
+    "passed": true,
+    "lammps_fresh": {
+      "calls_per_batch": 100,
+      "batch_seconds": [
+        0.814381791,
+        0.804045833,
+        0.8003346250000001,
+        0.8086059999999997,
+        0.8122342079999996
+      ],
+      "median_seconds": 0.008086059999999997,
+      "min_seconds": 0.008003346250000001,
+      "max_seconds": 0.00814381791,
+      "process_wall_seconds": 4.20449195895344,
+      "mpi_tasks": 1,
+      "openmp_threads": 0,
+      "final_state_errors": {
+        "energy_per_atom": 2.8421709430404007e-13,
+        "forces": 3.402771397986726e-10,
+        "charges": 4.90973928179983e-12
+      }
+    },
+    "slowdown_vs_fresh": 5.133902245733326,
+    "lammps_steady": {
+      "calls_per_batch": 100,
+      "batch_seconds": [
+        0.430143875,
+        0.41898370799999995,
+        0.4224555000000001,
+        0.4216812080000001,
+        0.4259697080000002
+      ],
+      "median_seconds": 0.004224555000000001,
+      "min_seconds": 0.00418983708,
+      "max_seconds": 0.00430143875,
+      "process_wall_seconds": 2.2831664998084307,
+      "mpi_tasks": 1,
+      "openmp_threads": 0,
+      "loop_seconds_per_step": [
+        0.0042178,
+        0.00413454,
+        0.00416806,
+        0.00415562,
+        0.00420205
+      ],
+      "final_state_errors": {
+        "energy_per_atom": 5.873819948950162e-13,
+        "forces": 5.681481951569367e-10,
+        "charges": 6.371903005231161e-12
+      }
+    },
+    "slowdown_vs_steady": 9.826606966446025,
+    "implementation_revision": "7cefbb1abe054e5197fb6f920fa624e61b432f7c",
+    "working_tree_adjustment": "Same valency_val correction as the historical baseline; source hashes identify exact measured code."
+  },
+  "comparison": {
+    "atoms": 96,
+    "before_seconds": 0.2354112919420004,
+    "after_seconds": 0.0415130415931344,
+    "speedup": 5.670779179450288,
+    "implementation_comparison": {
+      "max_absolute_differences": {
+        "energy_per_atom": 0.0,
+        "components_per_atom": 0.0,
+        "forces": 0.0,
+        "charges": 0.0,
+        "bond_orders": 0.0,
+        "total_bond_orders": 0.0,
+        "lone_pairs": 0.0,
+        "bond_counts": 0.0,
+        "dipole": 0.0
+      },
+      "tolerances": {
+        "energy_per_atom": 1e-09,
+        "components_per_atom": 1e-09,
+        "forces": 2e-08,
+        "charges": 1e-10,
+        "bond_orders": 1e-10,
+        "total_bond_orders": 1e-10,
+        "lone_pairs": 1e-10,
+        "bond_counts": 0,
+        "dipole": 1e-09
+      },
+      "passed": true
+    }
+  }
+}

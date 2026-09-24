@@ -1,0 +1,83 @@
+{
+  "created_utc": "2026-09-23T23:58:54.636209+00:00",
+  "system": "cuo",
+  "full_derivative": false,
+  "force_convention": "fixed_charge",
+  "reference_convention": "LAMMPS supercells normalized to input cell for small inputs",
+  "units": {
+    "energy": "kcal/mol/input-cell",
+    "forces": "kcal/mol/Angstrom",
+    "charges": "e"
+  },
+  "environment": {
+    "numpy": "2.0.2",
+    "autograd": "1.9.1",
+    "ase": "3.27.0"
+  },
+  "python": "3.10.13 | packaged by conda-forge | (main, Dec 23 2023, 15:35:25) [Clang 16.0.6 ]",
+  "reference_verified": true,
+  "cases": {
+    "surface_cuo_010": {
+      "atoms": 96,
+      "force_field": "ffield.reax.CuOHCl.2010",
+      "force_field_sha256": "8b1a57a6945be8b1d9df3b69df8f329dc32561393ed1f02221a5ef0c21e8c07e",
+      "optional": true,
+      "energy": -8626.30281841148,
+      "evaluation_seconds": {
+        "replicated": 0.043464708141982555,
+        "ase": 0.12468933314085007
+      },
+      "backend_comparison": {
+        "max_absolute_differences": {
+          "energy_per_atom": 0.0,
+          "components_per_atom": 0.0,
+          "forces": 0.0,
+          "charges": 0.0,
+          "bond_orders": 0.0,
+          "total_bond_orders": 0.0,
+          "lone_pairs": 0.0,
+          "bond_counts": 0.0,
+          "dipole": 0.0
+        },
+        "tolerances": {
+          "energy_per_atom": 1e-09,
+          "components_per_atom": 1e-09,
+          "forces": 2e-08,
+          "charges": 1e-10,
+          "bond_orders": 1e-10,
+          "total_bond_orders": 1e-10,
+          "lone_pairs": 1e-10,
+          "bond_counts": 0,
+          "dipole": 1e-09
+        },
+        "passed": true
+      },
+      "passed": true,
+      "lammps_comparison": {
+        "maximum_absolute_errors": {
+          "energy_per_atom": 3.789561257387201e-14,
+          "components_per_atom": 4.926429634603361e-13,
+          "forces": 4.594209457309262e-10,
+          "charges": 5.204947584047659e-12,
+          "dipole": 7.888534270250602e-11,
+          "total_bond_orders": 1.2434497875801753e-14,
+          "lone_pairs": 2.220446049250313e-16,
+          "bond_counts": 0.0
+        },
+        "limits": {
+          "energy_per_atom": 1e-05,
+          "components_per_atom": 1e-05,
+          "forces": 0.0001,
+          "charges": 1e-06,
+          "dipole": 1e-06,
+          "total_bond_orders": 1e-08,
+          "lone_pairs": 1e-08,
+          "bond_counts": 0
+        },
+        "passed": true
+      },
+      "reference_version": "LAMMPS (22 Jul 2025 - Update 4)"
+    }
+  },
+  "passed": true
+}
