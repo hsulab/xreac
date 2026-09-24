@@ -59,12 +59,14 @@ wurtzite bulk cell. Both bulk cells have full PBC; CuO has PBC in the surface
 plane. Cell heights exceed the cutoff, so both codes use identical atom counts.
 These are deterministic, unrelaxed fixtures, not equilibrium predictions.
 
-The xreac timer includes **fresh ASE neighbor construction on every call**,
+The default xreac timer includes **fresh ASE neighbor construction on every call**
+(`neighbor_skin=0`),
 QEq, energy, fixed-charge forces, and all reported properties. It explicitly
 calls `ReaxFFCalculator.calculate()` to bypass ASE's result cache. No neighbor
-list is reused. Force-field loading, imports, and process startup are excluded.
+list is reused in this mode. Force-field loading, imports, and process startup are excluded.
 Both programs use one numerical thread; LAMMPS uses one MPI rank. No OS core
-affinity is imposed. Medians over five batches on the Apple M1 Pro give:
+affinity is imposed. The original bin-based ASE baseline, retained for comparison,
+gave these medians over five batches on the Apple M1 Pro:
 
 | Pilot | Atoms | xreac/ASE (ms) | Fresh LAMMPS (ms) | xreac / LAMMPS |
 | --- | ---: | ---: | ---: | ---: |
@@ -90,6 +92,64 @@ skipping the timing loops. The CuO example also defaults to ASE timing;
 `--neighbor-backend replicated` explicitly reproduces historical CuO timings.
 Optional bulk validation uses `--include-bulk`. The routine 16-case validation
 suite remains unchanged.
+
+### Tree construction and neighbor reuse
+
+Two separate improvements use the same three structures:
+
+- `3e68ee6`: use ASE's tree-based `PrimitiveNeighborList`, then expand its half
+  list into directed arrays with NumPy. Small periodic boxes at a 10 Å cutoff
+  gave the previous bin-based builder too few bins to prune pairs efficiently.
+- `b2e35a8`: reuse ASE topology with a 0.3 Å per-atom skin. Rebuild after any atom
+  moves more than the skin from its build position, or when cell, PBC, atom
+  identity/count, cutoff, or parameters change. QEq and all physical results
+  are recomputed on every call. Zero skin explicitly requests fresh builds.
+
+Single-thread medians in milliseconds, five batches per mode:
+
+| Pilot | Original ASE | Tree commit, fresh | Skin commit, fresh | Skin commit, reuse | Native, fresh | Total speedup, original / reuse |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Water, 192 atoms | 535.94 | 120.91 | 122.53 | 109.82 | 165.90 | 4.88x |
+| ZnO, 128 atoms | 251.28 | 68.45 | 73.16 | 66.14 | 89.21 | 3.80x |
+| CuO surface, 96 atoms | 117.10 | 29.28 | 30.85 | 27.62 | 30.68 | 4.24x |
+
+The reuse and native columns were measured in the same run as the skin commit's
+fresh column. Reuse gives another **1.11–1.12x** over fresh tree construction in
+that run, and **1.11–1.51x** over fresh native construction. Timing variation
+between runs explains part of the difference between the two fresh columns.
+Reuse timings exclude the initial build and hold coordinates fixed; these are
+steady throughput measurements, not moving-atom MD or relaxation speedups.
+Actual savings during motion depend on how often rebuilding is necessary.
+ASE result caching is bypassed; QEq has no history reuse in xreac.
+
+LAMMPS remains faster. In the skin-commit run, fresh LAMMPS times were
+44.73 / 38.79 / 8.08 ms (water / ZnO / CuO); its fixed-geometry reuse times were
+17.25 / 15.55 / 4.38 ms. Against the latter, xreac/ASE reuse is still
+6.37x / 4.25x / 6.31x slower. The LAMMPS modes also differ in setup and QEq
+history, so these ratios do not isolate neighbor construction alone.
+
+All initial evaluations pass LAMMPS checks of energies, components, forces,
+charges, dipoles, and bond properties. Each pilot is also checked after a seeded
+displacement of at most 0.03 Å (list reuse), then a 0.35 Å translation that forces
+a rebuild. Both states match fresh native and LAMMPS evaluations. These are
+perturbations of the three existing fixtures, not additional structure families.
+The second commit passes all 182 tests, including pair-cutoff crossings,
+cumulative displacement, periodic images, and cache invalidation.
+
+Reproduce the comparison:
+
+```sh
+python scripts/benchmark_lammps.py --compare-neighbors --repeats 5 --batch-seconds 0.3 --lammps-calls 30
+```
+
+Per-commit timings, source hashes, rebuild counts, and numerical checks:
+[water](water/cpu_ase_neighbors.json), [ZnO](zno/cpu_ase_neighbors.json),
+[CuO](cuo/cpu_ase_neighbors.json). Each system also retains
+`cpu_ase_neighbors_results.json.gz` and `cpu_ase_neighbors_reference.tar.gz`.
+The archives contain initial, reuse, and rebuild reference inputs/outputs;
+restore the bundled parameter file as `ffield` in each extracted directory.
+`git_revision` records HEAD when a run started; `committed_revision` identifies
+the exact implementation, verified against all recorded core source hashes.
 
 ## Historical native-neighbor benchmarks
 

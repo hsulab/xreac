@@ -28,9 +28,15 @@ ASE neighbors on every timed evaluation, bypass result caching, and verify
 the result against LAMMPS. See [pilot timings](cpu_ase_pilot.json),
 [numerical results](cpu_ase_pilot_results.json.gz), and
 [raw reference runs](cpu_ase_pilot_reference.tar.gz).
+The original bin-based baseline is retained there. The newer
+[tree/reuse comparison](cpu_ase_neighbors.json),
+[numerical results](cpu_ase_neighbors_results.json.gz), and
+[reference archive](cpu_ase_neighbors_reference.tar.gz) record both optimization
+commits and LAMMPS checks after movement, including a forced rebuild.
 
 ```sh
 python scripts/benchmark_lammps.py
+python scripts/benchmark_lammps.py --compare-neighbors
 ```
 
 - [Monomer/dimer PDF](report.pdf) and [CSV](report.csv).

@@ -1,0 +1,526 @@
+{
+  "case": "periodic_bulk_water_192",
+  "baseline_record": "cpu_ase_pilot.json",
+  "structure_record": "structures.json",
+  "note": "Same three pilots. Fresh builds and fixed-geometry topology reuse are separate timings; fresh QEq and all properties on every evaluation. Motion checks are not MD throughput measurements.",
+  "speedups": {
+    "tree_vs_original_ase": 4.432506856383786,
+    "reuse_vs_same_run_fresh_ase": 1.1157337130047773,
+    "reuse_vs_original_ase": 4.88001906407718,
+    "reuse_vs_same_run_native": 1.5105546059143058
+  },
+  "stages": {
+    "tree": {
+      "created_utc": "2026-09-24T12:43:46.717344+00:00",
+      "git_revision": "3e68ee627789531b11ce0f3a9b56f46a8a9442df",
+      "source_sha256": {
+        "src/xreac/__init__.py": "042f04a1863f7c98a8704683a71099794097c97fc48574fb07bfdfa8ccfa0ad5",
+        "src/xreac/ase.py": "e0d0f3ca1b01356020d9c60e8d4d164a8c96f1b4820a0d32411ae2210010f842",
+        "src/xreac/calculator.py": "27710b9da5eb2a9da8bc88378cdda2cb4b4172acadc40a988b3252aadbdaa088",
+        "src/xreac/energy.py": "2478fcb98e2f5e85f4342f3a12cd735f4d31ce1c8bf05ca974a2bad885462a61",
+        "src/xreac/forcefield.py": "f214ce7f30d0a8d07acfaef1f45c8d1b0545430f051153aa710ee8c4e218b6e8",
+        "src/xreac/geometry.py": "179db73ce1385f55d938e791ac75014fb696e79979a4bad89affdac279c7e75c",
+        "src/xreac/neighbors.py": "46e6db68ac8223c13db53ef7ca475ef183b341bb3cabdc27cd025f210a8c53ee",
+        "src/xreac/reference.py": "29209294faa2711df6b57f8785e964c07b8f61d446e8a8046a8bcf638779dddd"
+      },
+      "platform": "macOS-26.6-arm64-arm-64bit",
+      "cpu": "Apple M1 Pro",
+      "python": "3.10.13 | packaged by conda-forge | (main, Dec 23 2023, 15:35:25) [Clang 16.0.6 ]",
+      "environment": {
+        "numpy": "2.0.2",
+        "autograd": "1.9.1",
+        "ase": "3.27.0"
+      },
+      "thread_environment": {
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "MKL_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": "1",
+        "BLIS_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1"
+      },
+      "executable": "/opt/homebrew/bin/lmp_mpi",
+      "repeats": 5,
+      "suite": "pilots",
+      "neighbor_backend": "ase",
+      "lammps_timing": true,
+      "method": {
+        "xreac": "ReaxFFCalculator.calculate, fresh ASE neighbors each call, fresh QEq, fixed-charge forces, all properties; ASE result cache bypassed",
+        "lammps_fresh": "Repeated run 0; rebuild neighbors and recreate QEq fix with zero charges each call; all properties",
+        "lammps_steady": "Fixed geometry, no integrator, QEq each step with history and neighbor reuse; properties at batch endpoints",
+        "timing": "Median batch wall time per call; force-field loading, process startup and final dumps excluded",
+        "cpu_limit": "One MPI rank and numerical-library thread; no OS core affinity is imposed",
+        "caveat": "Fresh LAMMPS includes command parsing/setup overhead; steady is an optimistic fixed-geometry baseline, not MD"
+      },
+      "cases": {
+        "periodic_bulk_water_192": {
+          "system": "water",
+          "atoms": 192,
+          "force_field": "ffield.reax.HO.2015",
+          "force_field_sha256": "526dea2d55d748caed94734139dda66064e194f74f46eee9b0f511eead38b7d1",
+          "reference_version": "LAMMPS (22 Jul 2025 - Update 4)",
+          "reference_cell_repetitions": [
+            1,
+            1,
+            1
+          ],
+          "structure_sha256": "6585c85e448aa9425c24912e6e53d0f2c5ee3705d4a0b50d5828ecb409d22e7b",
+          "comparison": {
+            "maximum_absolute_errors": {
+              "energy_per_atom": 2.5674277518798285e-12,
+              "components_per_atom": 9.563905223330949e-12,
+              "forces": 7.940732515976379e-10,
+              "charges": 1.1340817174243512e-11,
+              "dipole": 1.6910917111090384e-10,
+              "total_bond_orders": 2.9976021664879227e-15,
+              "lone_pairs": 1.8042877111312916e-23,
+              "bond_counts": 0.0
+            },
+            "limits": {
+              "energy_per_atom": 1e-05,
+              "components_per_atom": 1e-05,
+              "forces": 0.0001,
+              "charges": 1e-06,
+              "dipole": 1e-06,
+              "total_bond_orders": 1e-08,
+              "lone_pairs": 1e-08,
+              "bond_counts": 0
+            },
+            "passed": true
+          },
+          "xreac": {
+            "calls_per_batch": 3,
+            "batch_seconds": [
+              0.36278095841407776,
+              0.36273499950766563,
+              0.3503960007801652,
+              0.35609337501227856,
+              0.3795597506687045
+            ],
+            "median_seconds": 0.1209116665025552,
+            "min_seconds": 0.11679866692672174,
+            "max_seconds": 0.12651991688956818,
+            "first_seconds": 0.13572729099541903,
+            "cpu_to_wall_ratio": 0.9873020933218486,
+            "neighbor_backend": "ase",
+            "neighbor_build_included": true,
+            "result_cache_used": false
+          },
+          "lammps_fresh": {
+            "calls_per_batch": 30,
+            "batch_seconds": [
+              1.333887125,
+              1.334314792,
+              1.3286791250000003,
+              1.3377215000000007,
+              1.3265441659999997
+            ],
+            "median_seconds": 0.044462904166666664,
+            "min_seconds": 0.04421813886666666,
+            "max_seconds": 0.04459071666666669,
+            "process_wall_seconds": 6.874229250475764,
+            "mpi_tasks": 1,
+            "openmp_threads": 0,
+            "final_state_errors": {
+              "energy_per_atom": 2.5674277518798285e-12,
+              "charges": 1.1340817174243512e-11,
+              "forces": 7.940732515976379e-10
+            }
+          },
+          "slowdown_vs_fresh": 2.7193830175672895,
+          "lammps_steady": {
+            "calls_per_batch": 30,
+            "batch_seconds": [
+              0.537505334,
+              0.5084382089999999,
+              0.5066057910000001,
+              0.5073829159999999,
+              0.503270042
+            ],
+            "median_seconds": 0.016912763866666663,
+            "min_seconds": 0.01677566806666667,
+            "max_seconds": 0.01791684446666667,
+            "process_wall_seconds": 2.7677208743989468,
+            "mpi_tasks": 1,
+            "openmp_threads": 0,
+            "loop_seconds_per_step": [
+              0.016407366666666666,
+              0.015877333333333334,
+              0.0157431,
+              0.015829733333333332,
+              0.015698233333333332
+            ],
+            "final_state_errors": {
+              "energy_per_atom": 2.662166783314509e-12,
+              "charges": 8.558487252230407e-12,
+              "forces": 4.2157921598118264e-10
+            }
+          },
+          "slowdown_vs_steady": 7.149137033767722
+        }
+      },
+      "committed_revision": "3e68ee627789531b11ce0f3a9b56f46a8a9442df",
+      "tests_passed": 171,
+      "driver_sha256": {
+        "scripts/benchmark_lammps.py": "67b86ac52c14301944fcf2605b87f42af5b9151637e57cd0371c31819c1e1c99",
+        "scripts/validate.py": "a9e9c43802d587cafc668d51c94f690a6e02c610a745fbcdd49840c50aef16ba",
+        "examples/periodic_water.py": "2224526a1a040549bab9397e9ab5c0f06a2630e6193204b5e958503dc0b638c5",
+        "examples/water_cluster.py": "dfbf9c81b15c906217c03baaf3a93810e4c1a5075c811187787ebc7195b24f23"
+      }
+    },
+    "skin": {
+      "created_utc": "2026-09-24T12:47:46.863958+00:00",
+      "git_revision": "3e68ee627789531b11ce0f3a9b56f46a8a9442df",
+      "source_sha256": {
+        "src/xreac/__init__.py": "042f04a1863f7c98a8704683a71099794097c97fc48574fb07bfdfa8ccfa0ad5",
+        "src/xreac/ase.py": "d7be5c1b1bf5641047df78a1ed67397d397027b107babd0520eca032a44dced0",
+        "src/xreac/calculator.py": "27710b9da5eb2a9da8bc88378cdda2cb4b4172acadc40a988b3252aadbdaa088",
+        "src/xreac/energy.py": "2478fcb98e2f5e85f4342f3a12cd735f4d31ce1c8bf05ca974a2bad885462a61",
+        "src/xreac/forcefield.py": "f214ce7f30d0a8d07acfaef1f45c8d1b0545430f051153aa710ee8c4e218b6e8",
+        "src/xreac/geometry.py": "179db73ce1385f55d938e791ac75014fb696e79979a4bad89affdac279c7e75c",
+        "src/xreac/neighbors.py": "46e6db68ac8223c13db53ef7ca475ef183b341bb3cabdc27cd025f210a8c53ee",
+        "src/xreac/reference.py": "29209294faa2711df6b57f8785e964c07b8f61d446e8a8046a8bcf638779dddd"
+      },
+      "platform": "macOS-26.6-arm64-arm-64bit",
+      "cpu": "Apple M1 Pro",
+      "python": "3.10.13 | packaged by conda-forge | (main, Dec 23 2023, 15:35:25) [Clang 16.0.6 ]",
+      "environment": {
+        "numpy": "2.0.2",
+        "autograd": "1.9.1",
+        "ase": "3.27.0"
+      },
+      "thread_environment": {
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "MKL_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": "1",
+        "BLIS_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1"
+      },
+      "executable": "/opt/homebrew/bin/lmp_mpi",
+      "repeats": 5,
+      "suite": "pilots",
+      "neighbor_backend": "ase",
+      "compare_neighbors": true,
+      "lammps_timing": true,
+      "method": {
+        "xreac": "ReaxFFCalculator.calculate, fresh ASE neighbors each call, fresh QEq, fixed-charge forces, all properties; ASE result cache bypassed",
+        "xreac_reuse": "Optional: fixed geometry, ASE skin=0.3 A; topology built in warmup and reused in timed batches; fresh QEq and all properties every call",
+        "xreac_native": "Optional: core evaluate with fresh native neighbors, fresh QEq and all properties every call",
+        "motion_checks": "Optional: 0.03 A maximum seeded displacement, then 0.35 A translation to force rebuilding; each checked against fresh native and LAMMPS results outside timing",
+        "lammps_fresh": "Repeated run 0; rebuild neighbors and recreate QEq fix with zero charges each call; all properties",
+        "lammps_steady": "Fixed geometry, no integrator, QEq each step with history and neighbor reuse; properties at batch endpoints",
+        "timing": "Median batch wall time per call; force-field loading, process startup and final dumps excluded",
+        "cpu_limit": "One MPI rank and numerical-library thread; no OS core affinity is imposed",
+        "caveat": "Fresh LAMMPS includes command parsing/setup overhead; steady is an optimistic fixed-geometry baseline, not MD"
+      },
+      "cases": {
+        "periodic_bulk_water_192": {
+          "system": "water",
+          "atoms": 192,
+          "force_field": "ffield.reax.HO.2015",
+          "force_field_sha256": "526dea2d55d748caed94734139dda66064e194f74f46eee9b0f511eead38b7d1",
+          "reference_version": "LAMMPS (22 Jul 2025 - Update 4)",
+          "reference_cell_repetitions": [
+            1,
+            1,
+            1
+          ],
+          "structure_sha256": "6585c85e448aa9425c24912e6e53d0f2c5ee3705d4a0b50d5828ecb409d22e7b",
+          "comparison": {
+            "maximum_absolute_errors": {
+              "energy_per_atom": 2.5674277518798285e-12,
+              "components_per_atom": 9.563905223330949e-12,
+              "forces": 7.940732515976379e-10,
+              "charges": 1.1340817174243512e-11,
+              "dipole": 1.6910917111090384e-10,
+              "total_bond_orders": 2.9976021664879227e-15,
+              "lone_pairs": 1.8042877111312916e-23,
+              "bond_counts": 0.0
+            },
+            "limits": {
+              "energy_per_atom": 1e-05,
+              "components_per_atom": 1e-05,
+              "forces": 0.0001,
+              "charges": 1e-06,
+              "dipole": 1e-06,
+              "total_bond_orders": 1e-08,
+              "lone_pairs": 1e-08,
+              "bond_counts": 0
+            },
+            "passed": true
+          },
+          "xreac": {
+            "calls_per_batch": 3,
+            "batch_seconds": [
+              0.3723208326846361,
+              0.36938474979251623,
+              0.36532262433320284,
+              0.36727712489664555,
+              0.36760204192250967
+            ],
+            "median_seconds": 0.1225340139741699,
+            "min_seconds": 0.12177420811106761,
+            "max_seconds": 0.12410694422821204,
+            "first_seconds": 0.1325579583644867,
+            "cpu_to_wall_ratio": 0.9944756322846681,
+            "neighbor_backend": "ase",
+            "neighbor_skin": 0,
+            "neighbor_build_included": true,
+            "neighbor_rebuild_each_call": true,
+            "neighbor_list_builds_including_warmup": 16,
+            "result_cache_used": false
+          },
+          "xreac_reuse": {
+            "calls_per_batch": 3,
+            "batch_seconds": [
+              0.3232689583674073,
+              0.3406752087175846,
+              0.32947112526744604,
+              0.3284650407731533,
+              0.3365035830065608
+            ],
+            "median_seconds": 0.10982370842248201,
+            "min_seconds": 0.10775631945580244,
+            "max_seconds": 0.11355840290586154,
+            "first_seconds": 0.14057133346796036,
+            "cpu_to_wall_ratio": 0.998868828795369,
+            "neighbor_backend": "ase",
+            "neighbor_skin": 0.3,
+            "neighbor_build_included": true,
+            "neighbor_rebuild_each_call": false,
+            "neighbor_list_builds_including_warmup": 1,
+            "result_cache_used": false,
+            "comparison": {
+              "maximum_absolute_errors": {
+                "energy_per_atom": 2.5674277518798285e-12,
+                "components_per_atom": 9.559168271759214e-12,
+                "forces": 7.940732515976379e-10,
+                "charges": 1.1340817174243512e-11,
+                "dipole": 1.6910917111090384e-10,
+                "total_bond_orders": 2.9976021664879227e-15,
+                "lone_pairs": 1.8042877111312916e-23,
+                "bond_counts": 0.0
+              },
+              "limits": {
+                "energy_per_atom": 1e-05,
+                "components_per_atom": 1e-05,
+                "forces": 0.0001,
+                "charges": 1e-06,
+                "dipole": 1e-06,
+                "total_bond_orders": 1e-08,
+                "lone_pairs": 1e-08,
+                "bond_counts": 0
+              },
+              "passed": true
+            }
+          },
+          "xreac_native": {
+            "calls_per_batch": 2,
+            "batch_seconds": [
+              0.3215062916278839,
+              0.3204871257767081,
+              0.33734574913978577,
+              0.33308666571974754,
+              0.3317894171923399
+            ],
+            "median_seconds": 0.16589470859616995,
+            "min_seconds": 0.16024356288835406,
+            "max_seconds": 0.16867287456989288,
+            "first_seconds": 0.1608674582093954,
+            "cpu_to_wall_ratio": 0.9923487819124516,
+            "neighbor_backend": "replicated",
+            "neighbor_build_included": true,
+            "result_cache_used": false,
+            "comparison": {
+              "maximum_absolute_errors": {
+                "energy_per_atom": 2.5674277518798285e-12,
+                "components_per_atom": 9.563905223330949e-12,
+                "forces": 7.940732515976379e-10,
+                "charges": 1.1340817174243512e-11,
+                "dipole": 1.6910917111090384e-10,
+                "total_bond_orders": 2.9976021664879227e-15,
+                "lone_pairs": 1.8042877111312916e-23,
+                "bond_counts": 0.0
+              },
+              "limits": {
+                "energy_per_atom": 1e-05,
+                "components_per_atom": 1e-05,
+                "forces": 0.0001,
+                "charges": 1e-06,
+                "dipole": 1e-06,
+                "total_bond_orders": 1e-08,
+                "lone_pairs": 1e-08,
+                "bond_counts": 0
+              },
+              "passed": true
+            }
+          },
+          "motion_checks": {
+            "reuse": {
+              "comparison": {
+                "maximum_absolute_errors": {
+                  "energy_per_atom": 4.073778351691241e-12,
+                  "components_per_atom": 1.9340973267389927e-11,
+                  "forces": 4.886828719463665e-10,
+                  "charges": 7.155387393709134e-12,
+                  "dipole": 5.162803518032888e-11,
+                  "total_bond_orders": 2.6645352591003757e-15,
+                  "lone_pairs": 1.2666203129718236e-23,
+                  "bond_counts": 0.0
+                },
+                "limits": {
+                  "energy_per_atom": 1e-05,
+                  "components_per_atom": 1e-05,
+                  "forces": 0.0001,
+                  "charges": 1e-06,
+                  "dipole": 1e-06,
+                  "total_bond_orders": 1e-08,
+                  "lone_pairs": 1e-08,
+                  "bond_counts": 0
+                },
+                "passed": true
+              },
+              "native_comparison": {
+                "max_absolute_differences": {
+                  "energy_per_atom": 0.0,
+                  "components_per_atom": 4.736951571734001e-15,
+                  "forces": 0.0,
+                  "charges": 0.0,
+                  "bond_orders": 0.0,
+                  "total_bond_orders": 0.0,
+                  "lone_pairs": 0.0,
+                  "bond_counts": 0.0,
+                  "dipole": 0.0
+                },
+                "tolerances": {
+                  "energy_per_atom": 1e-09,
+                  "components_per_atom": 1e-09,
+                  "forces": 2e-08,
+                  "charges": 1e-10,
+                  "bond_orders": 1e-10,
+                  "total_bond_orders": 1e-10,
+                  "lone_pairs": 1e-10,
+                  "bond_counts": 0,
+                  "dipole": 1e-09
+                },
+                "passed": true
+              },
+              "neighbor_list_builds": 1
+            },
+            "rebuild": {
+              "comparison": {
+                "maximum_absolute_errors": {
+                  "energy_per_atom": 4.329573736564877e-12,
+                  "components_per_atom": 1.193948643655555e-11,
+                  "forces": 4.964109123761773e-10,
+                  "charges": 7.055134254585482e-12,
+                  "dipole": 4.028777311759768e-11,
+                  "total_bond_orders": 2.4424906541753444e-15,
+                  "lone_pairs": 1.2666203129718236e-23,
+                  "bond_counts": 0.0
+                },
+                "limits": {
+                  "energy_per_atom": 1e-05,
+                  "components_per_atom": 1e-05,
+                  "forces": 0.0001,
+                  "charges": 1e-06,
+                  "dipole": 1e-06,
+                  "total_bond_orders": 1e-08,
+                  "lone_pairs": 1e-08,
+                  "bond_counts": 0
+                },
+                "passed": true
+              },
+              "native_comparison": {
+                "max_absolute_differences": {
+                  "energy_per_atom": 1.8947806286936004e-14,
+                  "components_per_atom": 1.8947806286936004e-14,
+                  "forces": 0.0,
+                  "charges": 0.0,
+                  "bond_orders": 0.0,
+                  "total_bond_orders": 0.0,
+                  "lone_pairs": 0.0,
+                  "bond_counts": 0.0,
+                  "dipole": 0.0
+                },
+                "tolerances": {
+                  "energy_per_atom": 1e-09,
+                  "components_per_atom": 1e-09,
+                  "forces": 2e-08,
+                  "charges": 1e-10,
+                  "bond_orders": 1e-10,
+                  "total_bond_orders": 1e-10,
+                  "lone_pairs": 1e-10,
+                  "bond_counts": 0,
+                  "dipole": 1e-09
+                },
+                "passed": true
+              },
+              "neighbor_list_builds": 2
+            }
+          },
+          "lammps_fresh": {
+            "calls_per_batch": 30,
+            "batch_seconds": [
+              1.330240375,
+              1.345690084,
+              1.329065,
+              1.3420563330000004,
+              1.3487317079999999
+            ],
+            "median_seconds": 0.04473521110000001,
+            "min_seconds": 0.04430216666666666,
+            "max_seconds": 0.04495772359999999,
+            "process_wall_seconds": 6.908059041947126,
+            "mpi_tasks": 1,
+            "openmp_threads": 0,
+            "final_state_errors": {
+              "energy_per_atom": 2.5674277518798285e-12,
+              "charges": 1.1340817174243512e-11,
+              "forces": 7.940732515976379e-10
+            }
+          },
+          "slowdown_vs_fresh": 2.7390954677795154,
+          "lammps_steady": {
+            "calls_per_batch": 30,
+            "batch_seconds": [
+              0.556654792,
+              0.5175930830000001,
+              0.515454667,
+              0.518062958,
+              0.516856792
+            ],
+            "median_seconds": 0.01725310276666667,
+            "min_seconds": 0.01718182223333333,
+            "max_seconds": 0.018555159733333333,
+            "process_wall_seconds": 2.839295665733516,
+            "mpi_tasks": 1,
+            "openmp_threads": 0,
+            "loop_seconds_per_step": [
+              0.017009666666666666,
+              0.01615686666666667,
+              0.0160375,
+              0.016200733333333335,
+              0.016138033333333333
+            ],
+            "final_state_errors": {
+              "energy_per_atom": 2.662166783314509e-12,
+              "charges": 8.558487252230407e-12,
+              "forces": 4.2157921598118264e-10
+            }
+          },
+          "slowdown_vs_steady": 7.102143633602414
+        }
+      },
+      "committed_revision": "b2e35a8262369f6a7394dc8b3718679b575087ec",
+      "tests_passed": 182,
+      "driver_sha256": {
+        "scripts/benchmark_lammps.py": "83930abfaaa8d7d194f58747452b0ba6fd6dc862dae9b34a5c40e2fdbf35ec06",
+        "scripts/validate.py": "a9e9c43802d587cafc668d51c94f690a6e02c610a745fbcdd49840c50aef16ba",
+        "examples/periodic_water.py": "2224526a1a040549bab9397e9ab5c0f06a2630e6193204b5e958503dc0b638c5",
+        "examples/water_cluster.py": "dfbf9c81b15c906217c03baaf3a93810e4c1a5075c811187787ebc7195b24f23"
+      }
+    }
+  }
+}

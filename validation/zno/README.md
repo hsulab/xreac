@@ -44,9 +44,14 @@ See [ASE pilot timings and LAMMPS checks](cpu_ase_pilot.json),
 [numerical results](cpu_ase_pilot_results.json.gz), and
 [raw reference runs](cpu_ase_pilot_reference.tar.gz). Coordinates are stored
 under `periodic_bulk_zno_128` in [structures.json](structures.json).
+The newer [tree/reuse comparison](cpu_ase_neighbors.json),
+[numerical results](cpu_ase_neighbors_results.json.gz), and
+[reference archive](cpu_ase_neighbors_reference.tar.gz) record both optimization
+commits and LAMMPS checks after movement, including a forced rebuild.
 
 ```sh
 python scripts/benchmark.py
+python scripts/benchmark.py --compare-neighbors
 python scripts/validate.py --verify --system zno --include-bulk
 ```
 

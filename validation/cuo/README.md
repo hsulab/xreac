@@ -31,8 +31,9 @@ python examples/cuo_surface.py
 
 The timed backend is **ASE**, with neighbor construction included on every
 call and result caching bypassed. The native backend is evaluated separately
-for consistency. Current ASE timings are retained in
-[cpu_ase_pilot.json](cpu_ase_pilot.json); the earlier timing sections below
+for consistency. Improved ASE tree/reuse timings are retained in
+[cpu_ase_neighbors.json](cpu_ase_neighbors.json), with the original bin-based
+baseline in [cpu_ase_pilot.json](cpu_ase_pilot.json); the earlier timing sections below
 used native neighbors and are historical baselines.
 
 LAMMPS verification is mandatory. The example checks energy components,
