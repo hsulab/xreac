@@ -1,6 +1,31 @@
 # Changelog
 
-## Unreleased
+## 0.7.0
+
+Improve ASE neighbor performance and add a verified bulk-water molecular
+dynamics example. QEq remains fully converged at each geometry.
+
+- Use ASE's tree-based neighbor builder and vectorized reverse edges. Add
+  `neighbor_skin=0.3` Angstrom per atom by default, reusing topology until
+  displacement, cell, periodicity, atom identity/count, cutoff, or calculator
+  settings require rebuilding. Set `neighbor_skin=0` for fresh construction
+  on every evaluation. Charges, energies, and forces are always recomputed
+  at changed geometries.
+- Across the three single-CPU pilots, tree construction improves full
+  evaluation throughput by 3.7–4.4x over the original ASE bin-based path;
+  topology reuse adds about 1.11x in the same-run comparisons. Reuse timings
+  hold geometry fixed and exclude the initial build; moving-MD gains depend
+  on rebuild frequency. Retain source hashes and numerical checks per commit.
+- Add `examples/water_md.py`: ASE Berendsen MD for the existing 192-atom
+  water box, with matched masses, initial velocities, and settings in LAMMPS.
+  A 1 ps run gives 237.8 ms/step for xreac versus 31.9 ms/step for LAMMPS
+  on one CPU thread, with substantial within-run timing variation. Sampled
+  states from both trajectories pass fresh LAMMPS checks. The initial box is
+  an unrelaxed fixture, not an equilibrated-water production model.
+- Add an isolated QEq factorization/history-cache experiment. All 4,101
+  charge comparisons pass, but cached solves take 2.50 s versus 1.74 s for
+  direct solves over 4,000 timed steps. The direct solve accounts for only
+  about 0.18% of MD time in this case; keep the production direct solver.
 
 - Use fresh ASE neighbor lists inside timed benchmark evaluations, explicitly
   bypassing ASE result caching. Make bulk water (192 atoms), wurtzite ZnO bulk
@@ -20,6 +45,14 @@
   license text, and file-specific license notes in source and wheel distributions.
 - Use the bundled parameters by default in the CuO example and reference test;
   `--system cuo --verify` runs the existing slab without a separate download.
+
+Validation: all 186 tests pass, including LAMMPS reference checks. The sampled
+water-MD force differences are below 7e-10 kcal/mol/Angstrom. Formatting,
+documentation, and package checks are part of the release workflow.
+
+Licensing: code remains GPL-2.0-or-later. The bundled Cu/O/H/Cl parameter
+file is separately CC BY-NC 4.0, including its noncommercial restriction;
+see `NOTICE`, `LICENSES/CC-BY-NC-4.0.txt`, and `data/README.md`.
 
 ## 0.6.1
 
