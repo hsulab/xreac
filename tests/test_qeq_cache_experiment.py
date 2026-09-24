@@ -46,3 +46,14 @@ def test_cache_does_not_accept_nonfinite_matrix():
     matrix[0, 0] = np.nan
     with pytest.raises(ValueError):
         CachedQEq().solve(matrix, rhs)
+
+
+def test_cache_accepts_convergence_after_last_allowed_correction():
+    matrix, rhs = system(6, 42)
+    cache = CachedQEq(max_corrections=1)
+    cache.solve(matrix, rhs)
+    changed_rhs = rhs.copy()
+    changed_rhs[0] += 0.1
+    np.testing.assert_allclose(cache.solve(matrix, changed_rhs), np.linalg.solve(matrix, changed_rhs), atol=1e-12)
+    assert cache.rebuilds == 1
+    assert cache.corrections == 1

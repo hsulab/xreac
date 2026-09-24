@@ -59,10 +59,12 @@ class CachedQEq:
             guess = self.history[-1].copy()
             if len(self.history) == 2:
                 guess = 2 * guess - self.history[-2]
-            for _ in range(self.max_corrections):
+            for correction in range(self.max_corrections + 1):
                 residual = rhs - matrix @ guess
                 if np.max(abs(residual)) <= self.tolerance:
                     solution = guess
+                    break
+                if correction == self.max_corrections:
                     break
                 guess += lu_solve(self.factor, residual, check_finite=False)
                 self.corrections += 1
