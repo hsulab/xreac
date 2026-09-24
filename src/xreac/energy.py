@@ -120,13 +120,10 @@ class EnergyModel:
         bo, pi, pp = bo * corr, pi * corr * f1, pp * corr * f1
         return tuple(np.where(v >= 1e-10, v, 0.0) for v in (bo, bo - pi - pp, pi, pp))
 
-    def properties(self, x, charges):
-        _, r = self.edges.geometry(x)
-        bo = self.bond_orders(r)[0]
-        total = self.edges.atom_sum(bo)
-        de = total - self.a["valency_e"]
-        half = onp.trunc(getval(de) / 2)
-        nlp = np.exp(-self.g[15] * (2 + de - 2 * half) ** 2) - half
+    def properties(self, x, charges, bond_state):
+        # Numerical values from this evaluation's energy pass, never a cache
+        # carried across geometries or calculator calls.
+        bo, total, nlp = bond_state
         center = np.sum(x * self.a["mass"][:, None], axis=0) / np.sum(self.a["mass"])
         return dict(
             bond_orders=self.edges.pair_sum(bo),
@@ -136,7 +133,7 @@ class EnergyModel:
             dipole=np.sum((x - center) * charges[:, None], axis=0),
         )
 
-    def components(self, x, fixed_charges=None):
+    def components(self, x, fixed_charges=None, *, return_bond_state=False):
         p, a, g, i, j = self.p, self.a, self.g, self.i, self.j
         vectors, r = self.edges.geometry(x)
         q, taper, shield = self.electrostatics(r, fixed_charges)
@@ -180,7 +177,12 @@ class EnergyModel:
         self.angles(e, vectors, r, bo, pi, pp, total, d, db, nlp, vlpex, neighbors)
         self.torsions(e, vectors, r, bo, pi, db, neighbors)
         self.hydrogen_bonds(e, vectors, r, bo)
-        return np.stack([e[k] for k in COMPONENTS]), q
+        result = np.stack([e[k] for k in COMPONENTS]), q
+        if return_bond_state:
+            # Properties are observations, not additional force objectives.
+            # Detach these values without adding zero-gradient output paths.
+            return *result, tuple(getval(v) for v in (bo, total, nlp))
+        return result
 
     def special_bond_corrections(self, e, bo, total, d):
         a, g, i, j = self.a, self.g, self.i, self.j

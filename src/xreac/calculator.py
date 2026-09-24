@@ -111,8 +111,11 @@ class Calculator:
                 _, distances = model.edges.geometry(x)
                 fixed_charges = model.electrostatics(distances)[0]
 
+            bond_state = None
+
             def values(y):
-                components, charges = model.components(y, fixed_charges)
+                nonlocal bond_state
+                components, charges, bond_state = model.components(y, fixed_charges, return_bond_state=True)
                 return anp.concatenate((components, charges))
 
             backward, values_at_x = make_vjp(values)(x)
@@ -124,7 +127,7 @@ class Calculator:
             raise ValueError("Non-finite energy, charges, or forces; check the geometry")
         if abs(charges.sum()) > 1e-8:
             raise ValueError("QEq charge constraint failed")
-        properties = model.properties(x, charges)
+        properties = model.properties(x, charges, bond_state)
         return Evaluation(
             float(components.sum()),
             force,
