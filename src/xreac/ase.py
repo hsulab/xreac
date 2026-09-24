@@ -6,15 +6,24 @@ import numpy as np
 
 try:
     from ase.calculators.calculator import Calculator as ASECalculator, all_changes
-    from ase.neighborlist import neighbor_list
+    from ase.neighborlist import PrimitiveNeighborList
     from ase.units import kcal, mol
 except ImportError as exc:
     raise ImportError("Install xreac[ase] to use the ASE calculator") from exc
 
 from .calculator import Calculator
-from .geometry import validate_expansion_limit
+from .geometry import Boundary, validate_expansion_limit
 
 KCAL_MOL_TO_EV = kcal / mol
+
+
+def _directed_neighbors(neighbor_list):
+    """Flatten ASE's half list and add reverse edges without Python pair loops."""
+    counts = [len(row) for row in neighbor_list.neighbors]
+    i = np.repeat(np.arange(len(counts), dtype=int), counts)
+    j = np.concatenate(neighbor_list.neighbors) if counts else np.empty(0, dtype=int)
+    shifts = np.concatenate(neighbor_list.displacements).reshape(-1, 3) if counts else np.empty((0, 3), dtype=int)
+    return np.concatenate((i, j)), np.concatenate((j, i)), np.concatenate((shifts, -shifts))
 
 
 class ReaxFFCalculator(ASECalculator):
@@ -89,11 +98,15 @@ class ReaxFFCalculator(ASECalculator):
             raise ValueError("Initial charges must be finite and sum to zero; only neutral systems are supported")
         neighbors = None
         if self.parameters.neighbor_backend == "ase":
+            Boundary(self.atoms.cell.array, self.atoms.pbc)
             # Build integer topology here, before entering the core evaluator.
             # The core only differentiates x[j] - x[i] + S @ cell, never this call.
             cutoff = np.nextafter(float(self.core.force_field.general[12]), np.inf)
-            i, j, S = neighbor_list("ijS", self.atoms, cutoff, self_interaction=False)
-            neighbors = (i, j, S)
+            neighbor_list = PrimitiveNeighborList(
+                np.full(len(self.atoms), cutoff / 2), skin=0, self_interaction=False, bothways=False
+            )
+            neighbor_list.update(self.atoms.pbc, self.atoms.cell, self.atoms.positions)
+            neighbors = _directed_neighbors(neighbor_list)
         result = self.core.evaluate(
             self.atoms.get_chemical_symbols(),
             self.atoms.positions,

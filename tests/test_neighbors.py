@@ -13,7 +13,7 @@ from autograd import grad
 
 from validate import validation_cases, backend_differences
 from xreac import Calculator, ForceField
-from xreac.ase import ReaxFFCalculator
+from xreac.ase import ReaxFFCalculator, PrimitiveNeighborList, _directed_neighbors
 from xreac.neighbors import Neighbors, scatter_sum, replicated_neighbors
 from xreac.energy import EnergyModel
 
@@ -45,6 +45,17 @@ def test_neighbor_backends(name, archived_results, case_results):
     ase_edges = Neighbors(ase_list, len(x), cell, pbc)
     for key in ("i", "j", "shifts"):
         np.testing.assert_array_equal(getattr(native_edges, key), getattr(ase_edges, key))
+    tree = PrimitiveNeighborList(
+        np.full(len(x), np.nextafter(ff.general[12], np.inf) / 2),
+        skin=0,
+        self_interaction=False,
+        bothways=False,
+    )
+    atoms = Atoms(symbols, positions=x, cell=cell, pbc=pbc)
+    tree.update(atoms.pbc, atoms.cell, atoms.positions)
+    tree_edges = Neighbors(_directed_neighbors(tree), len(x), cell, pbc)
+    for key in ("i", "j", "shifts"):
+        np.testing.assert_array_equal(getattr(tree_edges, key), getattr(ase_edges, key))
     expected = case_results(name).native
     actual = case_results(name).ase
     assert actual.neighbor_backend == "ase"
@@ -252,15 +263,14 @@ def test_ase_builds_arrays_before_core_evaluation(monkeypatch):
     ff = ForceField.bundled("ffield.reax.HO.2015")
     filename, symbols, x, cell, pbc = CASES["small_water_4A"]
     atoms = Atoms(symbols, positions=x, cell=cell, pbc=pbc, calculator=ReaxFFCalculator(ff))
-    original_builder = adapter.neighbor_list
+    original_builder = adapter.PrimitiveNeighborList.build
     original_evaluate = atoms.calc.core.evaluate
     calls = []
 
-    def build(quantities, supplied_atoms, cutoff, **kwargs):
-        assert quantities == "ijS"
-        assert not isinstance(supplied_atoms.positions, Box)
+    def build(nl, pbc, cell, positions):
+        assert not isinstance(positions, Box)
         calls.append("build")
-        return original_builder(quantities, supplied_atoms, cutoff, **kwargs)
+        return original_builder(nl, pbc, cell, positions)
 
     def evaluate(*args, **kwargs):
         calls.append("evaluate")
@@ -273,11 +283,11 @@ def test_ase_builds_arrays_before_core_evaluation(monkeypatch):
             def forbidden(*args, **kwargs):
                 raise AssertionError("Neighbor builder called inside core evaluate")
 
-            patch.setattr(adapter, "neighbor_list", forbidden)
+            patch.setattr(adapter.PrimitiveNeighborList, "build", forbidden)
             patch.setattr("ase.neighborlist.primitive_neighbor_list", forbidden)
             return original_evaluate(*args, **kwargs)
 
-    monkeypatch.setattr(adapter, "neighbor_list", build)
+    monkeypatch.setattr(adapter.PrimitiveNeighborList, "build", build)
     monkeypatch.setattr(atoms.calc.core, "evaluate", evaluate)
     atoms.get_forces()
     atoms.get_potential_energy()

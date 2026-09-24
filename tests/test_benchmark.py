@@ -12,7 +12,7 @@ def test_ase_timing_bypasses_result_cache(monkeypatch):
     from xreac import calculator
 
     calls = []
-    original = adapter.neighbor_list
+    original = adapter.PrimitiveNeighborList.build
 
     def build(*args, **kwargs):
         calls.append(1)
@@ -21,7 +21,7 @@ def test_ase_timing_bypasses_result_cache(monkeypatch):
     def forbidden(*args, **kwargs):
         raise AssertionError("ASE benchmarks must not use native neighbor construction")
 
-    monkeypatch.setattr(adapter, "neighbor_list", build)
+    monkeypatch.setattr(adapter.PrimitiveNeighborList, "build", build)
     monkeypatch.setattr(calculator, "replicated_neighbors", forbidden)
     filename, symbols, x, cell, pbc = validation_cases()["cluster_water_monomer"]
     calc = Calculator(ForceField.bundled(filename))
