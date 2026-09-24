@@ -11,7 +11,7 @@ import autograd.numpy as np
 import numpy as onp
 from autograd.tracer import getval
 
-from .neighbors import Neighbors
+from .neighbors import Neighbors, scatter_sum
 
 C_ELE = 332.06371
 QEQ_COULOMB = 14.4
@@ -91,7 +91,30 @@ class EnergyModel:
         return q, taper, shield
 
     def bond_orders(self, r):
-        p, a, g, i, j = self.p, self.a, self.g, self.i, self.j
+        a, g = self.a, self.g
+        # Recompute candidates at this geometry, including for caller-supplied
+        # skin lists. Long-range edges remain available to nonbonded terms.
+        selected = onp.flatnonzero(getval(r) <= min(BOND_CUT, g[12]))
+        r, i, j = r[selected], self.i[selected], self.j[selected]
+        p = {
+            key: self.p[key][selected]
+            for key in (
+                "p_bo1",
+                "p_bo2",
+                "p_bo3",
+                "p_bo4",
+                "p_bo5",
+                "p_bo6",
+                "r_s",
+                "r_p",
+                "r_pp",
+                "ovc",
+                "v13cor",
+                "p_boc3",
+                "p_boc4",
+                "p_boc5",
+            )
+        }
         cutoff = 0.01 * g[29]
         sigma_ok = (a["r_s"][i] > 0) & (a["r_s"][j] > 0)
         sigma = np.where(
@@ -102,10 +125,10 @@ class EnergyModel:
         pi = np.where(pi_ok, np.exp(p["p_bo3"] * (r / np.where(pi_ok, p["r_p"], 1)) ** p["p_bo4"]), 0)
         pp = np.where(pp_ok, np.exp(p["p_bo5"] * (r / np.where(pp_ok, p["r_pp"], 1)) ** p["p_bo6"]), 0)
         raw = sigma + pi + pp
-        mask = (getval(raw) >= cutoff) & (getval(r) <= min(BOND_CUT, g[12]))
+        mask = getval(raw) >= cutoff
         bo = np.where(mask, raw - cutoff, 0)
         pi, pp = np.where(mask, pi, 0), np.where(mask, pp, 0)
-        total = self.edges.atom_sum(bo)
+        total = scatter_sum(bo, i, self.n)
         # LAMMPS uses valency_val for the *uncorrected* bond-order correction.
         # The corrected coordination below instead uses valency_boc; the two
         # parameters can differ for heavy elements such as Cu.
@@ -118,7 +141,9 @@ class EnergyModel:
         f5 = 1 / (1 + np.exp(-(p["p_boc4"] * bo**2 - db[j]) * p["p_boc3"] + p["p_boc5"]))
         corr = f1 * np.where(p["v13cor"] >= 0.001, f4 * f5, 1)
         bo, pi, pp = bo * corr, pi * corr * f1, pp * corr * f1
-        return tuple(np.where(v >= 1e-10, v, 0.0) for v in (bo, bo - pi - pp, pi, pp))
+        return tuple(
+            scatter_sum(np.where(v >= 1e-10, v, 0.0), selected, len(self.i)) for v in (bo, bo - pi - pp, pi, pp)
+        )
 
     def properties(self, x, charges, bond_state):
         # Numerical values from this evaluation's energy pass, never a cache
