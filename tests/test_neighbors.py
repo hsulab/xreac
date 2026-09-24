@@ -145,6 +145,26 @@ def test_scatter_sum_derivative():
     np.testing.assert_array_equal(derivative, [8, 4, 8, 8])
 
 
+@pytest.mark.parametrize("shift", [1, 2**62])
+@pytest.mark.parametrize("index_dtype", [np.int64, np.uint64])
+def test_neighbor_order_with_large_image_shifts(shift, index_dtype):
+    # Exercise ordinary packed keys and the overflow-safe fallback using only
+    # integer topology, without introducing another simulation structure.
+    i = np.array([1, 0, 0, 1, 0, 1], dtype=index_dtype)
+    j = 1 - i
+    shifts = np.array([[shift, 0, 0], [0, 0, 0], [-shift, 0, 0], [0, 0, 0], [-shift - 1, 0, 0], [shift + 1, 0, 0]])
+    edges = Neighbors((i, j, shifts), 2, np.eye(3), True)
+    keys = list(zip(edges.i, edges.j, *edges.shifts.T))
+    assert keys == sorted(zip(i, j, *shifts.T))
+    np.testing.assert_array_equal(edges.i[edges.reverse], edges.j)
+    np.testing.assert_array_equal(edges.shifts[edges.reverse], -edges.shifts)
+    np.testing.assert_array_equal(edges.reverse[edges.reverse], np.arange(len(i)))
+    with pytest.raises(ValueError, match="both directions"):
+        Neighbors((i[:-1], j[:-1], shifts[:-1]), 2, np.eye(3), True)
+    with pytest.raises(ValueError, match="Duplicate"):
+        Neighbors((np.r_[i, i[:1]], np.r_[j, j[:1]], np.concatenate((shifts, shifts[:1]))), 2, np.eye(3), True)
+
+
 def test_ase_default_no_replication_and_backend_switch(monkeypatch):
     filename, symbols, x, cell, pbc = CASES["small_water_4A"]
     ff = ForceField.bundled(filename)

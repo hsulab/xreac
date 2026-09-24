@@ -62,6 +62,42 @@ def scatter_sum(values, indices, size):
 defvjp(scatter_sum, lambda ans, values, indices, size: lambda g: g[indices], None, None)
 
 
+def _edge_order(i, j, shifts, atoms):
+    """Sort directed edges and find their reverses without tuple-key arrays."""
+    i, j = i.astype(onp.int64, copy=False), j.astype(onp.int64, copy=False)
+    bounds = [max(abs(int(column.min(initial=0))), abs(int(column.max(initial=0)))) for column in shifts.T]
+    size = atoms * atoms
+    for bound in bounds:
+        size *= 2 * bound + 1
+    if size <= onp.iinfo(onp.int64).max:
+        # Mixed-radix keys preserve lexicographic (i, j, Sx, Sy, Sz) order.
+        # Check the complete range with Python integers before packing, so
+        # large caller-supplied image shifts cannot collide through overflow.
+        keys = i * atoms + j
+        reverse_keys = j * atoms + i
+        for column, bound in zip(shifts.T, bounds):
+            width = 2 * bound + 1
+            column = column.astype(onp.int64)
+            keys = keys * width + column + bound
+            reverse_keys = reverse_keys * width - column + bound
+        order = onp.argsort(keys, kind="stable")
+        keys, reverse_keys = keys[order], reverse_keys[order]
+        reverse = onp.argsort(reverse_keys, kind="stable")
+        duplicate = onp.any(keys[1:] == keys[:-1])
+    else:
+        keys = onp.column_stack((i, j, shifts))
+        order = onp.lexsort(keys[:, ::-1].T)
+        keys = keys[order]
+        reverse_keys = onp.column_stack((j, i, -shifts))[order]
+        reverse = onp.lexsort(reverse_keys[:, ::-1].T)
+        duplicate = onp.any(onp.all(keys[1:] == keys[:-1], axis=1))
+    if duplicate:
+        raise ValueError("Duplicate neighbor edges are not allowed")
+    if not onp.array_equal(keys, reverse_keys[reverse]):
+        raise ValueError("neighbors must include both directions: (i, j, S) and (j, i, -S)")
+    return order, reverse
+
+
 class Neighbors:
     """Validate and copy an explicit full directed list ``(i, j, S)``."""
 
@@ -84,17 +120,9 @@ class Neighbors:
             raise ValueError("Zero-shift self neighbors are not allowed")
         # Builders need not sort by j or shift. Canonical sorting gives stable
         # reductions and a deterministic reverse-edge map for many-body terms.
-        order = onp.lexsort((shifts[:, 2], shifts[:, 1], shifts[:, 0], j, i))
+        order, self.reverse = _edge_order(i, j, shifts, atoms)
         self.i, self.j, self.shifts = (values[order].astype(onp.int64) for values in (i, j, shifts))
         self.offsets = self.shifts @ self.cell
-        keys = onp.column_stack((self.i, self.j, self.shifts))
-        if onp.any(onp.all(keys[1:] == keys[:-1], axis=1)):
-            raise ValueError("Duplicate neighbor edges are not allowed")
-        reverse_keys = onp.column_stack((self.j, self.i, -self.shifts))
-        reverse_order = onp.lexsort(reverse_keys[:, ::-1].T)
-        if not onp.array_equal(keys, reverse_keys[reverse_order]):
-            raise ValueError("neighbors must include both directions: (i, j, S) and (j, i, -S)")
-        self.reverse = reverse_order
         # The canonical list is sorted, so index order is lexicographic order.
         self.half = onp.arange(len(self.i)) < self.reverse
         counts = onp.bincount(self.i, minlength=self.n)
