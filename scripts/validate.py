@@ -28,6 +28,21 @@ from xreac.reference import evaluate_lammps
 
 
 CUO_FORCE_FIELD = "ffield.reax.CuOHCl.2010"
+PILOT_CASES = ("periodic_bulk_water_192", "periodic_bulk_zno_128", "surface_cuo_010")
+
+
+def zno_bulk_case():
+    """One 128-atom wurtzite benchmark cell; dimensions all exceed 10 Angstrom.
+
+    Representative fixture parameters, not a relaxed equilibrium prediction:
+    a=3.25 Angstrom, c=5.21 Angstrom, u=0.382, with seeded 0.01 Angstrom noise.
+    """
+    from ase.build import bulk
+
+    atoms = bulk("ZnO", "wurtzite", a=3.25, c=5.21, u=0.382, orthorhombic=True).repeat((4, 2, 2))
+    atoms.positions += np.random.default_rng(260924).normal(0, 0.01, atoms.positions.shape)
+    atoms.wrap()
+    return "ffield.reax.ZnOH.2010", atoms.get_chemical_symbols(), atoms.positions, atoms.cell.array, atoms.pbc.tolist()
 
 
 def cuo_surface_case():
@@ -85,6 +100,8 @@ def validation_cases(include_bulk=False, *, include_cuo=False):
     )
     if include_cuo:
         cases["surface_cuo_010"] = cuo_surface_case()
+    if include_bulk:
+        cases["periodic_bulk_zno_128"] = zno_bulk_case()
     return cases
 
 
@@ -128,7 +145,9 @@ def main():
     parser.add_argument("--verify", action="store_true", help="Also run fresh LAMMPS single points")
     parser.add_argument("--executable", help="Override lmp_mpi executable")
     parser.add_argument("--system", choices=tuple(SYSTEMS.values()), help="Validate one chemical system")
-    parser.add_argument("--include-bulk", action="store_true", help="Also check the 192-atom water box")
+    parser.add_argument(
+        "--include-bulk", action="store_true", help="Also check 192-atom water and 128-atom ZnO bulk cells"
+    )
     parser.add_argument("--cuo-force-field", type=Path, help="Include the CuO slab using a custom Cu/O parameter file")
     parser.add_argument(
         "--output",
@@ -183,7 +202,7 @@ def main():
                 "atoms": len(x),
                 "force_field": filename,
                 "force_field_sha256": ff.checksum,
-                "optional": name in ("periodic_bulk_water_192", "surface_cuo_010"),
+                "optional": name in PILOT_CASES,
                 "energy": results["ase"].energy,
                 "evaluation_seconds": timings,
                 "backend_comparison": backend_differences(results["ase"], results["replicated"], len(x)),

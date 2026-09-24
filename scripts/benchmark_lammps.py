@@ -1,4 +1,4 @@
-"""Compare single-CPU xreac evaluations with in-process lmp_mpi timings."""
+"""Benchmark bulk water, bulk ZnO, and CuO surface with ASE neighbors and LAMMPS."""
 
 import argparse
 from datetime import datetime, timezone
@@ -36,9 +36,12 @@ for path in ("src", "scripts", "tests", "examples"):
 
 import numpy as np
 from cases import cluster
-from validate import SYSTEMS, validation_cases
-from water_cluster import comparison
+from ase import Atoms
+from ase.io import write
+from validate import PILOT_CASES, SYSTEMS, validation_cases
+from water_cluster import comparison, serialize
 from xreac import Calculator, ForceField
+from xreac.ase import ReaxFFCalculator
 from xreac.reference import evaluate_lammps
 
 
@@ -54,9 +57,35 @@ def distribution(samples, count):
 
 
 def native_timing(calc, symbols, x, cell, pbc, repeats, target_seconds):
+    """Explicit native option retained for reproducing historical measurements."""
+
     def evaluate():
         return calc.evaluate(symbols, x, cell=cell, pbc=pbc, full_derivative=False)
 
+    result, timing = evaluation_timing(evaluate, repeats, target_seconds)
+    timing.update(neighbor_backend="replicated", neighbor_build_included=True, result_cache_used=False)
+    return result, timing
+
+
+def ase_timing(calc, symbols, x, cell, pbc, repeats, target_seconds):
+    """Time fresh ASE neighbors and full evaluations, bypassing ASE result caching."""
+    atoms = Atoms(symbols, positions=x, cell=cell, pbc=pbc)
+    adapter = ReaxFFCalculator(calc.force_field, neighbor_backend="ase", full_derivative=False)
+    adapter.core = calc
+
+    def evaluate():
+        # Calling get_forces() at unchanged coordinates would return cached
+        # results. calculate() always rebuilds ASE's ijS list and reruns QEq,
+        # energy, forces, and properties. Include all of that in the timer.
+        adapter.calculate(atoms)
+        return adapter.evaluation
+
+    result, timing = evaluation_timing(evaluate, repeats, target_seconds)
+    timing.update(neighbor_backend="ase", neighbor_build_included=True, result_cache_used=False)
+    return result, timing
+
+
+def evaluation_timing(evaluate, repeats, target_seconds):
     start = time.perf_counter()
     result = evaluate()
     first = time.perf_counter() - start
@@ -137,10 +166,13 @@ run 0
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--executable", default=os.environ.get("XREAC_LAMMPS", "lmp_mpi"))
-    parser.add_argument("--include-large", action="store_true", help="Include 100/200-atom Zn/O and 192-atom water")
+    parser.add_argument(
+        "--suite", choices=("pilots", "legacy"), default="pilots", help="Default: exactly three pilot cases"
+    )
+    parser.add_argument("--include-large", action="store_true", help="Include larger cases with --suite legacy")
     parser.add_argument("--repeats", type=int, default=5)
     parser.add_argument("--batch-seconds", type=float, default=0.3)
-    parser.add_argument("--lammps-calls", type=int, default=1000)
+    parser.add_argument("--lammps-calls", type=int, default=100)
     parser.add_argument(
         "--skip-lammps-timing",
         action="store_true",
@@ -154,13 +186,19 @@ def main():
     args = parser.parse_args()
     if min(args.repeats, args.batch_seconds, args.lammps_calls) <= 0:
         parser.error("Repeat counts and batch duration must be positive")
+    if args.include_large and args.suite != "legacy":
+        parser.error("--include-large is for --suite legacy; the default already includes both bulk pilots")
     executable = shutil.which(args.executable)
     if executable is None:
         parser.error(f"Executable not found: {args.executable}")
     args.output.mkdir(parents=True, exist_ok=False)
-    cases = validation_cases(args.include_large)
-    names = ["cluster_water_monomer", "cluster_water_distorted_dimer", "methane", "zno_cluster20"]
-    if args.include_large:
+    cases = validation_cases(args.suite == "pilots" or args.include_large, include_cuo=args.suite == "pilots")
+    names = (
+        list(PILOT_CASES)
+        if args.suite == "pilots"
+        else ["cluster_water_monomer", "cluster_water_distorted_dimer", "methane", "zno_cluster20"]
+    )
+    if args.suite == "legacy" and args.include_large:
         for n in (100, 200):
             symbols, x = cluster(n)
             cases[f"zno_cluster{n}"] = ("ffield.reax.ZnOH.2010", symbols, x, None, False)
@@ -184,9 +222,11 @@ def main():
         "thread_environment": THREAD_ENV,
         "executable": executable,
         "repeats": args.repeats,
+        "suite": args.suite,
+        "neighbor_backend": "ase",
         "lammps_timing": not args.skip_lammps_timing,
         "method": {
-            "xreac": "Calculator.evaluate, native neighbors, fresh QEq, fixed-charge forces, all properties",
+            "xreac": "ReaxFFCalculator.calculate, fresh ASE neighbors each call, fresh QEq, fixed-charge forces, all properties; ASE result cache bypassed",
             "lammps_fresh": "Repeated run 0; rebuild neighbors and recreate QEq fix with zero charges each call; all properties",
             "lammps_steady": "Fixed geometry, no integrator, QEq each step with history and neighbor reuse; properties at batch endpoints",
             "timing": "Median batch wall time per call; force-field loading, process startup and final dumps excluded",
@@ -198,10 +238,17 @@ def main():
     for name in names:
         filename, symbols, x, cell, pbc = cases[name]
         ff = ForceField.bundled(filename)
-        result, native = native_timing(Calculator(ff), symbols, x, cell, pbc, args.repeats, args.batch_seconds)
+        result, timing = ase_timing(Calculator(ff), symbols, x, cell, pbc, args.repeats, args.batch_seconds)
         work = args.output / name
-        ref = evaluate_lammps(ff, symbols, x, cell=cell, pbc=pbc, executable=executable, directory=work)
+        work.mkdir()
+        structure = dict(symbols=symbols, positions=x.tolist(), cell=None if cell is None else cell.tolist(), pbc=pbc)
+        (work / "structure.json").write_text(json.dumps(structure, indent=2) + "\n")
+        write(work / "structure.extxyz", Atoms(symbols, positions=x, cell=cell, pbc=pbc))
+        ref = evaluate_lammps(ff, symbols, x, cell=cell, pbc=pbc, executable=executable, directory=work / "reference")
         checks = comparison(result, ref, len(x))
+        (work / "results.json").write_text(
+            json.dumps(dict(ase=serialize(result), reference=serialize(ref)), indent=2) + "\n"
+        )
         if not checks["passed"] or ref.cell_repetitions != (1, 1, 1):
             raise RuntimeError(f"Reference mismatch or unequal atom counts: {name}")
         row = {
@@ -210,11 +257,13 @@ def main():
             "force_field": filename,
             "force_field_sha256": ff.checksum,
             "reference_version": ref.version,
+            "reference_cell_repetitions": ref.cell_repetitions,
+            "structure_sha256": sha256((work / "structure.json").read_bytes()).hexdigest(),
             "comparison": checks,
-            "xreac": native,
+            "xreac": timing,
         }
         for mode in () if args.skip_lammps_timing else ("fresh", "steady"):
-            timing, energy, state = lammps_timing(work, executable, args.repeats, args.lammps_calls, mode)
+            elapsed, energy, state = lammps_timing(ref.directory, executable, args.repeats, args.lammps_calls, mode)
             errors = {
                 "energy_per_atom": abs(energy - result.energy) / len(x),
                 "charges": float(np.max(abs(state[:, 1] - result.charges))),
@@ -222,12 +271,12 @@ def main():
             }
             if any(errors[key] > checks["limits"][key] for key in errors):
                 raise RuntimeError(f"Timed {mode} calculation mismatch: {name}: {errors}")
-            timing["final_state_errors"] = errors
-            row[f"lammps_{mode}"] = timing
-            row[f"slowdown_vs_{mode}"] = native["median_seconds"] / timing["median_seconds"]
+            elapsed["final_state_errors"] = errors
+            row[f"lammps_{mode}"] = elapsed
+            row[f"slowdown_vs_{mode}"] = timing["median_seconds"] / elapsed["median_seconds"]
         report["cases"][name] = row
         (args.output / "summary.json").write_text(json.dumps(report, indent=2) + "\n")
-        message = f"{name} ({len(x)} atoms): xreac {1000 * native['median_seconds']:.3f} ms"
+        message = f"{name} ({len(x)} atoms): xreac/ASE {1000 * timing['median_seconds']:.3f} ms"
         if args.skip_lammps_timing:
             message += "; LAMMPS verification PASS"
         else:

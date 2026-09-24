@@ -41,6 +41,12 @@ def main():
     )
     parser.add_argument("--executable", default=os.environ.get("XREAC_LAMMPS", "lmp_mpi"))
     parser.add_argument(
+        "--neighbor-backend",
+        choices=("ase", "replicated"),
+        default="ase",
+        help="Timed backend; replicated is only for reproducing historical native timings",
+    )
+    parser.add_argument(
         "--source-root", type=Path, default=ROOT, help="Repository or extracted tree containing src/xreac"
     )
     parser.add_argument("--repeats", type=int, default=5)
@@ -79,7 +85,7 @@ def main():
     import numpy as np
     from ase import Atoms
     from ase.io import write
-    from benchmark_lammps import lammps_timing, native_timing
+    from benchmark_lammps import ase_timing, lammps_timing, native_timing
     from validate import backend_differences, validation_cases
     from water_cluster import comparison, serialize
     from xreac.ase import ReaxFFCalculator
@@ -91,18 +97,25 @@ def main():
     (args.output / "structure.json").write_text(json.dumps(structure, indent=2) + "\n")
     atoms = Atoms(symbols, positions=x, cell=cell, pbc=pbc)
     write(args.output / "cuo_010.extxyz", atoms)
-    result, timing = native_timing(Calculator(ff), symbols, x, cell, pbc, args.repeats, args.batch_seconds)
-    atoms.calc = ReaxFFCalculator(ff, neighbor_backend="ase")
-    atoms.get_forces()
-    ase_result = atoms.calc.evaluation
+    calc = Calculator(ff)
+    measure = ase_timing if args.neighbor_backend == "ase" else native_timing
+    result, timing = measure(calc, symbols, x, cell, pbc, args.repeats, args.batch_seconds)
+    if args.neighbor_backend == "ase":
+        ase_result = result
+        native_result = calc.evaluate(symbols, x, cell=cell, pbc=pbc)
+    else:
+        native_result = result
+        atoms.calc = ReaxFFCalculator(ff, neighbor_backend="ase")
+        atoms.get_forces()
+        ase_result = atoms.calc.evaluation
     reference = evaluate_lammps(
         ff, symbols, x, cell=cell, pbc=pbc, executable=executable, directory=args.output / "reference"
     )
-    checks = {"native": comparison(result, reference, len(x)), "ase": comparison(ase_result, reference, len(x))}
-    neighbors = backend_differences(result, ase_result, len(x))
+    checks = {"native": comparison(native_result, reference, len(x)), "ase": comparison(ase_result, reference, len(x))}
+    neighbors = backend_differences(native_result, ase_result, len(x))
     passed = all(row["passed"] for row in checks.values()) and neighbors["passed"]
     passed &= reference.cell_repetitions == (1, 1, 1)
-    numerical = dict(native=serialize(result), ase=serialize(ase_result), reference=serialize(reference))
+    numerical = dict(native=serialize(native_result), ase=serialize(ase_result), reference=serialize(reference))
     (args.output / "results.json").write_text(json.dumps(numerical, indent=2) + "\n")
     report = dict(
         created_utc=datetime.now(timezone.utc).isoformat(),
@@ -124,6 +137,7 @@ def main():
         thread_environment=THREAD_ENV,
         full_derivative=False,
         force_convention="fixed_charge",
+        neighbor_backend=args.neighbor_backend,
         xreac=timing,
         lammps_comparison=checks,
         neighbor_comparison=neighbors,
@@ -135,7 +149,7 @@ def main():
         (args.output / "summary.json").write_text(json.dumps(report, indent=2) + "\n")
         raise SystemExit(f"CuO comparison FAILED; see {args.output}")
     print(
-        f"CuO(010), {len(x)} atoms: LAMMPS and neighbor checks PASS; xreac {1000 * timing['median_seconds']:.3f} ms",
+        f"CuO(010), {len(x)} atoms: LAMMPS and neighbor checks PASS; xreac/{args.neighbor_backend} {1000 * timing['median_seconds']:.3f} ms",
         flush=True,
     )
     for mode in () if args.skip_lammps_timing else ("fresh", "steady"):
