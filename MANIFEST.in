@@ -4,5 +4,5 @@ recursive-include tests *.py
 include CHANGELOG.md
 recursive-include docs *.md *.py *.txt Makefile make.bat
 prune docs/_build
-recursive-include validation *.md *.json *.gz *.pdf *.csv
+recursive-include validation *.md *.json *.gz *.pdf *.csv *.patch
 prune validation/runs

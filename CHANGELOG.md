@@ -1,6 +1,9 @@
 # Changelog
 
-## Unreleased
+## 0.6.1
+
+Improve single-CPU performance and correct a bond-order parameter selection
+exposed by the new CuO surface example. The public calculator API is unchanged.
 
 - Add one optional CuO(010) surface example with mandatory LAMMPS verification
   and a before/after performance comparison using an external published parameter file.
@@ -12,6 +15,17 @@
   equations are unchanged.
 - Add reproducible single-CPU comparisons with `lmp_mpi`, including retained
   timings before and after optimization and per-commit speedups under `validation/`.
+- On the 96-atom CuO(010) fixture, reduce evaluation time from 235.41 ms to
+  41.51 ms (5.67x) on one Apple M1 Pro CPU thread. Both versions include the
+  same correctness fix and produce identical results. Fresh LAMMPS evaluations
+  take 8.09 ms; timings exclude process startup.
+- Include the CuO baseline correction patch in source distributions so the
+  retained before/after benchmark can be reproduced.
+
+Validation: all 165 tests pass with the optional external Cu/O parameter file
+enabled, including LAMMPS reference checks. The single CuO surface agrees with
+LAMMPS to within 4.6e-10 kcal/mol/Angstrom in force components. Cu/O parameters
+remain an external download; see `validation/cuo/README.md`.
 
 ## 0.6.0
 
