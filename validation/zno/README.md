@@ -1,6 +1,6 @@
 # Zn/O validation
 
-All 6 retained cases pass fresh LAMMPS comparisons. The largest force
+All 6 routine cases pass fresh LAMMPS comparisons. The largest force
 difference is 1.505e-10 kcal/mol/Å. Both Python neighbor builders agree.
 
 | Case | Atoms | Checks |
@@ -29,11 +29,27 @@ python scripts/validate_relaxation.py --backend ase
 python scripts/validate_relaxation.py --backend native
 ```
 
-[Archived benchmarks](benchmarks.json) retain 20/100/200-atom timings.
-These larger sizes are performance checks outside the default regression suite.
-Iteration-capped native FIRE timings are not convergence claims.
+[Archived benchmarks](benchmarks.json) retain historical 20/100/200-atom timings.
+Their iteration-capped native FIRE timings are not convergence claims.
+
+The current performance pilot is **one 128-atom wurtzite ZnO bulk cell**
+(64 Zn and 64 O), defined in `scripts/validate.py`. It uses an orthorhombic
+wurtzite cell with representative a=3.25 Angstrom, c=5.21 Angstrom, u=0.382,
+repeated (4, 2, 2) and perturbed by seeded 0.01 Angstrom displacements.
+Its dimensions are approximately 13.00 x 11.26 x 10.42 Angstrom, all larger
+than the 10 Angstrom cutoff. It is an unrelaxed fixture, not an equilibrium
+prediction. Existing isolated clusters cannot exercise bulk periodicity.
+
+See [ASE pilot timings and LAMMPS checks](cpu_ase_pilot.json),
+[numerical results](cpu_ase_pilot_results.json.gz), and
+[raw reference runs](cpu_ase_pilot_reference.tar.gz). Coordinates are stored
+under `periodic_bulk_zno_128` in [structures.json](structures.json).
 
 ```sh
 python scripts/benchmark.py
-python scripts/benchmark.py --relax-iterations 20
+python scripts/validate.py --verify --system zno --include-bulk
 ```
+
+`scripts/benchmark.py` now runs the same three ASE-neighbor pilots as
+`scripts/benchmark_lammps.py`; the old cluster/FIRE driver is retained in Git
+history through `b0ceb61`.

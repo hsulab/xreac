@@ -2,7 +2,8 @@
 
 Results are organized by chemical system. The default suite uses **16 structures**
 for energy, forces, QEq charges, dipoles, bond properties, and neighbor-list
-agreement. Each structure is stored once. The 192-atom water box is optional.
+agreement. Each structure is stored once. The 192-atom water box and
+128-atom wurtzite ZnO bulk cell are optional.
 An additional optional [96-atom CuO(010) slab](cuo/README.md) checks transfer
 of the performance improvements to a copper-oxide surface, always with fresh
 LAMMPS verification and the bundled Cu/O/H/Cl parameters, separately licensed
@@ -37,19 +38,70 @@ The three default systems have the same compact files:
   consolidation, used by regression tests. These values were not regenerated.
 
 Read compressed results with `json.load(gzip.open(path, "rt"))`. The baseline
-contains one native result per default case. The optional bulk case has fresh
+contains one native result per default case. The optional bulk cases have fresh
 LAMMPS verification but is outside the routine baseline suite.
 
 Water and Zn/O also retain ASE/native FIRE relaxation on their shared monomer
 and dimer. Water contains two targeted diagnostics and a [PDF report](water/report.pdf).
-Large Zn/O sizes are confined to optional [performance benchmarks](zno/benchmarks.json).
+Historical Zn/O cluster sizes are retained in [performance benchmarks](zno/benchmarks.json).
+
+## ASE-neighbor performance pilots
+
+```sh
+python scripts/benchmark_lammps.py --repeats 5 --batch-seconds 0.5 --lammps-calls 100
+# Equivalent entry point:
+python scripts/benchmark.py --repeats 5 --batch-seconds 0.5 --lammps-calls 100
+```
+
+The default runs exactly **three structures**. All are shared cases from
+`scripts/validate.py`: the existing water box and CuO slab, plus one new ZnO
+wurtzite bulk cell. Both bulk cells have full PBC; CuO has PBC in the surface
+plane. Cell heights exceed the cutoff, so both codes use identical atom counts.
+These are deterministic, unrelaxed fixtures, not equilibrium predictions.
+
+The xreac timer includes **fresh ASE neighbor construction on every call**,
+QEq, energy, fixed-charge forces, and all reported properties. It explicitly
+calls `ReaxFFCalculator.calculate()` to bypass ASE's result cache. No neighbor
+list is reused. Force-field loading, imports, and process startup are excluded.
+Both programs use one numerical thread; LAMMPS uses one MPI rank. No OS core
+affinity is imposed. Medians over five batches on the Apple M1 Pro give:
+
+| Pilot | Atoms | xreac/ASE (ms) | Fresh LAMMPS (ms) | xreac / LAMMPS |
+| --- | ---: | ---: | ---: | ---: |
+| Bulk water | 192 | 535.94 | 45.45 | 11.79x |
+| Bulk ZnO | 128 | 251.28 | 39.43 | 6.37x |
+| CuO(010) surface | 96 | 117.10 | 8.23 | 14.24x |
+
+All three pass fresh LAMMPS checks of energies, components, forces, charges,
+dipoles, and bond properties. Timed final energies, charges, and forces also
+pass. The LAMMPS fresh and steady timing modes have the meanings described
+below; steady timings are retained separately. These ASE measurements are a
+new baseline and do not replace or extend the historical native speedup tables.
+
+Each system has `cpu_ase_pilot.json`, `cpu_ase_pilot_results.json.gz`, and
+`cpu_ase_pilot_reference.tar.gz`:
+[water](water/cpu_ase_pilot.json), [ZnO](zno/cpu_ase_pilot.json),
+[CuO](cuo/cpu_ase_pilot.json). Coordinates remain in the existing system
+`structures.json` files. Raw archives omit duplicate `ffield` files; restore
+the named bundled file from `data/` before replaying their LAMMPS inputs.
+
+`--skip-lammps-timing` retains mandatory LAMMPS numerical verification while
+skipping the timing loops. The CuO example also defaults to ASE timing;
+`--neighbor-backend replicated` explicitly reproduces historical CuO timings.
+Optional bulk validation uses `--include-bulk`. The routine 16-case validation
+suite remains unchanged.
+
+## Historical native-neighbor benchmarks
 
 Single-CPU comparisons with `lmp_mpi` are recorded for
 [water](water/cpu_benchmark.json), [Zn/O](zno/cpu_benchmark.json), and
 [C/H/O](cho/cpu_benchmark.json). Each record contains the baseline and optimized
-runs, their source checksums, and the measured speedup. Reproduce a fresh run with:
+runs, their source checksums, and the measured speedup. These records used
+native neighbors. Reproduce them with the driver at the recorded historical
+commit (the current driver's default is ASE):
 
 ```sh
+# At the recorded historical commit:
 python scripts/benchmark_lammps.py --include-large
 ```
 
@@ -121,6 +173,7 @@ contains the corresponding raw reference inputs and outputs. Reproduce the
 measurement at any listed commit with:
 
 ```sh
+# At the recorded historical commit:
 python scripts/benchmark_lammps.py --include-large --skip-lammps-timing
 ```
 

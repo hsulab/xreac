@@ -83,6 +83,20 @@ python scripts/validate.py --verify --system cho
 
 See [validation](../validation/README.md) for the coverage and retained records.
 
+## Three performance pilots
+
+```sh
+python scripts/benchmark_lammps.py
+```
+
+The default benchmark runs exactly three shared cases: 192-atom bulk water,
+128-atom wurtzite ZnO bulk, and the 96-atom CuO(010) surface. It uses one CPU
+thread, builds **fresh ASE neighbor lists inside every timed evaluation**, and
+checks all three against LAMMPS. ASE result caching is bypassed explicitly.
+`scripts/benchmark.py` is an alias for the same driver and options.
+Use `--skip-lammps-timing` to skip the LAMMPS timing loops while retaining
+mandatory numerical verification. These fixtures are unrelaxed test geometries.
+
 `cuo_surface.py` adds one optional 96-atom CuO(010) slab. It always checks
 energies, forces, charges, and properties against LAMMPS, and measures
 single-CPU performance. It uses the bundled Cu/O/H/Cl supplement, separately
@@ -92,3 +106,7 @@ and [saved results](../validation/cuo/README.md).
 ```sh
 python examples/cuo_surface.py
 ```
+
+This example also times ASE neighbors by default. Its untimed native evaluation
+checks backend agreement. `--neighbor-backend replicated` is available only
+for reproducing the older native-neighbor benchmark records.

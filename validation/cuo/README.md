@@ -29,6 +29,12 @@ From the repository root, with the ASE extra installed:
 python examples/cuo_surface.py
 ```
 
+The timed backend is **ASE**, with neighbor construction included on every
+call and result caching bypassed. The native backend is evaluated separately
+for consistency. Current ASE timings are retained in
+[cpu_ase_pilot.json](cpu_ase_pilot.json); the earlier timing sections below
+used native neighbors and are historical baselines.
+
 LAMMPS verification is mandatory. The example checks energy components,
 forces, charges, dipoles, and bond properties for both native and ASE neighbor
 builders. A mismatch exits with an error. It saves the slab as extended XYZ,
@@ -95,6 +101,7 @@ mkdir -p validation/runs/cuo-baseline
 git archive c21c74b src | tar -x -C validation/runs/cuo-baseline
 patch -d validation/runs/cuo-baseline -p1 < validation/cuo/baseline_correction.patch
 python examples/cuo_surface.py \
+  --neighbor-backend replicated \
   --source-root validation/runs/cuo-baseline --skip-lammps-timing
 ```
 
@@ -151,7 +158,7 @@ source_dir="validation/runs/cuo-followup-source-$revision"
 mkdir -p "$source_dir"
 git archive "$revision" src | tar -x -C "$source_dir"
 python examples/cuo_surface.py --source-root "$source_dir" \
-  --repeats 7 --batch-seconds 0.5 --skip-lammps-timing
+  --neighbor-backend replicated --repeats 7 --batch-seconds 0.5 --skip-lammps-timing
 ```
 
 Repeat for the four revisions in table order, then reverse order, to obtain

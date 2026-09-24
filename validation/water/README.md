@@ -23,6 +23,16 @@ python scripts/validate.py --verify --system water
 
 Use `--include-bulk` to include the optional 192-atom box.
 
+The same box is the water performance pilot. Current benchmarks build fresh
+ASE neighbors on every timed evaluation, bypass result caching, and verify
+the result against LAMMPS. See [pilot timings](cpu_ase_pilot.json),
+[numerical results](cpu_ase_pilot_results.json.gz), and
+[raw reference runs](cpu_ase_pilot_reference.tar.gz).
+
+```sh
+python scripts/benchmark_lammps.py
+```
+
 - [Monomer/dimer PDF](report.pdf) and [CSV](report.csv).
 - [QEq audit](qeq.json): the shared monomer, with fresh QEq at each finite-difference displacement.
 - [Hydrogen-bond image diagnostic](hbond-images.json): the shared 4 Å cell versus its supercell.

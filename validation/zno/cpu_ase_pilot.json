@@ -1,0 +1,161 @@
+{
+  "created_utc": "2026-09-24T01:01:37.297841+00:00",
+  "git_revision": "b0ceb61807b11ee8ebe1f47a3b2e184bfacb95ac",
+  "source_sha256": {
+    "src/xreac/__init__.py": "042f04a1863f7c98a8704683a71099794097c97fc48574fb07bfdfa8ccfa0ad5",
+    "src/xreac/ase.py": "57eb4b680720350ec1f93bdd0b23a8f4320fb51e87f18f42b4e9320e6eea4fc4",
+    "src/xreac/calculator.py": "27710b9da5eb2a9da8bc88378cdda2cb4b4172acadc40a988b3252aadbdaa088",
+    "src/xreac/energy.py": "2478fcb98e2f5e85f4342f3a12cd735f4d31ce1c8bf05ca974a2bad885462a61",
+    "src/xreac/forcefield.py": "f214ce7f30d0a8d07acfaef1f45c8d1b0545430f051153aa710ee8c4e218b6e8",
+    "src/xreac/geometry.py": "179db73ce1385f55d938e791ac75014fb696e79979a4bad89affdac279c7e75c",
+    "src/xreac/neighbors.py": "46e6db68ac8223c13db53ef7ca475ef183b341bb3cabdc27cd025f210a8c53ee",
+    "src/xreac/reference.py": "29209294faa2711df6b57f8785e964c07b8f61d446e8a8046a8bcf638779dddd"
+  },
+  "platform": "macOS-26.6-arm64-arm-64bit",
+  "cpu": "Apple M1 Pro",
+  "python": "3.10.13 | packaged by conda-forge | (main, Dec 23 2023, 15:35:25) [Clang 16.0.6 ]",
+  "environment": {
+    "numpy": "2.0.2",
+    "autograd": "1.9.1",
+    "ase": "3.27.0"
+  },
+  "thread_environment": {
+    "OMP_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "MKL_NUM_THREADS": "1",
+    "VECLIB_MAXIMUM_THREADS": "1",
+    "BLIS_NUM_THREADS": "1",
+    "NUMEXPR_NUM_THREADS": "1"
+  },
+  "executable": "/opt/homebrew/bin/lmp_mpi",
+  "repeats": 5,
+  "suite": "pilots",
+  "neighbor_backend": "ase",
+  "lammps_timing": true,
+  "method": {
+    "xreac": "ReaxFFCalculator.calculate, fresh ASE neighbors each call, fresh QEq, fixed-charge forces, all properties; ASE result cache bypassed",
+    "lammps_fresh": "Repeated run 0; rebuild neighbors and recreate QEq fix with zero charges each call; all properties",
+    "lammps_steady": "Fixed geometry, no integrator, QEq each step with history and neighbor reuse; properties at batch endpoints",
+    "timing": "Median batch wall time per call; force-field loading, process startup and final dumps excluded",
+    "cpu_limit": "One MPI rank and numerical-library thread; no OS core affinity is imposed",
+    "caveat": "Fresh LAMMPS includes command parsing/setup overhead; steady is an optimistic fixed-geometry baseline, not MD"
+  },
+  "driver_sha256": {
+    "scripts/benchmark_lammps.py": "67b86ac52c14301944fcf2605b87f42af5b9151637e57cd0371c31819c1e1c99",
+    "scripts/validate.py": "a9e9c43802d587cafc668d51c94f690a6e02c610a745fbcdd49840c50aef16ba",
+    "examples/periodic_water.py": "2224526a1a040549bab9397e9ab5c0f06a2630e6193204b5e958503dc0b638c5",
+    "examples/water_cluster.py": "dfbf9c81b15c906217c03baaf3a93810e4c1a5075c811187787ebc7195b24f23"
+  },
+  "tests_passed": 171,
+  "structure_note": "Same shared water and CuO fixtures; one new seeded, unrelaxed wurtzite ZnO bulk cell.",
+  "cases": {
+    "periodic_bulk_zno_128": {
+      "system": "zno",
+      "atoms": 128,
+      "force_field": "ffield.reax.ZnOH.2010",
+      "force_field_sha256": "b5af5a65573ce60f32405a973e33f7cc89a90bc69e624a8ca89811eb67b1a07b",
+      "reference_version": "LAMMPS (22 Jul 2025 - Update 4)",
+      "reference_cell_repetitions": [
+        1,
+        1,
+        1
+      ],
+      "structure_sha256": "7099b2e748312c1a8b08a94ac849082282263c55f3d359092bbd010f51843a6e",
+      "comparison": {
+        "maximum_absolute_errors": {
+          "energy_per_atom": 1.9753088054130785e-12,
+          "components_per_atom": 2.859223968698643e-11,
+          "forces": 2.219788797219735e-10,
+          "charges": 2.937428078553239e-12,
+          "dipole": 2.8112623340348364e-11,
+          "total_bond_orders": 3.9968028886505635e-15,
+          "lone_pairs": 3.3306690738754696e-15,
+          "bond_counts": 0.0
+        },
+        "limits": {
+          "energy_per_atom": 1e-05,
+          "components_per_atom": 1e-05,
+          "forces": 0.0001,
+          "charges": 1e-06,
+          "dipole": 1e-06,
+          "total_bond_orders": 1e-08,
+          "lone_pairs": 1e-08,
+          "bond_counts": 0
+        },
+        "passed": true
+      },
+      "xreac": {
+        "calls_per_batch": 2,
+        "batch_seconds": [
+          0.5025658756494522,
+          0.5052140830084682,
+          0.5067214164882898,
+          0.49757158383727074,
+          0.4990247916430235
+        ],
+        "median_seconds": 0.2512829378247261,
+        "min_seconds": 0.24878579191863537,
+        "max_seconds": 0.2533607082441449,
+        "first_seconds": 0.2540037501603365,
+        "cpu_to_wall_ratio": 0.9889216775334353,
+        "neighbor_backend": "ase",
+        "neighbor_build_included": true,
+        "result_cache_used": false
+      },
+      "lammps_fresh": {
+        "calls_per_batch": 100,
+        "batch_seconds": [
+          3.9432731669999996,
+          3.9463305,
+          3.936474541999999,
+          3.9466787080000003,
+          3.9352906670000003
+        ],
+        "median_seconds": 0.03943273167,
+        "min_seconds": 0.03935290667,
+        "max_seconds": 0.03946678708,
+        "process_wall_seconds": 19.91634774953127,
+        "mpi_tasks": 1,
+        "openmp_threads": 0,
+        "final_state_errors": {
+          "energy_per_atom": 1.9753088054130785e-12,
+          "charges": 2.937428078553239e-12,
+          "forces": 2.219788797219735e-10
+        }
+      },
+      "slowdown_vs_fresh": 6.372445610099578,
+      "lammps_steady": {
+        "calls_per_batch": 100,
+        "batch_seconds": [
+          1.523069,
+          1.523178708,
+          1.5071141670000001,
+          1.5085211670000005,
+          1.5607372499999999
+        ],
+        "median_seconds": 0.01523069,
+        "min_seconds": 0.015071141670000001,
+        "max_seconds": 0.0156073725,
+        "process_wall_seconds": 7.83702833391726,
+        "mpi_tasks": 1,
+        "openmp_threads": 0,
+        "loop_seconds_per_step": [
+          0.0148322,
+          0.0148936,
+          0.0147303,
+          0.014744,
+          0.0152563
+        ],
+        "final_state_errors": {
+          "energy_per_atom": 3.709033080667723e-12,
+          "charges": 2.694511280765255e-12,
+          "forces": 2.6480151404939534e-10
+        }
+      },
+      "slowdown_vs_steady": 16.49846053098882
+    }
+  },
+  "structure_file": "structures.json",
+  "committed_revision": "7796b011f9370cc6c6284b590302ed3f27921fba",
+  "revision_note": "Measured working tree based on git_revision; retained source and driver hashes match committed_revision."
+}

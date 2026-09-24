@@ -60,7 +60,20 @@ The default suite reuses **16 representative structures**: six water cases,
 six Zn/O cases, and four C/H/O cases. Each structure checks both neighbor
 builders, all energy components, charges, forces, dipoles, and bond properties.
 Independent pre-consolidation baselines are retained for those same structures.
-The 192-atom water box is an optional seventeenth case.
+The 192-atom water box, 128-atom wurtzite ZnO bulk cell, and 96-atom CuO(010)
+surface are optional cases outside the routine suite. They form the three
+performance pilots:
+
+```sh
+python scripts/benchmark_lammps.py
+```
+
+Every timed xreac evaluation builds fresh ASE neighbors and computes QEq,
+energy, forces, and properties. The driver calls `calculate()` explicitly
+to bypass ASE's result cache at unchanged coordinates. All three pilots are
+verified against LAMMPS using one MPI rank and one numerical thread. Bulk
+ZnO is an unrelaxed wurtzite fixture with representative lattice parameters;
+the water box is not an equilibrated liquid snapshot.
 
 | System | Retained results | Coverage |
 | --- | --- | --- |
@@ -73,6 +86,7 @@ Reproduce all cases or select a system. The output path must be new:
 ```sh
 python scripts/validate.py --verify
 python scripts/validate.py --verify --system water --include-bulk
+python scripts/validate.py --verify --system zno --include-bulk
 ```
 
 Each system directory contains `structures.json`, `summary.json`, full numerical
@@ -91,8 +105,9 @@ ASE and native FIRE on the same monomer and dimer used by the single-point check
 
 Cutoff tests perturb the ZnO dimer around 5 and 10 Å. Symmetry, finite-difference,
 cache, neighbor-list reuse, and relaxation tests reuse the shared structures.
-Large Zn/O clusters belong to the optional benchmark script, not the routine
-reference suite. Input validation and targeted edge-case tests remain separate.
+Historical larger Zn/O clusters are available with the benchmark's explicit
+`--suite legacy --include-large` option; its timing backend is now ASE too.
+Input validation and targeted edge-case tests remain separate.
 
 These are deterministic verification geometries, not equilibrated liquid
 snapshots or predictions of physical stability. Agreement establishes

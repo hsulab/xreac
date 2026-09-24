@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- Use fresh ASE neighbor lists inside timed benchmark evaluations, explicitly
+  bypassing ASE result caching. Make bulk water (192 atoms), wurtzite ZnO bulk
+  (128 atoms), and the CuO(010) surface (96 atoms) the three default pilots,
+  with mandatory single-CPU LAMMPS verification. Share both bulk fixtures with
+  optional validation and retain older native timings as historical records.
+- Make `scripts/benchmark.py` an alias for the pilot benchmark driver and
+  switch the CuO example's timing default to ASE neighbors.
 - Reduce single-CPU CuO evaluation time from 42.52 ms to 30.42 ms (1.40x)
   with three separate optimizations: reuse bond-order values for properties,
   restrict bond-order work to the existing short-range cutoff, and pack
