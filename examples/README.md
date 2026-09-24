@@ -61,6 +61,33 @@ The optional `--include-bulk` adds the 192-atom box. Structures are deterministi
 fixtures, not equilibrated liquid snapshots. See the
 [water results](../validation/water/README.md).
 
+`water_md.py` runs the existing 192-atom water box with ASE's fixed-volume
+Berendsen thermostat and compares moving-MD throughput with single-rank LAMMPS:
+
+```sh
+python examples/water_md.py --steps 1000 --warmup 100
+# Longer example: 1 ps of timed dynamics at 0.25 fs/step.
+python examples/water_md.py --steps 4000 --warmup 100
+```
+
+Defaults are 300 K and a 100 fs thermostat time constant. Both engines use the
+same initial positions, seeded velocities, force-field masses, timestep, and
+3N temperature degrees of freedom. ASE uses its neighbor list with a 0.3 Å
+per-atom skin; LAMMPS uses a 0.6 Å pair skin. QEq is converged at every step.
+The timer excludes warmup and reference checks. Three frames from each run
+are checked against fresh LAMMPS calculations; mismatches stop the example.
+Outputs include sampled coordinates, numerical checks, timings, and raw LAMMPS
+inputs/outputs under `validation/runs/`.
+
+ASE scales velocities before velocity Verlet; LAMMPS's
+[`temp/berendsen`](https://docs.lammps.org/fix_temp_berendsen.html) scales after
+integration with `fix nve`. Therefore trajectories are not required to match
+point by point; energies, forces, charges, and properties are compared at the
+same sampled geometries. The unrelaxed fixture heats during initial settling;
+these runs demonstrate implementation and throughput, not equilibrated liquid
+statistics. See [ASE's MD documentation](https://ase.gitlab.io/ase/ase/md.html)
+for thermostat usage and ensemble limitations.
+
 `small_cells.py` demonstrates repeated images and verification against normalized
 larger LAMMPS supercells:
 

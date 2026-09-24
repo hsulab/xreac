@@ -50,7 +50,9 @@ periodic cells use image-resolved ASE or native replicated neighbor searches,
 feeding one input-cell energy model. Fixed-cell relaxation uses fixed-charge forces with either ASE FIRE
 or the retained native FIRE optimizer.
 
-Net charge, stress, variable-cell relaxation, MD integration, external fields,
+Fixed-volume MD can use ASE integrators; the bulk-water Berendsen example
+compares moving trajectories with LAMMPS (see [validation](validation.md)).
+Net charge, stress, variable-cell relaxation, a native MD integrator, external fields,
 and alternative charge models such as ACKS2 are not implemented. Exactly
 collinear active torsions are rejected because their dihedral derivative is
 undefined. A parsed force field still needs validation for its intended use.

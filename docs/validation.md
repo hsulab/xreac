@@ -79,6 +79,19 @@ verified against LAMMPS using one MPI rank and one numerical thread. Bulk
 ZnO is an unrelaxed wurtzite fixture with representative lattice parameters;
 the water box is not an equilibrated liquid snapshot.
 
+For moving bulk-water MD with ASE Berendsen and single-rank LAMMPS, run:
+
+```sh
+python examples/water_md.py --steps 1000 --warmup 100
+```
+
+This reuses the 192-atom water pilot at fixed volume, a 0.25 fs timestep,
+300 K target, and a 100 fs thermostat time constant. Timings exclude warmup
+and reference checks. Three samples from each trajectory are verified against
+fresh LAMMPS evaluations. Matched masses, initial velocities, and temperature
+degrees of freedom make the settings comparable; different thermostat ordering
+means trajectories need not coincide. Increase `--steps` for longer runs.
+
 | System | Retained results | Coverage |
 | --- | --- | --- |
 | Water | {download}`summary <../validation/water/summary.json>` | Monomer, distorted dimer, boundary crossing, rotated triclinic/partial PBC, small-cell hydrogen bonds, optional bulk |
