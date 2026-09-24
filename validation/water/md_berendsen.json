@@ -1,0 +1,475 @@
+{
+  "case": "periodic_bulk_water_192",
+  "structure_record": "structures.json",
+  "direct_md": {
+    "created_utc": "2026-09-24T13:20:41.044143+00:00",
+    "git_revision": "020d9ab436d526ee0b5f2d85c6b27a1c7504ba08",
+    "source_sha256": {
+      "src/xreac/__init__.py": "042f04a1863f7c98a8704683a71099794097c97fc48574fb07bfdfa8ccfa0ad5",
+      "src/xreac/ase.py": "d7be5c1b1bf5641047df78a1ed67397d397027b107babd0520eca032a44dced0",
+      "src/xreac/calculator.py": "27710b9da5eb2a9da8bc88378cdda2cb4b4172acadc40a988b3252aadbdaa088",
+      "src/xreac/energy.py": "2478fcb98e2f5e85f4342f3a12cd735f4d31ce1c8bf05ca974a2bad885462a61",
+      "src/xreac/forcefield.py": "f214ce7f30d0a8d07acfaef1f45c8d1b0545430f051153aa710ee8c4e218b6e8",
+      "src/xreac/geometry.py": "179db73ce1385f55d938e791ac75014fb696e79979a4bad89affdac279c7e75c",
+      "src/xreac/neighbors.py": "46e6db68ac8223c13db53ef7ca475ef183b341bb3cabdc27cd025f210a8c53ee",
+      "src/xreac/reference.py": "29209294faa2711df6b57f8785e964c07b8f61d446e8a8046a8bcf638779dddd",
+      "examples/water_md.py": "f2bbf6af0968167fcace685434fdbd294a8351509cd9134df6949cfcb0e5526d"
+    },
+    "platform": "macOS-26.6-arm64-arm-64bit",
+    "environment": {
+      "numpy": "2.0.2",
+      "autograd": "1.9.1",
+      "ase": "3.27.0"
+    },
+    "thread_environment": {
+      "OMP_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1",
+      "MKL_NUM_THREADS": "1",
+      "VECLIB_MAXIMUM_THREADS": "1",
+      "BLIS_NUM_THREADS": "1",
+      "NUMEXPR_NUM_THREADS": "1"
+    },
+    "case": "periodic_bulk_water_192",
+    "atoms": 192,
+    "force_field": "ffield.reax.HO.2015",
+    "force_field_sha256": "526dea2d55d748caed94734139dda66064e194f74f46eee9b0f511eead38b7d1",
+    "settings": {
+      "steps": 4000,
+      "warmup": 100,
+      "timestep_fs": 0.25,
+      "temperature_K": 300,
+      "taut_fs": 100,
+      "seed": 260924
+    },
+    "method": {
+      "neighbors": "ASE skin=0.3 A per atom, LAMMPS pair skin=0.6 A; displacement-based rebuilds",
+      "qeq": "Fresh direct xreac solve each step; LAMMPS qeq/reaxff each step with history, tolerance 1e-12",
+      "timing": "Moving MD, warmup and reference checks excluded; ASE wall time and LAMMPS internal loop time; one numerical thread/rank, no affinity",
+      "thermostat": "Fixed volume Berendsen, no constraints, matched masses and initial velocities; 3N temperature DOF and no ongoing COM removal",
+      "caveat": "ASE scales velocities before Verlet; LAMMPS scales after. Validate sampled identical geometries, not trajectory identity. Unrelaxed initial fixture; this is not an equilibrated-liquid study."
+    },
+    "ase": {
+      "seconds": 951.0737050008029,
+      "seconds_per_step": 0.23776842625020073,
+      "ns_per_day": 0.09084469431307332,
+      "cpu_to_wall_ratio": 0.9118952047983155,
+      "blocks": [
+        {
+          "steps": 2000,
+          "seconds": 274.25855766702443,
+          "cpu_seconds": 271.94001799999995
+        },
+        {
+          "steps": 2000,
+          "seconds": 676.8151473337784,
+          "cpu_seconds": 595.339533
+        }
+      ],
+      "neighbor_builds_during_production": 192,
+      "neighbor_builds_total": 200
+    },
+    "lammps": {
+      "seconds": 127.722,
+      "seconds_per_step": 0.0319305,
+      "ns_per_day": 0.6764692065579931
+    },
+    "slowdown": 7.446436048611852,
+    "ase_states": [
+      {
+        "step": 0,
+        "temperature_K": 593.7110875253317
+      },
+      {
+        "step": 2000,
+        "temperature_K": 361.98811727607006
+      },
+      {
+        "step": 4000,
+        "temperature_K": 327.2776738549616
+      }
+    ],
+    "ase_checks": [
+      {
+        "step": 0,
+        "comparison": {
+          "maximum_absolute_errors": {
+            "energy_per_atom": 4.5853691214385135e-12,
+            "components_per_atom": 8.10966109080861e-12,
+            "forces": 3.4219382882838545e-10,
+            "charges": 3.5470515413749126e-12,
+            "dipole": 9.340794804302277e-11,
+            "total_bond_orders": 2.886579864025407e-15,
+            "lone_pairs": 1.0132962503774589e-23,
+            "bond_counts": 0.0
+          },
+          "limits": {
+            "energy_per_atom": 1e-05,
+            "components_per_atom": 1e-05,
+            "forces": 0.0001,
+            "charges": 1e-06,
+            "dipole": 1e-06,
+            "total_bond_orders": 1e-08,
+            "lone_pairs": 1e-08,
+            "bond_counts": 0
+          },
+          "passed": true
+        },
+        "md_vs_fresh_errors": {
+          "energy": 0.0,
+          "forces": 0.0,
+          "charges": 0.0
+        }
+      },
+      {
+        "step": 2000,
+        "comparison": {
+          "maximum_absolute_errors": {
+            "energy_per_atom": 6.271723880975817e-12,
+            "components_per_atom": 9.663381206337363e-13,
+            "forces": 6.095994820043416e-10,
+            "charges": 1.191891030316583e-11,
+            "dipole": 1.3385204056248767e-10,
+            "total_bond_orders": 1.9984014443252818e-15,
+            "lone_pairs": 1.1063540692896745e-23,
+            "bond_counts": 0.0
+          },
+          "limits": {
+            "energy_per_atom": 1e-05,
+            "components_per_atom": 1e-05,
+            "forces": 0.0001,
+            "charges": 1e-06,
+            "dipole": 1e-06,
+            "total_bond_orders": 1e-08,
+            "lone_pairs": 1e-08,
+            "bond_counts": 0
+          },
+          "passed": true
+        },
+        "md_vs_fresh_errors": {
+          "energy": 0.0,
+          "forces": 0.0,
+          "charges": 0.0
+        }
+      },
+      {
+        "step": 4000,
+        "comparison": {
+          "maximum_absolute_errors": {
+            "energy_per_atom": 6.859105875870834e-12,
+            "components_per_atom": 6.821210263296962e-13,
+            "forces": 6.267044661001364e-10,
+            "charges": 1.201860833077717e-11,
+            "dipole": 6.508571459562518e-11,
+            "total_bond_orders": 2.6645352591003757e-15,
+            "lone_pairs": 1.1839022517165209e-23,
+            "bond_counts": 0.0
+          },
+          "limits": {
+            "energy_per_atom": 1e-05,
+            "components_per_atom": 1e-05,
+            "forces": 0.0001,
+            "charges": 1e-06,
+            "dipole": 1e-06,
+            "total_bond_orders": 1e-08,
+            "lone_pairs": 1e-08,
+            "bond_counts": 0
+          },
+          "passed": true
+        },
+        "md_vs_fresh_errors": {
+          "energy": 0.0,
+          "forces": 0.0,
+          "charges": 0.0
+        }
+      }
+    ],
+    "lammps_checks": [
+      {
+        "step": 0,
+        "comparison": {
+          "maximum_absolute_errors": {
+            "energy_per_atom": 2.7663797178926566e-12,
+            "components_per_atom": 8.0386068172326e-12,
+            "forces": 4.05812272674666e-10,
+            "charges": 3.542832693881337e-12,
+            "dipole": 1.2046541542076739e-10,
+            "total_bond_orders": 9.992007221626409e-16,
+            "lone_pairs": 4.782137916322191e-24,
+            "bond_counts": 0.0
+          },
+          "limits": {
+            "energy_per_atom": 1e-05,
+            "components_per_atom": 1e-05,
+            "forces": 0.0001,
+            "charges": 1e-06,
+            "dipole": 1e-06,
+            "total_bond_orders": 1e-08,
+            "lone_pairs": 1e-08,
+            "bond_counts": 0
+          },
+          "passed": true
+        },
+        "md_vs_xreac_errors": {
+          "charges": 5.969669203409467e-12,
+          "forces": 5.259597202211808e-10
+        }
+      },
+      {
+        "step": 2000,
+        "comparison": {
+          "maximum_absolute_errors": {
+            "energy_per_atom": 3.3348139065007367e-12,
+            "components_per_atom": 1.2742399727964464e-12,
+            "forces": 6.671621033405017e-10,
+            "charges": 1.2258527526398666e-11,
+            "dipole": 9.039524684339995e-11,
+            "total_bond_orders": 2.886579864025407e-15,
+            "lone_pairs": 1.307979343599475e-23,
+            "bond_counts": 0.0
+          },
+          "limits": {
+            "energy_per_atom": 1e-05,
+            "components_per_atom": 1e-05,
+            "forces": 0.0001,
+            "charges": 1e-06,
+            "dipole": 1e-06,
+            "total_bond_orders": 1e-08,
+            "lone_pairs": 1e-08,
+            "bond_counts": 0
+          },
+          "passed": true
+        },
+        "md_vs_xreac_errors": {
+          "charges": 4.065303649269936e-12,
+          "forces": 3.538307424832965e-10
+        }
+      },
+      {
+        "step": 4000,
+        "comparison": {
+          "maximum_absolute_errors": {
+            "energy_per_atom": 6.915949294731642e-12,
+            "components_per_atom": 2.7995383788947947e-12,
+            "forces": 5.06108932540883e-10,
+            "charges": 8.569811527081583e-12,
+            "dipole": 1.5618439874742762e-10,
+            "total_bond_orders": 1.5543122344752192e-15,
+            "lone_pairs": 1.1063540692896745e-23,
+            "bond_counts": 0.0
+          },
+          "limits": {
+            "energy_per_atom": 1e-05,
+            "components_per_atom": 1e-05,
+            "forces": 0.0001,
+            "charges": 1e-06,
+            "dipole": 1e-06,
+            "total_bond_orders": 1e-08,
+            "lone_pairs": 1e-08,
+            "bond_counts": 0
+          },
+          "passed": true
+        },
+        "md_vs_xreac_errors": {
+          "charges": 6.898592808113335e-12,
+          "forces": 4.467466396818054e-10
+        }
+      }
+    ],
+    "committed_revision": "47add41ec7ec6c64dd82e8deee9aee6199ecb0e9"
+  },
+  "qeq_experiment": {
+    "created_utc": "2026-09-24T14:40:02.885315+00:00",
+    "git_revision": "285230126cc8890cf5d125dcd6adb65a10a69166",
+    "source_sha256": {
+      "src/xreac/__init__.py": "042f04a1863f7c98a8704683a71099794097c97fc48574fb07bfdfa8ccfa0ad5",
+      "src/xreac/ase.py": "d7be5c1b1bf5641047df78a1ed67397d397027b107babd0520eca032a44dced0",
+      "src/xreac/calculator.py": "27710b9da5eb2a9da8bc88378cdda2cb4b4172acadc40a988b3252aadbdaa088",
+      "src/xreac/energy.py": "2478fcb98e2f5e85f4342f3a12cd735f4d31ce1c8bf05ca974a2bad885462a61",
+      "src/xreac/forcefield.py": "f214ce7f30d0a8d07acfaef1f45c8d1b0545430f051153aa710ee8c4e218b6e8",
+      "src/xreac/geometry.py": "179db73ce1385f55d938e791ac75014fb696e79979a4bad89affdac279c7e75c",
+      "src/xreac/neighbors.py": "46e6db68ac8223c13db53ef7ca475ef183b341bb3cabdc27cd025f210a8c53ee",
+      "src/xreac/reference.py": "29209294faa2711df6b57f8785e964c07b8f61d446e8a8046a8bcf638779dddd",
+      "examples/water_md.py": "f2bbf6af0968167fcace685434fdbd294a8351509cd9134df6949cfcb0e5526d",
+      "scripts/benchmark_water_qeq.py": "4048a7a635f39a5f74f0c69b41023eb8e2f7a95b4d4b9453d867d806a093b515"
+    },
+    "case": "periodic_bulk_water_192",
+    "atoms": 192,
+    "force_field_sha256": "526dea2d55d748caed94734139dda66064e194f74f46eee9b0f511eead38b7d1",
+    "settings": {
+      "steps": 4000,
+      "warmup": 100,
+      "timestep_fs": 0.25,
+      "temperature_K": 300,
+      "taut_fs": 100,
+      "seed": 260924
+    },
+    "thread_environment": {
+      "OMP_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1",
+      "MKL_NUM_THREADS": "1",
+      "VECLIB_MAXIMUM_THREADS": "1",
+      "BLIS_NUM_THREADS": "1",
+      "NUMEXPR_NUM_THREADS": "1"
+    },
+    "environment": {
+      "numpy": "2.0.2",
+      "autograd": "1.9.1",
+      "ase": "3.27.0",
+      "scipy": "1.15.3"
+    },
+    "method": "Every moving-MD QEq matrix solved with direct NumPy and cached SciPy LU/refinement; alternate solver order. Cached charges drive MD. Rebuild matrix and converge every step. Full MD timer includes both solvers and verification overhead; savings below isolate solver time, not a measured production speedup.",
+    "md": {
+      "seconds": 964.614304209128,
+      "seconds_per_step": 0.241153576052282,
+      "ns_per_day": 0.08956947831168437,
+      "cpu_to_wall_ratio": 0.9016898911872567,
+      "blocks": [
+        {
+          "steps": 2000,
+          "seconds": 481.01740487478673,
+          "cpu_seconds": 428.554844
+        },
+        {
+          "steps": 2000,
+          "seconds": 483.5968993343413,
+          "cpu_seconds": 441.228123
+        }
+      ],
+      "neighbor_builds_during_production": 192,
+      "neighbor_builds_total": 200
+    },
+    "qeq": {
+      "calls": 4101,
+      "production_calls": 4000,
+      "direct_seconds": 1.7362824063748121,
+      "cached_seconds": 2.504134250804782,
+      "solver_speedup": 0.6933663424062841,
+      "estimated_md_saving_fraction": -0.0007980913916160263,
+      "ideal_solve_elimination_ceiling_fraction": 0.0018046606933279008,
+      "estimated_direct_qeq_assembly_and_solve_seconds": 30.011221220716834,
+      "estimated_direct_qeq_fraction": 0.031193123363426105,
+      "lu_builds": 1034,
+      "refinement_corrections": 23423,
+      "max_absolute_kkt_residual": 9.99644811372491e-13,
+      "residual_tolerance": 1e-12,
+      "max_charge_difference": 2.2248869413488137e-13,
+      "direct_median_seconds": 0.0003287079744040966,
+      "cached_median_seconds": 0.00042714644223451614
+    },
+    "states": [
+      {
+        "step": 0,
+        "temperature_K": 593.7110875253326
+      },
+      {
+        "step": 2000,
+        "temperature_K": 361.9881172940773
+      },
+      {
+        "step": 4000,
+        "temperature_K": 327.286477714987
+      }
+    ],
+    "checks": [
+      {
+        "step": 0,
+        "comparison": {
+          "maximum_absolute_errors": {
+            "energy_per_atom": 4.689582056016661e-12,
+            "components_per_atom": 7.995974253086994e-12,
+            "forces": 3.589200048281782e-10,
+            "charges": 3.1685765122801968e-12,
+            "dipole": 1.368931634715409e-10,
+            "total_bond_orders": 2.4424906541753444e-15,
+            "lone_pairs": 1.1683926152311516e-23,
+            "bond_counts": 0.0
+          },
+          "limits": {
+            "energy_per_atom": 1e-05,
+            "components_per_atom": 1e-05,
+            "forces": 0.0001,
+            "charges": 1e-06,
+            "dipole": 1e-06,
+            "total_bond_orders": 1e-08,
+            "lone_pairs": 1e-08,
+            "bond_counts": 0
+          },
+          "passed": true
+        },
+        "md_vs_fresh_errors": {
+          "energy": 1.8189894035458565e-12,
+          "forces": 3.0020430585864233e-13,
+          "charges": 4.884981308350689e-15
+        }
+      },
+      {
+        "step": 2000,
+        "comparison": {
+          "maximum_absolute_errors": {
+            "energy_per_atom": 5.248542341481273e-12,
+            "components_per_atom": 2.1884716261411086e-12,
+            "forces": 6.736604607482377e-10,
+            "charges": 1.2707279672952154e-11,
+            "dipole": 1.0820144780154806e-10,
+            "total_bond_orders": 1.887379141862766e-15,
+            "lone_pairs": 1.3855275260263214e-23,
+            "bond_counts": 0.0
+          },
+          "limits": {
+            "energy_per_atom": 1e-05,
+            "components_per_atom": 1e-05,
+            "forces": 0.0001,
+            "charges": 1e-06,
+            "dipole": 1e-06,
+            "total_bond_orders": 1e-08,
+            "lone_pairs": 1e-08,
+            "bond_counts": 0
+          },
+          "passed": true
+        },
+        "md_vs_fresh_errors": {
+          "energy": 0.0,
+          "forces": 3.0730973321624333e-13,
+          "charges": 3.552713678800501e-15
+        }
+      },
+      {
+        "step": 4000,
+        "comparison": {
+          "maximum_absolute_errors": {
+            "energy_per_atom": 6.347515106123562e-12,
+            "components_per_atom": 5.684341886080801e-13,
+            "forces": 6.075682179584874e-10,
+            "charges": 1.2132406190801248e-11,
+            "dipole": 7.355538400588557e-11,
+            "total_bond_orders": 1.7763568394002505e-15,
+            "lone_pairs": 1.1787323728880644e-23,
+            "bond_counts": 0.0
+          },
+          "limits": {
+            "energy_per_atom": 1e-05,
+            "components_per_atom": 1e-05,
+            "forces": 0.0001,
+            "charges": 1e-06,
+            "dipole": 1e-06,
+            "total_bond_orders": 1e-08,
+            "lone_pairs": 1e-08,
+            "bond_counts": 0
+          },
+          "passed": true
+        },
+        "md_vs_fresh_errors": {
+          "energy": 0.0,
+          "forces": 9.677592061052565e-12,
+          "charges": 1.0014211682118912e-13
+        }
+      }
+    ],
+    "committed_revision": "285230126cc8890cf5d125dcd6adb65a10a69166"
+  },
+  "validation": {
+    "tests_passed": 186,
+    "ruff_format_check": "passed",
+    "strict_sphinx_html": "passed"
+  }
+}

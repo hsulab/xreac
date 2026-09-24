@@ -3,7 +3,7 @@
 A lightweight Python implementation of ReaxFF using NumPy and Autograd for
 small-to-medium neutral molecules, clusters, and periodic cells. It computes
 energies, QEq charges, forces, and bond properties from standard parameter files,
-with optional ASE integration for geometry optimization.
+with optional ASE integration for geometry optimization and fixed-volume MD.
 
 ## Install
 

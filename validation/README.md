@@ -151,6 +151,19 @@ restore the bundled parameter file as `ffield` in each extracted directory.
 `git_revision` records HEAD when a run started; `committed_revision` identifies
 the exact implementation, verified against all recorded core source hashes.
 
+## Bulk-water moving MD
+
+The [Berendsen MD example and results](water/README.md#bulk-water-berendsen-md)
+reuse the 192-atom water pilot for a 1 ps trajectory. Unlike the fixed-geometry
+tables above, this comparison includes atom movement and neighbor rebuilding.
+It also tests experimental QEq factorization/history reuse with a fresh matrix,
+checked convergence, and direct-solve agreement at every step.
+
+```sh
+python examples/water_md.py --steps 4000 --warmup 100
+python scripts/benchmark_water_qeq.py --steps 4000 --warmup 100
+```
+
 ## Historical native-neighbor benchmarks
 
 Single-CPU comparisons with `lmp_mpi` are recorded for
