@@ -85,9 +85,10 @@ See [validation](../validation/README.md) for the coverage and retained records.
 
 `cuo_surface.py` adds one optional 96-atom CuO(010) slab. It always checks
 energies, forces, charges, and properties against LAMMPS, and measures
-single-CPU performance. The Cu/O parameter file is an external published
-supplement; see [download instructions and saved results](../validation/cuo/README.md).
+single-CPU performance. It uses the bundled Cu/O/H/Cl supplement, separately
+licensed under **CC BY-NC 4.0**; see [parameter licenses](../data/README.md)
+and [saved results](../validation/cuo/README.md).
 
 ```sh
-python examples/cuo_surface.py --ffield path/to/jp102272z_si_001.txt
+python examples/cuo_surface.py
 ```

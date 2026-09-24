@@ -5,7 +5,8 @@ for energy, forces, QEq charges, dipoles, bond properties, and neighbor-list
 agreement. Each structure is stored once. The 192-atom water box is optional.
 An additional optional [96-atom CuO(010) slab](cuo/README.md) checks transfer
 of the performance improvements to a copper-oxide surface, always with fresh
-LAMMPS verification and an external published Cu/O parameter file.
+LAMMPS verification and the bundled Cu/O/H/Cl parameters, separately licensed
+under [CC BY-NC 4.0](../data/README.md).
 
 | System | Default cases | Purpose |
 | --- | ---: | --- |

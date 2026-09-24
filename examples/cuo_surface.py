@@ -1,6 +1,6 @@
 """Time one CuO(010) slab and always verify its results against lmp_mpi.
 
-Download the external Cu/O/H/Cl supplement as described in examples/README.md.
+The bundled Cu/O/H/Cl parameters have a separate CC BY-NC 4.0 license; see data/README.md.
 Use --source-root to measure an extracted historical src/ tree on the same slab.
 """
 
@@ -33,7 +33,12 @@ os.environ.update(THREAD_ENV)
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--ffield", type=Path, required=True, help="External Cu/O force-field file")
+    parser.add_argument(
+        "--ffield",
+        type=Path,
+        default=ROOT / "data/ffield.reax.CuOHCl.2010",
+        help="Cu/O parameter file (default: bundled)",
+    )
     parser.add_argument("--executable", default=os.environ.get("XREAC_LAMMPS", "lmp_mpi"))
     parser.add_argument(
         "--source-root", type=Path, default=ROOT, help="Repository or extracted tree containing src/xreac"

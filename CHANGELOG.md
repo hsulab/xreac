@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+- Bundle the unmodified Cu/O/H/Cl supplement as `data/ffield.reax.CuOHCl.2010`
+  under its separate CC BY-NC 4.0 license. Include attribution, the complete
+  license text, and file-specific license notes in source and wheel distributions.
+- Use the bundled parameters by default in the CuO example and reference test;
+  `--system cuo --verify` runs the existing slab without a separate download.
+
 ## 0.6.1
 
 Improve single-CPU performance and correct a bond-order parameter selection

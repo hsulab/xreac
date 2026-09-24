@@ -23,6 +23,14 @@ print(ff.checksum)
 | `ffield.reax.HO.2015` | Achtyl QEq water; H/O and dummy X type |
 | `ffield.reax.CHO.2008` | Chenoweth C/H/O |
 | `ffield.reax.ZnOH.2010` | Raymand 2010 Zn/O/H |
+| `ffield.reax.CuOHCl.2010` | van Duin 2010 Cu/O/H/Cl; one CuO(010) surface |
+
+The Cu/O/H/Cl file is separately licensed under **CC BY-NC 4.0**, which includes
+a noncommercial restriction. The xreac code and the other three parameter
+files retain their GPL-2.0-or-later licenses. See
+{download}`file-specific license notes <../data/README.md>`,
+{download}`attribution <../NOTICE>`, and the
+{download}`Cu/O/H/Cl license <../LICENSES/CC-BY-NC-4.0.txt>`.
 
 Source files live under the repository's `data/` directory. Wheels include
 them as `xreac.data`. Their original contents and citation headers are retained.

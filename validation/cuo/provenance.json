@@ -13,6 +13,6 @@
   ],
   "sha256": "8b1a57a6945be8b1d9df3b69df8f329dc32561393ed1f02221a5ef0c21e8c07e",
   "license": "CC BY-NC 4.0 (ACS Figshare metadata)",
-  "distribution": "External download; parameter file excluded from the repository and retained archive",
+  "distribution": "Bundled unchanged as data/ffield.reax.CuOHCl.2010 under CC BY-NC 4.0; see data/README.md and NOTICE",
   "crystal_reference": "https://doi.org/10.1103/PhysRevB.39.4343"
 }

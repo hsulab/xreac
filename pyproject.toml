@@ -8,8 +8,8 @@ version = "0.6.1"
 description = "Parameter-driven Autograd ReaxFF for molecules and periodic supercells"
 readme = "README.md"
 requires-python = ">=3.10"
-license = "GPL-2.0-or-later"
-license-files = ["LICENSE", "NOTICE"]
+license = "GPL-2.0-or-later AND CC-BY-NC-4.0"
+license-files = ["LICENSE", "NOTICE", "LICENSES/*.txt"]
 dependencies = ["numpy>=1.24,<3", "autograd>=1.9.1,<2"]
 
 [project.urls]
@@ -35,7 +35,7 @@ xreac = "src/xreac"
 "xreac.data" = "data"
 
 [tool.setuptools.package-data]
-"xreac.data" = ["ffield.reax.*"]
+"xreac.data" = ["ffield.reax.*", "README.md"]
 
 [tool.pytest.ini_options]
 pythonpath = ["src", "examples", "scripts"]

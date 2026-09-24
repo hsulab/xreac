@@ -12,43 +12,42 @@ space group C2/c, a=4.6837 Å, b=3.4226 Å, c=5.1288 Å, beta=99.54°,
 Cu at (1/4,1/4,0), and O at (0,0.416,1/4). Both periodic slab heights
 exceed the 10 Å cutoff, so xreac and LAMMPS evaluate exactly the same 96 atoms.
 
-The external parameter file is the unmodified supporting data for
+The bundled `data/ffield.reax.CuOHCl.2010` parameter file is the unmodified supporting data for
 [van Duin et al., J. Phys. Chem. A 114, 9507–9514 (2010)](https://doi.org/10.1021/jp102272z),
 [supplement DOI](https://doi.org/10.1021/jp102272z.s001). It includes H/O/Cu/Cl/X;
 this example uses Cu and O only. ACS Figshare lists the supplement under
-CC BY-NC 4.0. It is downloaded separately and is not bundled with xreac.
-See [provenance and checksum](provenance.json).
+CC BY-NC 4.0. This file retains that separate license, including its
+noncommercial restriction; see [parameter license notes](../../data/README.md),
+[full license](../../LICENSES/CC-BY-NC-4.0.txt), and
+[provenance and checksum](provenance.json).
 
 ## Run the example
 
 From the repository root, with the ASE extra installed:
 
 ```sh
-mkdir -p validation/runs/cuo-input
-curl -L --fail https://ndownloader.figshare.com/files/4408471 \
-  -o validation/runs/cuo-input/jp102272z_si_001.txt
-python examples/cuo_surface.py \
-  --ffield validation/runs/cuo-input/jp102272z_si_001.txt
+python examples/cuo_surface.py
 ```
 
 LAMMPS verification is mandatory. The example checks energy components,
 forces, charges, dipoles, and bond properties for both native and ASE neighbor
 builders. A mismatch exits with an error. It saves the slab as extended XYZ,
 full numerical results, and raw LAMMPS files under ignored `validation/runs/`.
-The supplied force field must support Cu/O; the retained results use SHA256
+Use `--ffield path/to/ffield` to override the bundled file. The supplied
+force field must support Cu/O; the retained results use SHA256
 `8b1a57a6945be8b1d9df3b69df8f329dc32561393ed1f02221a5ef0c21e8c07e`.
 
 The shared validation runner reuses this exact fixture:
 
 ```sh
-python scripts/validate.py --system cuo --verify \
-  --cuo-force-field validation/runs/cuo-input/jp102272z_si_001.txt
-XREAC_CUO_FORCE_FIELD=validation/runs/cuo-input/jp102272z_si_001.txt \
-  python -m pytest -q tests/test_cuo.py
+python scripts/validate.py --system cuo --verify
+python -m pytest -q tests/test_cuo.py
 ```
 
-CuO remains optional and adds no structures to the default validation suite.
-The regression test skips when the external parameter file is not specified.
+CuO remains optional in the shared validation runner and adds no structures
+to its default set. The CuO reference test uses the bundled file by default;
+`XREAC_CUO_FORCE_FIELD` can override it. Like the other reference tests, it
+requires LAMMPS and is excluded by `pytest -m 'not reference'`.
 
 ## Consistency and speed
 
@@ -85,8 +84,8 @@ Retained records:
 - [Structure](structures.json), [validation summary](summary.json), and
   [full numerical results](results.json.gz).
 - [Baseline/optimized timings, source hashes, and all consistency checks](cpu_benchmark.json).
-- [Raw LAMMPS inputs and outputs](reference.tar.gz). The external `ffield` is
-  omitted; copy the downloaded supplement to `ffield` in each extracted run
+- [Raw LAMMPS inputs and outputs](reference.tar.gz). The duplicate `ffield` is
+  omitted; copy `data/ffield.reax.CuOHCl.2010` to `ffield` in each extracted run
   directory before replaying it.
 
 To reproduce the historical baseline without changing the working tree:
@@ -96,7 +95,6 @@ mkdir -p validation/runs/cuo-baseline
 git archive c21c74b src | tar -x -C validation/runs/cuo-baseline
 patch -d validation/runs/cuo-baseline -p1 < validation/cuo/baseline_correction.patch
 python examples/cuo_surface.py \
-  --ffield validation/runs/cuo-input/jp102272z_si_001.txt \
   --source-root validation/runs/cuo-baseline --skip-lammps-timing
 ```
 

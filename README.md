@@ -39,5 +39,7 @@ See the [documentation](docs/index.md) for the API and supported features,
 [validation results](validation/README.md) for comparisons with `lmp_mpi`.
 LAMMPS is needed only for verification.
 
-GPL-2.0-or-later. See [LICENSE](LICENSE) and [NOTICE](NOTICE) for attribution
-and parameter-file provenance.
+The code is GPL-2.0-or-later. Bundled `ffield.reax.CuOHCl.2010` data is
+separately licensed under **CC BY-NC 4.0**, including a noncommercial restriction.
+See [parameter licenses](data/README.md), [LICENSE](LICENSE), and [NOTICE](NOTICE)
+for the license scope, attribution, and parameter-file provenance.

@@ -129,22 +129,19 @@ def main():
     parser.add_argument("--executable", help="Override lmp_mpi executable")
     parser.add_argument("--system", choices=tuple(SYSTEMS.values()), help="Validate one chemical system")
     parser.add_argument("--include-bulk", action="store_true", help="Also check the 192-atom water box")
-    parser.add_argument(
-        "--cuo-force-field", type=Path, help="Include the CuO slab using an external Cu/O parameter file"
-    )
+    parser.add_argument("--cuo-force-field", type=Path, help="Include the CuO slab using a custom Cu/O parameter file")
     parser.add_argument(
         "--output",
         type=Path,
         default=ROOT / "validation" / "runs" / datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ"),
     )
     args = parser.parse_args()
-    if args.system == "cuo" and args.cuo_force_field is None:
-        parser.error("--system cuo requires --cuo-force-field")
-    if args.cuo_force_field is not None and not args.verify:
+    include_cuo = args.system == "cuo" or args.cuo_force_field is not None
+    if include_cuo and not args.verify:
         parser.error("CuO validation requires --verify for a fresh LAMMPS comparison")
     args.output.mkdir(parents=True, exist_ok=False)
     all_passed = True
-    cases = validation_cases(args.include_bulk, include_cuo=args.cuo_force_field is not None)
+    cases = validation_cases(args.include_bulk, include_cuo=include_cuo)
     systems = tuple(dict.fromkeys(SYSTEMS[case[0]] for case in cases.values()))
     for system in (args.system,) if args.system else systems:
         destination = args.output / system
@@ -167,7 +164,7 @@ def main():
                 continue
             ff = (
                 ForceField.from_file(args.cuo_force_field)
-                if filename == CUO_FORCE_FIELD
+                if filename == CUO_FORCE_FIELD and args.cuo_force_field is not None
                 else ForceField.bundled(filename)
             )
             structures[name] = dict(

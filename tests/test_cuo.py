@@ -1,11 +1,11 @@
-"""Optional CuO regression: reuse the one surface fixture and an external force field."""
+"""CuO reference regression: reuse the one surface fixture and bundled parameters."""
 
 import os
 
 from ase import Atoms
 import pytest
 
-from validate import backend_differences, validation_cases
+from validate import CUO_FORCE_FIELD, backend_differences, validation_cases
 from water_cluster import comparison
 from xreac import Calculator, ForceField
 from xreac.ase import ReaxFFCalculator
@@ -15,9 +15,7 @@ from xreac.reference import evaluate_lammps
 @pytest.mark.reference
 def test_cuo_surface_matches_lammps(tmp_path):
     path = os.environ.get("XREAC_CUO_FORCE_FIELD")
-    if not path:
-        pytest.skip("Set XREAC_CUO_FORCE_FIELD to the external Cu/O/H/Cl supplement")
-    ff = ForceField.from_file(path)
+    ff = ForceField.from_file(path) if path else ForceField.bundled(CUO_FORCE_FIELD)
     _, symbols, x, cell, pbc = validation_cases(include_cuo=True)["surface_cuo_010"]
     assert len(symbols) == 96 and symbols.count("Cu") == symbols.count("O") == 48
     # This distinction is absent from the earlier bundled validation cases.

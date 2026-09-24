@@ -1,4 +1,8 @@
-xreac is distributed under GPL-2.0-or-later. See LICENSE.
+xreac code is distributed under GPL-2.0-or-later. See LICENSE.
+Bundled parameter data has the file-specific licenses described below and
+in data/README.md. The Cu/O/H/Cl parameter file is separately licensed under
+CC BY-NC 4.0, not GPL. Its noncommercial restriction applies to that data;
+it does not change the license of the xreac code or the other parameter files.
 
 The ReaxFF equations, parameter mappings, and numerical conventions in
 src/xreac/energy.py and src/xreac/forcefield.py are adapted from LAMMPS
@@ -27,6 +31,28 @@ Surface Science 604 (9-10), 741-752 (2010), as cited in the parameter file.
 Contributor: Aidan Thompson, athomps@sandia.gov. File date: 2011-02-18.
 This is the 2010 ZnOH set, not the earlier 2008 ZnO parameterization.
 All original entries remain in the unmodified source data.
+
+data/ffield.reax.CuOHCl.2010 is an unmodified, renamed copy of
+jp102272z_si_001.txt, supporting information for:
+A. C. T. van Duin, V. S. Bryantsev, M. S. Diallo, W. A. Goddard,
+O. Rahaman, D. J. Doren, D. Raymand, and K. Hermansson,
+Development and Validation of a ReaxFF Reactive Force Field for Cu Cation/Water
+Interactions and Copper Metal/Metal Oxide/Metal Hydroxide Condensed Phases,
+Journal of Physical Chemistry A 114, 9507-9514 (2010).
+Paper: https://doi.org/10.1021/jp102272z
+Supplement: https://doi.org/10.1021/jp102272z.s001
+Source: https://ndownloader.figshare.com/files/4408471
+License metadata: https://api.figshare.com/v2/articles/2732188
+SHA256: 8b1a57a6945be8b1d9df3b69df8f329dc32561393ed1f02221a5ef0c21e8c07e
+
+ACS Figshare distributes this supplement under Creative Commons
+Attribution-NonCommercial 4.0 International (CC BY-NC 4.0).
+Retain attribution and license notices, indicate modifications, and comply
+with the noncommercial condition. See LICENSES/CC-BY-NC-4.0.txt and
+https://creativecommons.org/licenses/by-nc/4.0/ for the terms and disclaimer
+of warranties. xreac does not relicense this file or grant commercial-use
+permission. Only its filename has changed; its contents are byte-for-byte
+identical to the published supplement, including its original header.
 
 data/ffield.reax.HO.2015 is an unmodified copy of examples/reaxff/water/qeq_ff.water
 from the same LAMMPS release and distribution.

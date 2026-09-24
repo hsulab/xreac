@@ -63,7 +63,7 @@ jobs:
           import numpy as np
           from xreac import Calculator, ForceField
 
-          for filename in ('ffield.reax.HO.2015', 'ffield.reax.CHO.2008', 'ffield.reax.ZnOH.2010'):
+          for filename in ('ffield.reax.HO.2015', 'ffield.reax.CHO.2008', 'ffield.reax.ZnOH.2010', 'ffield.reax.CuOHCl.2010'):
               ff = ForceField.bundled(filename)
               assert ff.path.is_file()
           ff = ForceField.bundled('ffield.reax.HO.2015')
