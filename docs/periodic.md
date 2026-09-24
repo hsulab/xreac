@@ -65,10 +65,18 @@ donor and acceptor can share an input atom index if they occupy different images
 Charges are solved on the input atoms; self-image couplings enter the QEq diagonal.
 Bond counts apply their threshold per image before reduction to the input atoms.
 
-The ASE adapter rebuilds the neighbor list for each new evaluation, including
-changes to positions, cell, or PBC. During autodiff, the selected edges and lattice shifts
-stay fixed while their vectors and distances remain differentiable. There is
-no skin or list reuse between changed geometries; ASE caches unchanged results.
+The ASE adapter uses the tree-based `PrimitiveNeighborList` and defaults to
+`neighbor_skin=0.3` Å per atom. The search includes an extra `2*neighbor_skin`
+in pair distance. It reuses integer edges until any atom moves more than the
+skin from its position at the last build, and rebuilds on cell, PBC, atom
+identity/count, cutoff, or calculator parameter changes. Coordinate wrapping
+may cause an earlier rebuild. Charges, energies, forces, and bond properties
+are recalculated at every new geometry; only topology is reused.
+Set `neighbor_skin=0` to rebuild on every evaluation. `reset()` clears both
+topology and result caches. `neighbor_list_builds` counts completed builds over
+the calculator's lifetime, including those before a reset.
+During autodiff, the selected edges and lattice shifts stay fixed while their
+vectors and distances remain differentiable. ASE separately caches unchanged results.
 When calling the core with your own arrays, **you** must keep the list complete
 for the current coordinates, cell, and PBC. Both edge directions are required;
 half lists, duplicates, out-of-range indices, and zero-shift self edges are

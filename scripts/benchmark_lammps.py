@@ -38,7 +38,7 @@ import numpy as np
 from cases import cluster
 from ase import Atoms
 from ase.io import write
-from validate import PILOT_CASES, SYSTEMS, validation_cases
+from validate import PILOT_CASES, SYSTEMS, backend_differences, validation_cases
 from water_cluster import comparison, serialize
 from xreac import Calculator, ForceField
 from xreac.ase import ReaxFFCalculator
@@ -67,22 +67,61 @@ def native_timing(calc, symbols, x, cell, pbc, repeats, target_seconds):
     return result, timing
 
 
-def ase_timing(calc, symbols, x, cell, pbc, repeats, target_seconds):
-    """Time fresh ASE neighbors and full evaluations, bypassing ASE result caching."""
+def ase_timing(calc, symbols, x, cell, pbc, repeats, target_seconds, *, neighbor_skin=0):
+    """Time full evaluations, optionally reusing topology; bypass ASE result caching."""
     atoms = Atoms(symbols, positions=x, cell=cell, pbc=pbc)
-    adapter = ReaxFFCalculator(calc.force_field, neighbor_backend="ase", full_derivative=False)
+    adapter = ReaxFFCalculator(
+        calc.force_field, neighbor_backend="ase", neighbor_skin=neighbor_skin, full_derivative=False
+    )
     adapter.core = calc
 
     def evaluate():
         # Calling get_forces() at unchanged coordinates would return cached
-        # results. calculate() always rebuilds ASE's ijS list and reruns QEq,
+        # results. With skin=0, calculate() rebuilds ASE's ijS list and reruns QEq,
         # energy, forces, and properties. Include all of that in the timer.
         adapter.calculate(atoms)
         return adapter.evaluation
 
     result, timing = evaluation_timing(evaluate, repeats, target_seconds)
-    timing.update(neighbor_backend="ase", neighbor_build_included=True, result_cache_used=False)
+    timing.update(
+        neighbor_backend="ase",
+        neighbor_skin=neighbor_skin,
+        neighbor_build_included=True,
+        neighbor_rebuild_each_call=neighbor_skin == 0,
+        neighbor_list_builds_including_warmup=adapter.neighbor_list_builds,
+        result_cache_used=False,
+    )
     return result, timing
+
+
+def verify_neighbor_motion(ff, symbols, x, cell, pbc, executable, work):
+    """Check reuse and rebuilding on two displacements of the same pilot."""
+    atoms = Atoms(symbols, positions=x, cell=cell, pbc=pbc)
+    adapter = ReaxFFCalculator(ff)
+    adapter.calculate(atoms)
+    perturbation = np.random.default_rng(260924).normal(size=x.shape)
+    perturbation *= 0.03 / np.max(np.linalg.norm(perturbation, axis=1))
+    reports = {}
+    for label, translation, builds in (("reuse", 0.0, 1), ("rebuild", 0.35, 2)):
+        atoms.positions[:] = x + perturbation + [translation, 0, 0]
+        adapter.calculate(atoms)
+        if adapter.neighbor_list_builds != builds:
+            raise RuntimeError(f"Expected {builds} neighbor builds in {label}")
+        native = adapter.core.evaluate(symbols, atoms.positions, cell=cell, pbc=pbc)
+        ref = evaluate_lammps(
+            ff, symbols, atoms.positions, cell=cell, pbc=pbc, executable=executable, directory=work / label
+        )
+        checks = comparison(adapter.evaluation, ref, len(x))
+        native_checks = backend_differences(adapter.evaluation, native, len(x))
+        if not checks["passed"] or not native_checks["passed"] or ref.cell_repetitions != (1, 1, 1):
+            raise RuntimeError(f"Moving-neighbor mismatch in {label}: {checks}, {native_checks}")
+        (work / label / "results.json").write_text(
+            json.dumps(dict(ase=serialize(adapter.evaluation), reference=serialize(ref)), indent=2) + "\n"
+        )
+        reports[label] = dict(
+            comparison=checks, native_comparison=native_checks, neighbor_list_builds=adapter.neighbor_list_builds
+        )
+    return reports
 
 
 def evaluation_timing(evaluate, repeats, target_seconds):
@@ -170,6 +209,11 @@ def main():
         "--suite", choices=("pilots", "legacy"), default="pilots", help="Default: exactly three pilot cases"
     )
     parser.add_argument("--include-large", action="store_true", help="Include larger cases with --suite legacy")
+    parser.add_argument(
+        "--compare-neighbors",
+        action="store_true",
+        help="Also time native/reused ASE lists and verify reuse/rebuild on displaced copies of each pilot",
+    )
     parser.add_argument("--repeats", type=int, default=5)
     parser.add_argument("--batch-seconds", type=float, default=0.3)
     parser.add_argument("--lammps-calls", type=int, default=100)
@@ -188,6 +232,8 @@ def main():
         parser.error("Repeat counts and batch duration must be positive")
     if args.include_large and args.suite != "legacy":
         parser.error("--include-large is for --suite legacy; the default already includes both bulk pilots")
+    if args.compare_neighbors and args.suite != "pilots":
+        parser.error("--compare-neighbors uses only the three pilot systems")
     executable = shutil.which(args.executable)
     if executable is None:
         parser.error(f"Executable not found: {args.executable}")
@@ -224,9 +270,13 @@ def main():
         "repeats": args.repeats,
         "suite": args.suite,
         "neighbor_backend": "ase",
+        "compare_neighbors": args.compare_neighbors,
         "lammps_timing": not args.skip_lammps_timing,
         "method": {
             "xreac": "ReaxFFCalculator.calculate, fresh ASE neighbors each call, fresh QEq, fixed-charge forces, all properties; ASE result cache bypassed",
+            "xreac_reuse": "Optional: fixed geometry, ASE skin=0.3 A; topology built in warmup and reused in timed batches; fresh QEq and all properties every call",
+            "xreac_native": "Optional: core evaluate with fresh native neighbors, fresh QEq and all properties every call",
+            "motion_checks": "Optional: 0.03 A maximum seeded displacement, then 0.35 A translation to force rebuilding; each checked against fresh native and LAMMPS results outside timing",
             "lammps_fresh": "Repeated run 0; rebuild neighbors and recreate QEq fix with zero charges each call; all properties",
             "lammps_steady": "Fixed geometry, no integrator, QEq each step with history and neighbor reuse; properties at batch endpoints",
             "timing": "Median batch wall time per call; force-field loading, process startup and final dumps excluded",
@@ -262,6 +312,19 @@ def main():
             "comparison": checks,
             "xreac": timing,
         }
+        if args.compare_neighbors:
+            for mode, timer, options in (
+                ("reuse", ase_timing, {"neighbor_skin": 0.3}),
+                ("native", native_timing, {}),
+            ):
+                actual, elapsed = timer(
+                    Calculator(ff), symbols, x, cell, pbc, args.repeats, args.batch_seconds, **options
+                )
+                agreement = comparison(actual, ref, len(x))
+                if not agreement["passed"]:
+                    raise RuntimeError(f"Reference mismatch: {name}/{mode}: {agreement}")
+                row[f"xreac_{mode}"] = dict(elapsed, comparison=agreement)
+            row["motion_checks"] = verify_neighbor_motion(ff, symbols, x, cell, pbc, executable, work / "motion")
         for mode in () if args.skip_lammps_timing else ("fresh", "steady"):
             elapsed, energy, state = lammps_timing(ref.directory, executable, args.repeats, args.lammps_calls, mode)
             errors = {
@@ -277,6 +340,11 @@ def main():
         report["cases"][name] = row
         (args.output / "summary.json").write_text(json.dumps(report, indent=2) + "\n")
         message = f"{name} ({len(x)} atoms): xreac/ASE {1000 * timing['median_seconds']:.3f} ms"
+        if args.compare_neighbors:
+            message += (
+                f"; ASE reuse {1000 * row['xreac_reuse']['median_seconds']:.3f} ms"
+                f"; native {1000 * row['xreac_native']['median_seconds']:.3f} ms"
+            )
         if args.skip_lammps_timing:
             message += "; LAMMPS verification PASS"
         else:

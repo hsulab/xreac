@@ -1,6 +1,7 @@
 """Optional ASE adapter. Core xreac imports do not require ASE."""
 
 from dataclasses import replace
+from numbers import Real
 
 import numpy as np
 
@@ -35,6 +36,8 @@ class ReaxFFCalculator(ASECalculator):
     option for single-point charge-response calculations.
     neighbor_backend="ase" uses ASE's image-resolved neighbor list by default.
     Set it to "replicated" to use the native dense image/replication method.
+    neighbor_skin is ASE's per-atom displacement allowance in Angstrom;
+    zero forces a fresh list on every evaluation. Only topology is reused.
     """
 
     implemented_properties = ["energy", "forces", "charges", "dipole"]
@@ -43,6 +46,7 @@ class ReaxFFCalculator(ASECalculator):
         "total_charge": 0,
         "max_expanded_atoms": 512,
         "neighbor_backend": "ase",
+        "neighbor_skin": 0.3,
     }
 
     def __init__(
@@ -53,15 +57,21 @@ class ReaxFFCalculator(ASECalculator):
         total_charge=0,
         max_expanded_atoms=512,
         neighbor_backend="ase",
+        neighbor_skin=0.3,
         **kwargs,
     ):
         self.core = Calculator(force_field, max_expanded_atoms=max_expanded_atoms)
         self.evaluation = None
+        self._neighbor_list = None
+        self._neighbor_key = None
+        self._neighbors = None
+        self.neighbor_list_builds = 0
         super().__init__(
             full_derivative=full_derivative,
             total_charge=total_charge,
             max_expanded_atoms=max_expanded_atoms,
             neighbor_backend=neighbor_backend,
+            neighbor_skin=neighbor_skin,
             **kwargs,
         )
 
@@ -77,6 +87,10 @@ class ReaxFFCalculator(ASECalculator):
             validate_expansion_limit(kwargs["max_expanded_atoms"])
         if kwargs.get("neighbor_backend", "ase") not in ("ase", "replicated"):
             raise ValueError("neighbor_backend must be 'replicated' or 'ase'")
+        if "neighbor_skin" in kwargs:
+            skin = kwargs["neighbor_skin"]
+            if isinstance(skin, bool) or not isinstance(skin, Real) or not np.isfinite(skin) or skin < 0:
+                raise ValueError("neighbor_skin must be a finite nonnegative number")
         changed = super().set(**kwargs)
         if changed:
             self.core.max_expanded_atoms = self.parameters.max_expanded_atoms
@@ -86,6 +100,35 @@ class ReaxFFCalculator(ASECalculator):
     def reset(self):
         super().reset()
         self.evaluation = None
+        self._neighbor_list = None
+        self._neighbor_key = None
+        self._neighbors = None
+
+    def _ase_neighbors(self):
+        """Update ASE topology before differentiation; recompute physics in core."""
+        atoms = self.atoms
+        Boundary(atoms.cell.array, atoms.pbc)
+        cutoff = np.nextafter(float(self.core.force_field.general[12]), np.inf)
+        skin = self.parameters.neighbor_skin
+        key = (cutoff, skin, tuple(atoms.numbers))
+        if self._neighbor_list is None or key != self._neighbor_key or skin == 0:
+            self._neighbor_list = PrimitiveNeighborList(
+                np.full(len(atoms), cutoff / 2), skin=skin, self_interaction=False, bothways=False
+            )
+            self._neighbor_key = key
+        try:
+            # ASE adds skin to each radius: pair cutoff grows by 2*skin.
+            # It rebuilds after any atom moves more than skin from its build
+            # position, or cell/PBC changes. Wrapped jumps rebuild as well.
+            rebuilt = self._neighbor_list.update(atoms.pbc, atoms.cell, atoms.positions)
+        except Exception:
+            self._neighbor_list = None
+            self._neighbors = None
+            raise
+        if rebuilt:
+            self._neighbors = _directed_neighbors(self._neighbor_list)
+            self.neighbor_list_builds += 1
+        return self._neighbors
 
     def calculate(self, atoms=None, properties=("energy", "forces"), system_changes=all_changes):
         super().calculate(atoms, properties, system_changes)
@@ -98,15 +141,9 @@ class ReaxFFCalculator(ASECalculator):
             raise ValueError("Initial charges must be finite and sum to zero; only neutral systems are supported")
         neighbors = None
         if self.parameters.neighbor_backend == "ase":
-            Boundary(self.atoms.cell.array, self.atoms.pbc)
             # Build integer topology here, before entering the core evaluator.
             # The core only differentiates x[j] - x[i] + S @ cell, never this call.
-            cutoff = np.nextafter(float(self.core.force_field.general[12]), np.inf)
-            neighbor_list = PrimitiveNeighborList(
-                np.full(len(self.atoms), cutoff / 2), skin=0, self_interaction=False, bothways=False
-            )
-            neighbor_list.update(self.atoms.pbc, self.atoms.cell, self.atoms.positions)
-            neighbors = _directed_neighbors(neighbor_list)
+            neighbors = self._ase_neighbors()
         result = self.core.evaluate(
             self.atoms.get_chemical_symbols(),
             self.atoms.positions,

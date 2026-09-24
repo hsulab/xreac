@@ -1,18 +1,26 @@
 """Ensure benchmark timings include actual ASE neighbor construction and evaluation."""
 
 import numpy as np
+import pytest
 
 from benchmark_lammps import ase_timing
 from validate import PILOT_CASES, validation_cases
 from xreac import Calculator, ForceField
 
 
-def test_ase_timing_bypasses_result_cache(monkeypatch):
+@pytest.mark.parametrize("skin", [0, 0.3])
+def test_ase_timing_bypasses_result_cache(monkeypatch, skin):
     from xreac import ase as adapter
     from xreac import calculator
 
     calls = []
+    evaluations = []
     original = adapter.PrimitiveNeighborList.build
+    original_evaluate = calculator.Calculator.evaluate
+
+    def evaluate(*args, **kwargs):
+        evaluations.append(1)
+        return original_evaluate(*args, **kwargs)
 
     def build(*args, **kwargs):
         calls.append(1)
@@ -22,11 +30,14 @@ def test_ase_timing_bypasses_result_cache(monkeypatch):
         raise AssertionError("ASE benchmarks must not use native neighbor construction")
 
     monkeypatch.setattr(adapter.PrimitiveNeighborList, "build", build)
+    monkeypatch.setattr(calculator.Calculator, "evaluate", evaluate)
     monkeypatch.setattr(calculator, "replicated_neighbors", forbidden)
     filename, symbols, x, cell, pbc = validation_cases()["cluster_water_monomer"]
     calc = Calculator(ForceField.bundled(filename))
-    result, timing = ase_timing(calc, symbols, x, cell, pbc, repeats=2, target_seconds=1e-9)
-    assert len(calls) == 1 + 2 * timing["calls_per_batch"]
+    result, timing = ase_timing(calc, symbols, x, cell, pbc, repeats=2, target_seconds=1e-9, neighbor_skin=skin)
+    assert len(evaluations) == 1 + 2 * timing["calls_per_batch"]
+    assert len(calls) == (len(evaluations) if skin == 0 else 1)
+    assert timing["neighbor_list_builds_including_warmup"] == len(calls)
     assert result.neighbor_backend == timing["neighbor_backend"] == "ase"
     assert timing["neighbor_build_included"] and not timing["result_cache_used"]
     assert np.isfinite(result.forces).all()

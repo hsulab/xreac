@@ -351,3 +351,81 @@ def test_reuse_supplied_skin_list_for_displacements():
         assert backend_differences(actual, expected, len(x))["passed"]
     for original, array in zip(originals, supplied):
         np.testing.assert_array_equal(original, array)
+
+
+@pytest.mark.parametrize("name", ["small_water_4A", "small_zinc_chain", "periodic_partial_pbc_water"])
+def test_ase_skin_reuses_topology_and_recomputes_physics(name):
+    filename, symbols, x, cell, pbc = CASES[name]
+    atoms = Atoms(symbols, positions=x, cell=cell, pbc=pbc)
+    adapter = ReaxFFCalculator(ForceField.bundled(filename))
+    atoms.calc = adapter
+    atoms.get_forces()
+    old_result = adapter.evaluation
+    topology = adapter._neighbors
+    # Cumulative displacement is measured from the build, not the last call.
+    for displacement, builds in ((0.04, 1), (0.2, 1), (0.31, 2)):
+        atoms.positions[0, 0] = x[0, 0] + displacement
+        atoms.get_forces()
+        expected = adapter.core.evaluate(symbols, atoms.positions, cell=cell, pbc=pbc)
+        checks = backend_differences(adapter.evaluation, expected, len(atoms))
+        assert checks["passed"], checks
+        assert adapter.evaluation is not old_result
+        assert adapter.neighbor_list_builds == builds
+        if builds == 1:
+            assert adapter._neighbors is topology
+
+
+def test_ase_skin_invalidation():
+    filename, symbols, x, cell, pbc = CASES["small_water_4A"]
+    atoms = Atoms(symbols, positions=x, cell=cell, pbc=pbc)
+    adapter = ReaxFFCalculator(ForceField.bundled(filename))
+
+    def check(builds):
+        adapter.calculate(atoms)
+        expected = adapter.core.evaluate(atoms.get_chemical_symbols(), atoms.positions, cell=atoms.cell, pbc=atoms.pbc)
+        checks = backend_differences(adapter.evaluation, expected, len(atoms))
+        assert checks["passed"], checks
+        assert adapter.neighbor_list_builds == builds
+
+    check(1)
+    atoms.cell[0, 0] += 0.1
+    check(2)
+    atoms.pbc[2] = False
+    check(3)
+    atoms.positions[0] += atoms.cell[0]
+    check(4)
+    atoms = atoms[[1, 0, 2]]
+    check(5)
+    atoms = atoms[:2]
+    check(6)
+    adapter.core.force_field.general[12] -= 0.1
+    check(7)
+    adapter.set(neighbor_skin=0.1)
+    check(8)
+    adapter.reset()
+    check(9)
+    adapter.set(neighbor_backend="replicated")
+    check(9)
+    adapter.set(neighbor_backend="ase")
+    check(10)
+    adapter.set(neighbor_skin=0)
+    check(11)
+    check(12)
+
+
+def test_ase_skin_pair_enters_cutoff_without_rebuild():
+    # Reuse the ZnO dimer. Both atoms move towards each other by < skin,
+    # exercising the required 2*skin buffer beyond the pair cutoff.
+    filename, symbols, x, cell, pbc = CASES["zno_zno"]
+    atoms = Atoms(symbols, positions=x, cell=cell, pbc=pbc)
+    adapter = ReaxFFCalculator(ForceField.bundled(filename))
+    cutoff = adapter.core.force_field.general[12]
+    atoms.positions[:] = [[0, 0, 0], [cutoff + 0.5, 0, 0]]
+    adapter.calculate(atoms)
+    atoms.positions[:, 0] += [0.29, -0.29]
+    adapter.calculate(atoms)
+    expected = adapter.core.evaluate(symbols, atoms.positions)
+    checks = backend_differences(adapter.evaluation, expected, len(atoms))
+    assert checks["passed"], checks
+    assert adapter.neighbor_list_builds == 1
+    assert adapter.evaluation.energy != 0

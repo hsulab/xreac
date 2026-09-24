@@ -75,7 +75,9 @@ and `hydrogen_bonds`. See [parameter format](force-fields.md) for supported file
 
 Implemented ASE properties are `energy`, `forces`, `charges`, and `dipole`.
 Supported calculator parameters are `full_derivative=False`, `total_charge=0`,
-`max_expanded_atoms=512`, and `neighbor_backend="ase"`.
+`max_expanded_atoms=512`, `neighbor_backend="ase"`, and `neighbor_skin=0.3` (Å).
+The skin controls ASE topology reuse; zero rebuilds at every evaluation.
+`neighbor_list_builds` counts builds over the adapter's lifetime.
 The expansion limit applies only when `neighbor_backend="replicated"`.
 Update parameters with `atoms.calc.set(...)` to invalidate
 the cache. ASE standard calculator initialization options are accepted through

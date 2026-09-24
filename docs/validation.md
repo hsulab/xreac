@@ -68,8 +68,12 @@ performance pilots:
 python scripts/benchmark_lammps.py
 ```
 
-Every timed xreac evaluation builds fresh ASE neighbors and computes QEq,
-energy, forces, and properties. The driver calls `calculate()` explicitly
+By default every timed xreac evaluation builds fresh ASE neighbors
+(`neighbor_skin=0`) and computes QEq, energy, forces, and properties.
+Use `--compare-neighbors` to additionally time native builds and ASE topology
+reuse at fixed geometry, and check displaced copies of the same pilots against
+LAMMPS on both a reuse and a rebuild. Reuse timings exclude the initial build;
+they measure steady throughput, not moving MD. The driver calls `calculate()` explicitly
 to bypass ASE's result cache at unchanged coordinates. All three pilots are
 verified against LAMMPS using one MPI rank and one numerical thread. Bulk
 ZnO is an unrelaxed wurtzite fixture with representative lattice parameters;

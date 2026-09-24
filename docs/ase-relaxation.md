@@ -31,6 +31,10 @@ cutoff, expands its half list into both directions, and passes
 `neighbors=(i, j, S)` into the core evaluator. Neighbor construction is outside
 the differentiated calculation; only vectors and distances depend on positions.
 Both neighbor options feed the same energy model.
+ASE uses a 0.3 Å per-atom skin by default, reusing topology across small
+movements while recomputing charges and forces. Set `neighbor_skin=0` to force
+fresh neighbor construction on every evaluation. See
+[neighbor handling](periodic.md#neighbor-backends) for rebuild conditions.
 To select the retained native method:
 
 ```python

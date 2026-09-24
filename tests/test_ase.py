@@ -94,6 +94,11 @@ def test_charge_validation(atoms):
         {"full_derivative": "false"},
         {"total_charge": 1},
         {"misspelled_option": True},
+        {"neighbor_skin": -0.1},
+        {"neighbor_skin": float("inf")},
+        {"neighbor_skin": float("nan")},
+        {"neighbor_skin": True},
+        {"neighbor_skin": "0.3"},
     ],
 )
 def test_invalid_parameters(kwargs):
