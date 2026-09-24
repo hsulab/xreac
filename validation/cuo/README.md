@@ -49,7 +49,7 @@ to its default set. The CuO reference test uses the bundled file by default;
 `XREAC_CUO_FORCE_FIELD` can override it. Like the other reference tests, it
 requires LAMMPS and is excluded by `pytest -m 'not reference'`.
 
-## Consistency and speed
+## Initial optimization (v0.6.1)
 
 The new case exposed a pre-existing distinction in LAMMPS's bond-order
 correction: the uncorrected coordination uses `valency_val`, while the
@@ -99,3 +99,62 @@ python examples/cuo_surface.py \
 ```
 
 `--skip-lammps-timing` still performs fresh LAMMPS numerical verification.
+
+## Further single-CPU optimizations
+
+The next round reuses the **same 96-atom slab**, parameters, and force convention.
+Each stage is measured in a fresh process in both forward and reverse commit
+order. Each process runs seven batches targeting 0.5 seconds per batch;
+the table reports medians over all 14 batch times per evaluation, excluding
+startup. One numerical thread and one LAMMPS MPI rank are used, without core
+affinity. These measurements are independent of the earlier timing session.
+
+| Commit | Change | Time per evaluation | Speedup over previous stage | Speedup over this round's baseline |
+| --- | --- | ---: | ---: | ---: |
+| `691483c` | Previous implementation | 42.52 ms | — | 1.000x |
+| `082920b` | Reuse bond-order values for properties | 40.14 ms | 1.059x | 1.059x |
+| `7008b33` | Limit bond-order work to short-range neighbors | 35.77 ms | 1.122x | 1.188x |
+| `5b22be2` | Pack neighbor sorting keys | 30.42 ms | 1.176x | 1.397x |
+
+This reduces evaluation time by **28.4%**. Fresh LAMMPS evaluations in the
+same run take **8.19 ms**, leaving xreac **3.71x** slower on this fixture.
+
+Bond-order reuse is confined to a single evaluation: properties consume the
+numerical values already computed for that geometry's energy and forces.
+Bond candidates are selected again at every geometry using the existing
+5 Angstrom cutoff (capped by the force-field cutoff). Nonbonded terms retain
+their full neighbor lists. Packed integer keys preserve the canonical edge
+order and reverse-edge checks; large shifts fall back to the previous sorting
+method if packing could overflow. No cross-geometry cache is introduced.
+
+All stages and both sweeps have **zero differences** from the baseline in
+energy, components, forces, charges, bond orders, coordination, lone pairs,
+bond counts, and dipoles. Each run independently verifies native and ASE
+neighbors against LAMMPS. Maximum differences from LAMMPS are
+3.8e-14 kcal/mol/atom in energy, 4.6e-10 kcal/mol/Angstrom in forces, and
+5.3e-12 e in charges. All **169 tests** pass, including four integer-topology
+checks for ordinary/large shifts and signed/unsigned indices. These checks
+add no simulation structures.
+
+- [Per-commit timing batches, source hashes, environment, and all comparisons](cpu_followup.json)
+- [Final numerical results](cpu_followup_results.json.gz)
+- [Final raw LAMMPS inputs, outputs, and timing logs](cpu_followup_reference.tar.gz)
+
+The raw archive omits the duplicate `ffield`; restore it from
+`data/ffield.reax.CuOHCl.2010` as for the original archive above.
+
+To measure an individual stage with the current example driver:
+
+```sh
+revision=5b22be2
+source_dir="validation/runs/cuo-followup-source-$revision"
+mkdir -p "$source_dir"
+git archive "$revision" src | tar -x -C "$source_dir"
+python examples/cuo_surface.py --source-root "$source_dir" \
+  --repeats 7 --batch-seconds 0.5 --skip-lammps-timing
+```
+
+Repeat for the four revisions in table order, then reverse order, to obtain
+14 batches per stage. The JSON records each batch's call count and duration;
+pool duration/count across both sweeps before taking the median. Omit
+`--skip-lammps-timing` to measure LAMMPS as well.

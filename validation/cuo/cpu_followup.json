@@ -1,0 +1,1132 @@
+{
+  "created_utc": "2026-09-24T00:51:35.042994+00:00",
+  "case": "surface_cuo_010",
+  "atoms": 96,
+  "methodology": "Two sweeps in forward and reverse commit order; seven batches per sweep; each batch targets 0.5 s; medians over 14 per-evaluation batch times; startup excluded; no core affinity.",
+  "sweep_order": [
+    [
+      "691483c",
+      "082920b",
+      "7008b33",
+      "5b22be2"
+    ],
+    [
+      "5b22be2",
+      "7008b33",
+      "082920b",
+      "691483c"
+    ]
+  ],
+  "structure_sha256": "3265ec114bd0ab1f07ea880c5b8d30830fc3619977e3bd4996429ade43795638",
+  "force_field_sha256": "8b1a57a6945be8b1d9df3b69df8f329dc32561393ed1f02221a5ef0c21e8c07e",
+  "platform": "macOS-26.6-arm64-arm-64bit",
+  "python": "3.10.13 | packaged by conda-forge | (main, Dec 23 2023, 15:35:25) [Clang 16.0.6 ]",
+  "environment": {
+    "numpy": "2.0.2",
+    "autograd": "1.9.1",
+    "ase": "3.27.0"
+  },
+  "thread_environment": {
+    "OMP_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "MKL_NUM_THREADS": "1",
+    "VECLIB_MAXIMUM_THREADS": "1",
+    "BLIS_NUM_THREADS": "1",
+    "NUMEXPR_NUM_THREADS": "1"
+  },
+  "force_convention": "fixed_charge",
+  "reference_version": "LAMMPS (22 Jul 2025 - Update 4)",
+  "reference_cell_repetitions": [
+    1,
+    1,
+    1
+  ],
+  "stages": [
+    {
+      "revision": "691483cea65290026d2510cc7f5eef348739ba67",
+      "change": "Previous implementation",
+      "median_seconds": 0.04251555611307804,
+      "min_seconds": 0.040639378202076144,
+      "max_seconds": 0.049990041689439255,
+      "timing_sweeps": [
+        {
+          "calls_per_batch": 11,
+          "batch_seconds": [
+            0.5472817094996572,
+            0.5498904585838318,
+            0.47500187531113625,
+            0.49420445784926414,
+            0.4646309996023774,
+            0.47559154126793146,
+            0.4719314584508538
+          ],
+          "median_seconds": 0.04323559466072104,
+          "min_seconds": 0.04223918178203431,
+          "max_seconds": 0.049990041689439255,
+          "first_seconds": 0.04638441652059555,
+          "cpu_to_wall_ratio": 0.9501130144574289
+        },
+        {
+          "calls_per_batch": 13,
+          "batch_seconds": [
+            0.5283119166269898,
+            0.5442376667633653,
+            0.5444376254454255,
+            0.5522305835038424,
+            0.5531738754361868,
+            0.5487990416586399,
+            0.5487881666049361
+          ],
+          "median_seconds": 0.04221447435422586,
+          "min_seconds": 0.040639378202076144,
+          "max_seconds": 0.04255183657201437,
+          "first_seconds": 0.04074466694146395,
+          "cpu_to_wall_ratio": 0.9915722371552051
+        }
+      ],
+      "lammps_comparisons": [
+        {
+          "native": {
+            "maximum_absolute_errors": {
+              "energy_per_atom": 3.789561257387201e-14,
+              "components_per_atom": 4.926429634603361e-13,
+              "forces": 4.594209457309262e-10,
+              "charges": 5.204947584047659e-12,
+              "dipole": 7.888534270250602e-11,
+              "total_bond_orders": 1.2434497875801753e-14,
+              "lone_pairs": 2.220446049250313e-16,
+              "bond_counts": 0.0
+            },
+            "limits": {
+              "energy_per_atom": 1e-05,
+              "components_per_atom": 1e-05,
+              "forces": 0.0001,
+              "charges": 1e-06,
+              "dipole": 1e-06,
+              "total_bond_orders": 1e-08,
+              "lone_pairs": 1e-08,
+              "bond_counts": 0
+            },
+            "passed": true
+          },
+          "ase": {
+            "maximum_absolute_errors": {
+              "energy_per_atom": 3.789561257387201e-14,
+              "components_per_atom": 4.926429634603361e-13,
+              "forces": 4.594209457309262e-10,
+              "charges": 5.204947584047659e-12,
+              "dipole": 7.888534270250602e-11,
+              "total_bond_orders": 1.2434497875801753e-14,
+              "lone_pairs": 2.220446049250313e-16,
+              "bond_counts": 0.0
+            },
+            "limits": {
+              "energy_per_atom": 1e-05,
+              "components_per_atom": 1e-05,
+              "forces": 0.0001,
+              "charges": 1e-06,
+              "dipole": 1e-06,
+              "total_bond_orders": 1e-08,
+              "lone_pairs": 1e-08,
+              "bond_counts": 0
+            },
+            "passed": true
+          }
+        },
+        {
+          "native": {
+            "maximum_absolute_errors": {
+              "energy_per_atom": 3.789561257387201e-14,
+              "components_per_atom": 4.926429634603361e-13,
+              "forces": 4.594209457309262e-10,
+              "charges": 5.204947584047659e-12,
+              "dipole": 7.888534270250602e-11,
+              "total_bond_orders": 1.2434497875801753e-14,
+              "lone_pairs": 2.220446049250313e-16,
+              "bond_counts": 0.0
+            },
+            "limits": {
+              "energy_per_atom": 1e-05,
+              "components_per_atom": 1e-05,
+              "forces": 0.0001,
+              "charges": 1e-06,
+              "dipole": 1e-06,
+              "total_bond_orders": 1e-08,
+              "lone_pairs": 1e-08,
+              "bond_counts": 0
+            },
+            "passed": true
+          },
+          "ase": {
+            "maximum_absolute_errors": {
+              "energy_per_atom": 3.789561257387201e-14,
+              "components_per_atom": 4.926429634603361e-13,
+              "forces": 4.594209457309262e-10,
+              "charges": 5.204947584047659e-12,
+              "dipole": 7.888534270250602e-11,
+              "total_bond_orders": 1.2434497875801753e-14,
+              "lone_pairs": 2.220446049250313e-16,
+              "bond_counts": 0.0
+            },
+            "limits": {
+              "energy_per_atom": 1e-05,
+              "components_per_atom": 1e-05,
+              "forces": 0.0001,
+              "charges": 1e-06,
+              "dipole": 1e-06,
+              "total_bond_orders": 1e-08,
+              "lone_pairs": 1e-08,
+              "bond_counts": 0
+            },
+            "passed": true
+          }
+        }
+      ],
+      "neighbor_comparisons": [
+        {
+          "max_absolute_differences": {
+            "energy_per_atom": 0.0,
+            "components_per_atom": 0.0,
+            "forces": 0.0,
+            "charges": 0.0,
+            "bond_orders": 0.0,
+            "total_bond_orders": 0.0,
+            "lone_pairs": 0.0,
+            "bond_counts": 0.0,
+            "dipole": 0.0
+          },
+          "tolerances": {
+            "energy_per_atom": 1e-09,
+            "components_per_atom": 1e-09,
+            "forces": 2e-08,
+            "charges": 1e-10,
+            "bond_orders": 1e-10,
+            "total_bond_orders": 1e-10,
+            "lone_pairs": 1e-10,
+            "bond_counts": 0,
+            "dipole": 1e-09
+          },
+          "passed": true
+        },
+        {
+          "max_absolute_differences": {
+            "energy_per_atom": 0.0,
+            "components_per_atom": 0.0,
+            "forces": 0.0,
+            "charges": 0.0,
+            "bond_orders": 0.0,
+            "total_bond_orders": 0.0,
+            "lone_pairs": 0.0,
+            "bond_counts": 0.0,
+            "dipole": 0.0
+          },
+          "tolerances": {
+            "energy_per_atom": 1e-09,
+            "components_per_atom": 1e-09,
+            "forces": 2e-08,
+            "charges": 1e-10,
+            "bond_orders": 1e-10,
+            "total_bond_orders": 1e-10,
+            "lone_pairs": 1e-10,
+            "bond_counts": 0,
+            "dipole": 1e-09
+          },
+          "passed": true
+        }
+      ],
+      "baseline_comparisons": [
+        {
+          "max_absolute_differences": {
+            "energy_per_atom": 0.0,
+            "components_per_atom": 0.0,
+            "forces": 0.0,
+            "charges": 0.0,
+            "bond_orders": 0.0,
+            "total_bond_orders": 0.0,
+            "lone_pairs": 0.0,
+            "bond_counts": 0.0,
+            "dipole": 0.0
+          },
+          "tolerances": {
+            "energy_per_atom": 1e-09,
+            "components_per_atom": 1e-09,
+            "forces": 2e-08,
+            "charges": 1e-10,
+            "bond_orders": 1e-10,
+            "total_bond_orders": 1e-10,
+            "lone_pairs": 1e-10,
+            "bond_counts": 0,
+            "dipole": 1e-09
+          },
+          "passed": true
+        },
+        {
+          "max_absolute_differences": {
+            "energy_per_atom": 0.0,
+            "components_per_atom": 0.0,
+            "forces": 0.0,
+            "charges": 0.0,
+            "bond_orders": 0.0,
+            "total_bond_orders": 0.0,
+            "lone_pairs": 0.0,
+            "bond_counts": 0.0,
+            "dipole": 0.0
+          },
+          "tolerances": {
+            "energy_per_atom": 1e-09,
+            "components_per_atom": 1e-09,
+            "forces": 2e-08,
+            "charges": 1e-10,
+            "bond_orders": 1e-10,
+            "total_bond_orders": 1e-10,
+            "lone_pairs": 1e-10,
+            "bond_counts": 0,
+            "dipole": 1e-09
+          },
+          "passed": true
+        }
+      ],
+      "source_sha256": {
+        "xreac/__init__.py": "042f04a1863f7c98a8704683a71099794097c97fc48574fb07bfdfa8ccfa0ad5",
+        "xreac/ase.py": "57eb4b680720350ec1f93bdd0b23a8f4320fb51e87f18f42b4e9320e6eea4fc4",
+        "xreac/calculator.py": "8bd8929a06e7a586b20eeee634b494673528daa72c768d64cb6a469aafeee805",
+        "xreac/energy.py": "3bc30193548cfe08f931eded80b0ca17f5f73754d08b6675e2da084c069c76bc",
+        "xreac/forcefield.py": "f214ce7f30d0a8d07acfaef1f45c8d1b0545430f051153aa710ee8c4e218b6e8",
+        "xreac/geometry.py": "179db73ce1385f55d938e791ac75014fb696e79979a4bad89affdac279c7e75c",
+        "xreac/neighbors.py": "4ee6bd8567eba58da3b66c0bb73bb76461dfca466ed4fc84050c63c5e62b139d",
+        "xreac/reference.py": "29209294faa2711df6b57f8785e964c07b8f61d446e8a8046a8bcf638779dddd"
+      },
+      "cumulative_speedup": 1.0,
+      "incremental_speedup": 1.0
+    },
+    {
+      "revision": "082920bebee99b5b9a1c1ae73b7259c7d0d3a41b",
+      "change": "Reuse bond-order values",
+      "median_seconds": 0.04013784136623144,
+      "min_seconds": 0.03896883653046993,
+      "max_seconds": 0.04160721148722447,
+      "timing_sweeps": [
+        {
+          "calls_per_batch": 13,
+          "batch_seconds": [
+            0.5132139595225453,
+            0.5337153328582644,
+            0.5362405832856894,
+            0.515178750269115,
+            0.5148809170350432,
+            0.5219444157555699,
+            0.5321379993110895
+          ],
+          "median_seconds": 0.04014957044273615,
+          "min_seconds": 0.03947799688634964,
+          "max_seconds": 0.04124927563736072,
+          "first_seconds": 0.03988775052130222,
+          "cpu_to_wall_ratio": 0.9881215564599444
+        },
+        {
+          "calls_per_batch": 13,
+          "batch_seconds": [
+            0.5065948748961091,
+            0.5408937493339181,
+            0.5216394597664475,
+            0.5127765005454421,
+            0.5328786671161652,
+            0.5192313324660063,
+            0.5364664169028401
+          ],
+          "median_seconds": 0.040126112289726734,
+          "min_seconds": 0.03896883653046993,
+          "max_seconds": 0.04160721148722447,
+          "first_seconds": 0.03894300013780594,
+          "cpu_to_wall_ratio": 0.9819813803671987
+        }
+      ],
+      "lammps_comparisons": [
+        {
+          "native": {
+            "maximum_absolute_errors": {
+              "energy_per_atom": 3.789561257387201e-14,
+              "components_per_atom": 4.926429634603361e-13,
+              "forces": 4.594209457309262e-10,
+              "charges": 5.204947584047659e-12,
+              "dipole": 7.888534270250602e-11,
+              "total_bond_orders": 1.2434497875801753e-14,
+              "lone_pairs": 2.220446049250313e-16,
+              "bond_counts": 0.0
+            },
+            "limits": {
+              "energy_per_atom": 1e-05,
+              "components_per_atom": 1e-05,
+              "forces": 0.0001,
+              "charges": 1e-06,
+              "dipole": 1e-06,
+              "total_bond_orders": 1e-08,
+              "lone_pairs": 1e-08,
+              "bond_counts": 0
+            },
+            "passed": true
+          },
+          "ase": {
+            "maximum_absolute_errors": {
+              "energy_per_atom": 3.789561257387201e-14,
+              "components_per_atom": 4.926429634603361e-13,
+              "forces": 4.594209457309262e-10,
+              "charges": 5.204947584047659e-12,
+              "dipole": 7.888534270250602e-11,
+              "total_bond_orders": 1.2434497875801753e-14,
+              "lone_pairs": 2.220446049250313e-16,
+              "bond_counts": 0.0
+            },
+            "limits": {
+              "energy_per_atom": 1e-05,
+              "components_per_atom": 1e-05,
+              "forces": 0.0001,
+              "charges": 1e-06,
+              "dipole": 1e-06,
+              "total_bond_orders": 1e-08,
+              "lone_pairs": 1e-08,
+              "bond_counts": 0
+            },
+            "passed": true
+          }
+        },
+        {
+          "native": {
+            "maximum_absolute_errors": {
+              "energy_per_atom": 3.789561257387201e-14,
+              "components_per_atom": 4.926429634603361e-13,
+              "forces": 4.594209457309262e-10,
+              "charges": 5.204947584047659e-12,
+              "dipole": 7.888534270250602e-11,
+              "total_bond_orders": 1.2434497875801753e-14,
+              "lone_pairs": 2.220446049250313e-16,
+              "bond_counts": 0.0
+            },
+            "limits": {
+              "energy_per_atom": 1e-05,
+              "components_per_atom": 1e-05,
+              "forces": 0.0001,
+              "charges": 1e-06,
+              "dipole": 1e-06,
+              "total_bond_orders": 1e-08,
+              "lone_pairs": 1e-08,
+              "bond_counts": 0
+            },
+            "passed": true
+          },
+          "ase": {
+            "maximum_absolute_errors": {
+              "energy_per_atom": 3.789561257387201e-14,
+              "components_per_atom": 4.926429634603361e-13,
+              "forces": 4.594209457309262e-10,
+              "charges": 5.204947584047659e-12,
+              "dipole": 7.888534270250602e-11,
+              "total_bond_orders": 1.2434497875801753e-14,
+              "lone_pairs": 2.220446049250313e-16,
+              "bond_counts": 0.0
+            },
+            "limits": {
+              "energy_per_atom": 1e-05,
+              "components_per_atom": 1e-05,
+              "forces": 0.0001,
+              "charges": 1e-06,
+              "dipole": 1e-06,
+              "total_bond_orders": 1e-08,
+              "lone_pairs": 1e-08,
+              "bond_counts": 0
+            },
+            "passed": true
+          }
+        }
+      ],
+      "neighbor_comparisons": [
+        {
+          "max_absolute_differences": {
+            "energy_per_atom": 0.0,
+            "components_per_atom": 0.0,
+            "forces": 0.0,
+            "charges": 0.0,
+            "bond_orders": 0.0,
+            "total_bond_orders": 0.0,
+            "lone_pairs": 0.0,
+            "bond_counts": 0.0,
+            "dipole": 0.0
+          },
+          "tolerances": {
+            "energy_per_atom": 1e-09,
+            "components_per_atom": 1e-09,
+            "forces": 2e-08,
+            "charges": 1e-10,
+            "bond_orders": 1e-10,
+            "total_bond_orders": 1e-10,
+            "lone_pairs": 1e-10,
+            "bond_counts": 0,
+            "dipole": 1e-09
+          },
+          "passed": true
+        },
+        {
+          "max_absolute_differences": {
+            "energy_per_atom": 0.0,
+            "components_per_atom": 0.0,
+            "forces": 0.0,
+            "charges": 0.0,
+            "bond_orders": 0.0,
+            "total_bond_orders": 0.0,
+            "lone_pairs": 0.0,
+            "bond_counts": 0.0,
+            "dipole": 0.0
+          },
+          "tolerances": {
+            "energy_per_atom": 1e-09,
+            "components_per_atom": 1e-09,
+            "forces": 2e-08,
+            "charges": 1e-10,
+            "bond_orders": 1e-10,
+            "total_bond_orders": 1e-10,
+            "lone_pairs": 1e-10,
+            "bond_counts": 0,
+            "dipole": 1e-09
+          },
+          "passed": true
+        }
+      ],
+      "baseline_comparisons": [
+        {
+          "max_absolute_differences": {
+            "energy_per_atom": 0.0,
+            "components_per_atom": 0.0,
+            "forces": 0.0,
+            "charges": 0.0,
+            "bond_orders": 0.0,
+            "total_bond_orders": 0.0,
+            "lone_pairs": 0.0,
+            "bond_counts": 0.0,
+            "dipole": 0.0
+          },
+          "tolerances": {
+            "energy_per_atom": 1e-09,
+            "components_per_atom": 1e-09,
+            "forces": 2e-08,
+            "charges": 1e-10,
+            "bond_orders": 1e-10,
+            "total_bond_orders": 1e-10,
+            "lone_pairs": 1e-10,
+            "bond_counts": 0,
+            "dipole": 1e-09
+          },
+          "passed": true
+        },
+        {
+          "max_absolute_differences": {
+            "energy_per_atom": 0.0,
+            "components_per_atom": 0.0,
+            "forces": 0.0,
+            "charges": 0.0,
+            "bond_orders": 0.0,
+            "total_bond_orders": 0.0,
+            "lone_pairs": 0.0,
+            "bond_counts": 0.0,
+            "dipole": 0.0
+          },
+          "tolerances": {
+            "energy_per_atom": 1e-09,
+            "components_per_atom": 1e-09,
+            "forces": 2e-08,
+            "charges": 1e-10,
+            "bond_orders": 1e-10,
+            "total_bond_orders": 1e-10,
+            "lone_pairs": 1e-10,
+            "bond_counts": 0,
+            "dipole": 1e-09
+          },
+          "passed": true
+        }
+      ],
+      "source_sha256": {
+        "xreac/__init__.py": "042f04a1863f7c98a8704683a71099794097c97fc48574fb07bfdfa8ccfa0ad5",
+        "xreac/ase.py": "57eb4b680720350ec1f93bdd0b23a8f4320fb51e87f18f42b4e9320e6eea4fc4",
+        "xreac/calculator.py": "27710b9da5eb2a9da8bc88378cdda2cb4b4172acadc40a988b3252aadbdaa088",
+        "xreac/energy.py": "9a8fbab68fae590fbbe44be1eecfb4d55f065127a440f379eb43eb6b731f7323",
+        "xreac/forcefield.py": "f214ce7f30d0a8d07acfaef1f45c8d1b0545430f051153aa710ee8c4e218b6e8",
+        "xreac/geometry.py": "179db73ce1385f55d938e791ac75014fb696e79979a4bad89affdac279c7e75c",
+        "xreac/neighbors.py": "4ee6bd8567eba58da3b66c0bb73bb76461dfca466ed4fc84050c63c5e62b139d",
+        "xreac/reference.py": "29209294faa2711df6b57f8785e964c07b8f61d446e8a8046a8bcf638779dddd"
+      },
+      "cumulative_speedup": 1.0592387299842938,
+      "incremental_speedup": 1.0592387299842938
+    },
+    {
+      "revision": "7008b33550af2383aecbbd3d970a5a0b851ddae0",
+      "change": "Limit bond-order work to short-range edges",
+      "median_seconds": 0.035774636051307124,
+      "min_seconds": 0.03483248893171549,
+      "max_seconds": 0.036780486131707826,
+      "timing_sweeps": [
+        {
+          "calls_per_batch": 15,
+          "batch_seconds": [
+            0.528691416606307,
+            0.5224873339757323,
+            0.5517072919756174,
+            0.5430933749303222,
+            0.5288063324987888,
+            0.5378214158117771,
+            0.5354176657274365
+          ],
+          "median_seconds": 0.03569451104849577,
+          "min_seconds": 0.03483248893171549,
+          "max_seconds": 0.036780486131707826,
+          "first_seconds": 0.03476120810955763,
+          "cpu_to_wall_ratio": 0.9932292787090076
+        },
+        {
+          "calls_per_batch": 14,
+          "batch_seconds": [
+            0.49104116670787334,
+            0.505638875067234,
+            0.5139734167605639,
+            0.4934441661462188,
+            0.5128233749419451,
+            0.507334291934967,
+            0.49337737541645765
+          ],
+          "median_seconds": 0.036117062504802434,
+          "min_seconds": 0.03507436905056238,
+          "max_seconds": 0.036712386911468844,
+          "first_seconds": 0.03596329130232334,
+          "cpu_to_wall_ratio": 0.9869410278661188
+        }
+      ],
+      "lammps_comparisons": [
+        {
+          "native": {
+            "maximum_absolute_errors": {
+              "energy_per_atom": 3.789561257387201e-14,
+              "components_per_atom": 4.926429634603361e-13,
+              "forces": 4.594209457309262e-10,
+              "charges": 5.204947584047659e-12,
+              "dipole": 7.888534270250602e-11,
+              "total_bond_orders": 1.2434497875801753e-14,
+              "lone_pairs": 2.220446049250313e-16,
+              "bond_counts": 0.0
+            },
+            "limits": {
+              "energy_per_atom": 1e-05,
+              "components_per_atom": 1e-05,
+              "forces": 0.0001,
+              "charges": 1e-06,
+              "dipole": 1e-06,
+              "total_bond_orders": 1e-08,
+              "lone_pairs": 1e-08,
+              "bond_counts": 0
+            },
+            "passed": true
+          },
+          "ase": {
+            "maximum_absolute_errors": {
+              "energy_per_atom": 3.789561257387201e-14,
+              "components_per_atom": 4.926429634603361e-13,
+              "forces": 4.594209457309262e-10,
+              "charges": 5.204947584047659e-12,
+              "dipole": 7.888534270250602e-11,
+              "total_bond_orders": 1.2434497875801753e-14,
+              "lone_pairs": 2.220446049250313e-16,
+              "bond_counts": 0.0
+            },
+            "limits": {
+              "energy_per_atom": 1e-05,
+              "components_per_atom": 1e-05,
+              "forces": 0.0001,
+              "charges": 1e-06,
+              "dipole": 1e-06,
+              "total_bond_orders": 1e-08,
+              "lone_pairs": 1e-08,
+              "bond_counts": 0
+            },
+            "passed": true
+          }
+        },
+        {
+          "native": {
+            "maximum_absolute_errors": {
+              "energy_per_atom": 3.789561257387201e-14,
+              "components_per_atom": 4.926429634603361e-13,
+              "forces": 4.594209457309262e-10,
+              "charges": 5.204947584047659e-12,
+              "dipole": 7.888534270250602e-11,
+              "total_bond_orders": 1.2434497875801753e-14,
+              "lone_pairs": 2.220446049250313e-16,
+              "bond_counts": 0.0
+            },
+            "limits": {
+              "energy_per_atom": 1e-05,
+              "components_per_atom": 1e-05,
+              "forces": 0.0001,
+              "charges": 1e-06,
+              "dipole": 1e-06,
+              "total_bond_orders": 1e-08,
+              "lone_pairs": 1e-08,
+              "bond_counts": 0
+            },
+            "passed": true
+          },
+          "ase": {
+            "maximum_absolute_errors": {
+              "energy_per_atom": 3.789561257387201e-14,
+              "components_per_atom": 4.926429634603361e-13,
+              "forces": 4.594209457309262e-10,
+              "charges": 5.204947584047659e-12,
+              "dipole": 7.888534270250602e-11,
+              "total_bond_orders": 1.2434497875801753e-14,
+              "lone_pairs": 2.220446049250313e-16,
+              "bond_counts": 0.0
+            },
+            "limits": {
+              "energy_per_atom": 1e-05,
+              "components_per_atom": 1e-05,
+              "forces": 0.0001,
+              "charges": 1e-06,
+              "dipole": 1e-06,
+              "total_bond_orders": 1e-08,
+              "lone_pairs": 1e-08,
+              "bond_counts": 0
+            },
+            "passed": true
+          }
+        }
+      ],
+      "neighbor_comparisons": [
+        {
+          "max_absolute_differences": {
+            "energy_per_atom": 0.0,
+            "components_per_atom": 0.0,
+            "forces": 0.0,
+            "charges": 0.0,
+            "bond_orders": 0.0,
+            "total_bond_orders": 0.0,
+            "lone_pairs": 0.0,
+            "bond_counts": 0.0,
+            "dipole": 0.0
+          },
+          "tolerances": {
+            "energy_per_atom": 1e-09,
+            "components_per_atom": 1e-09,
+            "forces": 2e-08,
+            "charges": 1e-10,
+            "bond_orders": 1e-10,
+            "total_bond_orders": 1e-10,
+            "lone_pairs": 1e-10,
+            "bond_counts": 0,
+            "dipole": 1e-09
+          },
+          "passed": true
+        },
+        {
+          "max_absolute_differences": {
+            "energy_per_atom": 0.0,
+            "components_per_atom": 0.0,
+            "forces": 0.0,
+            "charges": 0.0,
+            "bond_orders": 0.0,
+            "total_bond_orders": 0.0,
+            "lone_pairs": 0.0,
+            "bond_counts": 0.0,
+            "dipole": 0.0
+          },
+          "tolerances": {
+            "energy_per_atom": 1e-09,
+            "components_per_atom": 1e-09,
+            "forces": 2e-08,
+            "charges": 1e-10,
+            "bond_orders": 1e-10,
+            "total_bond_orders": 1e-10,
+            "lone_pairs": 1e-10,
+            "bond_counts": 0,
+            "dipole": 1e-09
+          },
+          "passed": true
+        }
+      ],
+      "baseline_comparisons": [
+        {
+          "max_absolute_differences": {
+            "energy_per_atom": 0.0,
+            "components_per_atom": 0.0,
+            "forces": 0.0,
+            "charges": 0.0,
+            "bond_orders": 0.0,
+            "total_bond_orders": 0.0,
+            "lone_pairs": 0.0,
+            "bond_counts": 0.0,
+            "dipole": 0.0
+          },
+          "tolerances": {
+            "energy_per_atom": 1e-09,
+            "components_per_atom": 1e-09,
+            "forces": 2e-08,
+            "charges": 1e-10,
+            "bond_orders": 1e-10,
+            "total_bond_orders": 1e-10,
+            "lone_pairs": 1e-10,
+            "bond_counts": 0,
+            "dipole": 1e-09
+          },
+          "passed": true
+        },
+        {
+          "max_absolute_differences": {
+            "energy_per_atom": 0.0,
+            "components_per_atom": 0.0,
+            "forces": 0.0,
+            "charges": 0.0,
+            "bond_orders": 0.0,
+            "total_bond_orders": 0.0,
+            "lone_pairs": 0.0,
+            "bond_counts": 0.0,
+            "dipole": 0.0
+          },
+          "tolerances": {
+            "energy_per_atom": 1e-09,
+            "components_per_atom": 1e-09,
+            "forces": 2e-08,
+            "charges": 1e-10,
+            "bond_orders": 1e-10,
+            "total_bond_orders": 1e-10,
+            "lone_pairs": 1e-10,
+            "bond_counts": 0,
+            "dipole": 1e-09
+          },
+          "passed": true
+        }
+      ],
+      "source_sha256": {
+        "xreac/__init__.py": "042f04a1863f7c98a8704683a71099794097c97fc48574fb07bfdfa8ccfa0ad5",
+        "xreac/ase.py": "57eb4b680720350ec1f93bdd0b23a8f4320fb51e87f18f42b4e9320e6eea4fc4",
+        "xreac/calculator.py": "27710b9da5eb2a9da8bc88378cdda2cb4b4172acadc40a988b3252aadbdaa088",
+        "xreac/energy.py": "2478fcb98e2f5e85f4342f3a12cd735f4d31ce1c8bf05ca974a2bad885462a61",
+        "xreac/forcefield.py": "f214ce7f30d0a8d07acfaef1f45c8d1b0545430f051153aa710ee8c4e218b6e8",
+        "xreac/geometry.py": "179db73ce1385f55d938e791ac75014fb696e79979a4bad89affdac279c7e75c",
+        "xreac/neighbors.py": "4ee6bd8567eba58da3b66c0bb73bb76461dfca466ed4fc84050c63c5e62b139d",
+        "xreac/reference.py": "29209294faa2711df6b57f8785e964c07b8f61d446e8a8046a8bcf638779dddd"
+      },
+      "cumulative_speedup": 1.1884273554063067,
+      "incremental_speedup": 1.1219636534852993
+    },
+    {
+      "revision": "5b22be2ba9f3f92f5ca7b7254b1ef661c580ecf6",
+      "change": "Pack neighbor sorting keys",
+      "median_seconds": 0.03042295827146839,
+      "min_seconds": 0.029382683829787898,
+      "max_seconds": 0.033254480427678895,
+      "timing_sweeps": [
+        {
+          "calls_per_batch": 17,
+          "batch_seconds": [
+            0.5182190835475922,
+            0.5247003324329853,
+            0.5231678755953908,
+            0.5454064579680562,
+            0.5653261672705412,
+            0.5235416255891323,
+            0.517775290645659
+          ],
+          "median_seconds": 0.03079656621112543,
+          "min_seconds": 0.03045737003797994,
+          "max_seconds": 0.033254480427678895,
+          "first_seconds": 0.030395125038921833,
+          "cpu_to_wall_ratio": 0.979774323424326
+        },
+        {
+          "calls_per_batch": 17,
+          "batch_seconds": [
+            0.5048656659200788,
+            0.4995056251063943,
+            0.5150062078610063,
+            0.5083019575104117,
+            0.5136039992794394,
+            0.504746250808239,
+            0.5166052905842662
+          ],
+          "median_seconds": 0.02990011514767128,
+          "min_seconds": 0.029382683829787898,
+          "max_seconds": 0.030388546504956836,
+          "first_seconds": 0.030347959138453007,
+          "cpu_to_wall_ratio": 0.9934798268447539
+        }
+      ],
+      "lammps_comparisons": [
+        {
+          "native": {
+            "maximum_absolute_errors": {
+              "energy_per_atom": 3.789561257387201e-14,
+              "components_per_atom": 4.926429634603361e-13,
+              "forces": 4.594209457309262e-10,
+              "charges": 5.204947584047659e-12,
+              "dipole": 7.888534270250602e-11,
+              "total_bond_orders": 1.2434497875801753e-14,
+              "lone_pairs": 2.220446049250313e-16,
+              "bond_counts": 0.0
+            },
+            "limits": {
+              "energy_per_atom": 1e-05,
+              "components_per_atom": 1e-05,
+              "forces": 0.0001,
+              "charges": 1e-06,
+              "dipole": 1e-06,
+              "total_bond_orders": 1e-08,
+              "lone_pairs": 1e-08,
+              "bond_counts": 0
+            },
+            "passed": true
+          },
+          "ase": {
+            "maximum_absolute_errors": {
+              "energy_per_atom": 3.789561257387201e-14,
+              "components_per_atom": 4.926429634603361e-13,
+              "forces": 4.594209457309262e-10,
+              "charges": 5.204947584047659e-12,
+              "dipole": 7.888534270250602e-11,
+              "total_bond_orders": 1.2434497875801753e-14,
+              "lone_pairs": 2.220446049250313e-16,
+              "bond_counts": 0.0
+            },
+            "limits": {
+              "energy_per_atom": 1e-05,
+              "components_per_atom": 1e-05,
+              "forces": 0.0001,
+              "charges": 1e-06,
+              "dipole": 1e-06,
+              "total_bond_orders": 1e-08,
+              "lone_pairs": 1e-08,
+              "bond_counts": 0
+            },
+            "passed": true
+          }
+        },
+        {
+          "native": {
+            "maximum_absolute_errors": {
+              "energy_per_atom": 3.789561257387201e-14,
+              "components_per_atom": 4.926429634603361e-13,
+              "forces": 4.594209457309262e-10,
+              "charges": 5.204947584047659e-12,
+              "dipole": 7.888534270250602e-11,
+              "total_bond_orders": 1.2434497875801753e-14,
+              "lone_pairs": 2.220446049250313e-16,
+              "bond_counts": 0.0
+            },
+            "limits": {
+              "energy_per_atom": 1e-05,
+              "components_per_atom": 1e-05,
+              "forces": 0.0001,
+              "charges": 1e-06,
+              "dipole": 1e-06,
+              "total_bond_orders": 1e-08,
+              "lone_pairs": 1e-08,
+              "bond_counts": 0
+            },
+            "passed": true
+          },
+          "ase": {
+            "maximum_absolute_errors": {
+              "energy_per_atom": 3.789561257387201e-14,
+              "components_per_atom": 4.926429634603361e-13,
+              "forces": 4.594209457309262e-10,
+              "charges": 5.204947584047659e-12,
+              "dipole": 7.888534270250602e-11,
+              "total_bond_orders": 1.2434497875801753e-14,
+              "lone_pairs": 2.220446049250313e-16,
+              "bond_counts": 0.0
+            },
+            "limits": {
+              "energy_per_atom": 1e-05,
+              "components_per_atom": 1e-05,
+              "forces": 0.0001,
+              "charges": 1e-06,
+              "dipole": 1e-06,
+              "total_bond_orders": 1e-08,
+              "lone_pairs": 1e-08,
+              "bond_counts": 0
+            },
+            "passed": true
+          }
+        }
+      ],
+      "neighbor_comparisons": [
+        {
+          "max_absolute_differences": {
+            "energy_per_atom": 0.0,
+            "components_per_atom": 0.0,
+            "forces": 0.0,
+            "charges": 0.0,
+            "bond_orders": 0.0,
+            "total_bond_orders": 0.0,
+            "lone_pairs": 0.0,
+            "bond_counts": 0.0,
+            "dipole": 0.0
+          },
+          "tolerances": {
+            "energy_per_atom": 1e-09,
+            "components_per_atom": 1e-09,
+            "forces": 2e-08,
+            "charges": 1e-10,
+            "bond_orders": 1e-10,
+            "total_bond_orders": 1e-10,
+            "lone_pairs": 1e-10,
+            "bond_counts": 0,
+            "dipole": 1e-09
+          },
+          "passed": true
+        },
+        {
+          "max_absolute_differences": {
+            "energy_per_atom": 0.0,
+            "components_per_atom": 0.0,
+            "forces": 0.0,
+            "charges": 0.0,
+            "bond_orders": 0.0,
+            "total_bond_orders": 0.0,
+            "lone_pairs": 0.0,
+            "bond_counts": 0.0,
+            "dipole": 0.0
+          },
+          "tolerances": {
+            "energy_per_atom": 1e-09,
+            "components_per_atom": 1e-09,
+            "forces": 2e-08,
+            "charges": 1e-10,
+            "bond_orders": 1e-10,
+            "total_bond_orders": 1e-10,
+            "lone_pairs": 1e-10,
+            "bond_counts": 0,
+            "dipole": 1e-09
+          },
+          "passed": true
+        }
+      ],
+      "baseline_comparisons": [
+        {
+          "max_absolute_differences": {
+            "energy_per_atom": 0.0,
+            "components_per_atom": 0.0,
+            "forces": 0.0,
+            "charges": 0.0,
+            "bond_orders": 0.0,
+            "total_bond_orders": 0.0,
+            "lone_pairs": 0.0,
+            "bond_counts": 0.0,
+            "dipole": 0.0
+          },
+          "tolerances": {
+            "energy_per_atom": 1e-09,
+            "components_per_atom": 1e-09,
+            "forces": 2e-08,
+            "charges": 1e-10,
+            "bond_orders": 1e-10,
+            "total_bond_orders": 1e-10,
+            "lone_pairs": 1e-10,
+            "bond_counts": 0,
+            "dipole": 1e-09
+          },
+          "passed": true
+        },
+        {
+          "max_absolute_differences": {
+            "energy_per_atom": 0.0,
+            "components_per_atom": 0.0,
+            "forces": 0.0,
+            "charges": 0.0,
+            "bond_orders": 0.0,
+            "total_bond_orders": 0.0,
+            "lone_pairs": 0.0,
+            "bond_counts": 0.0,
+            "dipole": 0.0
+          },
+          "tolerances": {
+            "energy_per_atom": 1e-09,
+            "components_per_atom": 1e-09,
+            "forces": 2e-08,
+            "charges": 1e-10,
+            "bond_orders": 1e-10,
+            "total_bond_orders": 1e-10,
+            "lone_pairs": 1e-10,
+            "bond_counts": 0,
+            "dipole": 1e-09
+          },
+          "passed": true
+        }
+      ],
+      "source_sha256": {
+        "xreac/__init__.py": "042f04a1863f7c98a8704683a71099794097c97fc48574fb07bfdfa8ccfa0ad5",
+        "xreac/ase.py": "57eb4b680720350ec1f93bdd0b23a8f4320fb51e87f18f42b4e9320e6eea4fc4",
+        "xreac/calculator.py": "27710b9da5eb2a9da8bc88378cdda2cb4b4172acadc40a988b3252aadbdaa088",
+        "xreac/energy.py": "2478fcb98e2f5e85f4342f3a12cd735f4d31ce1c8bf05ca974a2bad885462a61",
+        "xreac/forcefield.py": "f214ce7f30d0a8d07acfaef1f45c8d1b0545430f051153aa710ee8c4e218b6e8",
+        "xreac/geometry.py": "179db73ce1385f55d938e791ac75014fb696e79979a4bad89affdac279c7e75c",
+        "xreac/neighbors.py": "46e6db68ac8223c13db53ef7ca475ef183b341bb3cabdc27cd025f210a8c53ee",
+        "xreac/reference.py": "29209294faa2711df6b57f8785e964c07b8f61d446e8a8046a8bcf638779dddd"
+      },
+      "cumulative_speedup": 1.397482642342197,
+      "incremental_speedup": 1.175909184507468
+    }
+  ],
+  "lammps_fresh": {
+    "calls_per_batch": 100,
+    "batch_seconds": [
+      0.8199524579999999,
+      0.8197775,
+      0.842037125,
+      0.8187323749999997,
+      0.8191080410000002,
+      0.8187332079999994,
+      0.8190905840000005
+    ],
+    "median_seconds": 0.008191080410000003,
+    "min_seconds": 0.008187323749999998,
+    "max_seconds": 0.008420371250000001,
+    "process_wall_seconds": 5.924710459075868,
+    "mpi_tasks": 1,
+    "openmp_threads": 0,
+    "final_state_errors": {
+      "energy_per_atom": 4.3579954459952813e-13,
+      "forces": 5.630012012147745e-10,
+      "charges": 4.971800748876376e-12
+    }
+  },
+  "lammps_steady": {
+    "calls_per_batch": 100,
+    "batch_seconds": [
+      0.433840042,
+      0.429138333,
+      0.468234625,
+      0.47566820899999995,
+      0.43198916600000015,
+      0.4304275409999998,
+      0.43052045800000016
+    ],
+    "median_seconds": 0.004319891660000002,
+    "min_seconds": 0.00429138333,
+    "max_seconds": 0.0047566820899999996,
+    "process_wall_seconds": 3.2707817908376455,
+    "mpi_tasks": 1,
+    "openmp_threads": 0,
+    "loop_seconds_per_step": [
+      0.00425644,
+      0.0042326,
+      0.00462436,
+      0.00469737,
+      0.00426371,
+      0.00424591,
+      0.00424695
+    ],
+    "final_state_errors": {
+      "energy_per_atom": 2.2737367544323206e-13,
+      "forces": 5.48759260254883e-10,
+      "charges": 7.481570918344005e-12
+    }
+  },
+  "slowdown_vs_fresh": 3.7141569547195274,
+  "slowdown_vs_steady": 7.042528069203564,
+  "tests_passed": 169
+}

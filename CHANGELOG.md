@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Reduce single-CPU CuO evaluation time from 42.52 ms to 30.42 ms (1.40x)
+  with three separate optimizations: reuse bond-order values for properties,
+  restrict bond-order work to the existing short-range cutoff, and pack
+  neighbor sorting keys with an overflow-safe fallback. The same 96-atom
+  surface gives identical results at every stage and passes LAMMPS checks.
+  Retain per-commit timings under `validation/cuo/cpu_followup.json`.
 - Bundle the unmodified Cu/O/H/Cl supplement as `data/ffield.reax.CuOHCl.2010`
   under its separate CC BY-NC 4.0 license. Include attribution, the complete
   license text, and file-specific license notes in source and wheel distributions.

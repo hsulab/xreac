@@ -7,6 +7,8 @@ An additional optional [96-atom CuO(010) slab](cuo/README.md) checks transfer
 of the performance improvements to a copper-oxide surface, always with fresh
 LAMMPS verification and the bundled Cu/O/H/Cl parameters, separately licensed
 under [CC BY-NC 4.0](../data/README.md).
+Its [follow-up benchmark](cuo/README.md#further-single-cpu-optimizations)
+records a further 1.40x speedup in three separate commits with LAMMPS verification.
 
 | System | Default cases | Purpose |
 | --- | ---: | --- |
