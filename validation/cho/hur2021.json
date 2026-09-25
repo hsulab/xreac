@@ -1,0 +1,1571 @@
+{
+  "created_utc": "2026-09-25T16:05:06.039679+00:00",
+  "environment": {
+    "numpy": "2.0.2",
+    "autograd": "1.9.1",
+    "ase": "3.27.0"
+  },
+  "python": "3.10.13 | packaged by conda-forge | (main, Dec 23 2023, 15:35:25) [Clang 16.0.6 ]",
+  "units": {
+    "energy": "kcal/mol/input-cell",
+    "forces": "kcal/mol/Angstrom",
+    "charges": "e"
+  },
+  "force_convention": "fixed_charge",
+  "provenance": {
+    "doi": "10.1039/D1RA04397H",
+    "source": "https://www.rsc.org/suppdata/d1/ra/d1ra04397h/d1ra04397h2.pdf",
+    "download": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC9040638/supplementaryFiles",
+    "archive_member": "RA-011-D1RA04397H-s002.pdf",
+    "source_sha256": "867348b9395826206919eb3922ff5dba2f1a3301c307f0225e41b5a995fb1cfb",
+    "parameter_sha256": "d468f31f71c1ca429aef9e576bf2c5fda3d8eb8ad0c7c4ae433197692ee5825b",
+    "pages": "S10-S12 (PDF pages 10-12)",
+    "license": "CC-BY-NC-3.0",
+    "license_metadata": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC9040638/fullTextXML",
+    "extraction": "python scripts/extract_hur_parameters.py RA-011-D1RA04397H-s002.pdf data/ffield.reax.CHOCl.2021",
+    "changes": "Added attribution header; removed page furniture and blank lines; stripped outer whitespace. Numerical tokens and record order unchanged.",
+    "cross_check": "Extracted parameter text from s001 and s002 is byte-identical."
+  },
+  "command": "python scripts/validate.py --system cho --include-chocl --verify",
+  "scope": "Implementation comparison only; SN2 geometries are idealized, not optimized stationary points or a validated barrier.",
+  "passed": true,
+  "cases": {
+    "chocl_chloromethane": {
+      "validation": {
+        "atoms": 5,
+        "force_field": "ffield.reax.CHOCl.2021",
+        "force_field_sha256": "d468f31f71c1ca429aef9e576bf2c5fda3d8eb8ad0c7c4ae433197692ee5825b",
+        "optional": false,
+        "energy": -460.7158599784238,
+        "evaluation_seconds": {
+          "replicated": 0.004897041246294975,
+          "ase": 0.004691708832979202
+        },
+        "backend_comparison": {
+          "max_absolute_differences": {
+            "energy_per_atom": 0.0,
+            "components_per_atom": 0.0,
+            "forces": 0.0,
+            "charges": 0.0,
+            "bond_orders": 0.0,
+            "total_bond_orders": 0.0,
+            "lone_pairs": 0.0,
+            "bond_counts": 0.0,
+            "dipole": 0.0
+          },
+          "tolerances": {
+            "energy_per_atom": 1e-09,
+            "components_per_atom": 1e-09,
+            "forces": 2e-08,
+            "charges": 1e-10,
+            "bond_orders": 1e-10,
+            "total_bond_orders": 1e-10,
+            "lone_pairs": 1e-10,
+            "bond_counts": 0,
+            "dipole": 1e-09
+          },
+          "passed": true
+        },
+        "passed": true,
+        "total_charge": 0.0,
+        "reference_verified": true,
+        "reference_charge_mode": "equilibrated",
+        "lammps_comparison": {
+          "maximum_absolute_errors": {
+            "energy_per_atom": 4.5474735088646414e-14,
+            "components_per_atom": 3.517186542012496e-14,
+            "forces": 1.4566126083082054e-13,
+            "charges": 2.1649348980190553e-15,
+            "dipole": 2.3869795029440866e-15,
+            "total_bond_orders": 0.0,
+            "lone_pairs": 0.0,
+            "bond_counts": 0.0
+          },
+          "limits": {
+            "energy_per_atom": 1e-05,
+            "components_per_atom": 1e-05,
+            "forces": 0.0001,
+            "charges": 1e-06,
+            "dipole": 1e-06,
+            "total_bond_orders": 1e-08,
+            "lone_pairs": 1e-08,
+            "bond_counts": 0
+          },
+          "passed": true
+        },
+        "reference_version": "LAMMPS (22 Jul 2025 - Update 4)"
+      },
+      "structure": {
+        "symbols": [
+          "C",
+          "H",
+          "H",
+          "H",
+          "Cl"
+        ],
+        "positions": [
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            1.0370899457402698,
+            0.0,
+            -0.3666666666666667
+          ],
+          [
+            -0.5185449728701347,
+            0.8981462390204988,
+            -0.3666666666666667
+          ],
+          [
+            -0.5185449728701353,
+            -0.8981462390204984,
+            -0.3666666666666667
+          ],
+          [
+            0.0,
+            0.0,
+            1.85
+          ]
+        ],
+        "cell": null,
+        "pbc": false,
+        "total_charge": 0.0
+      },
+      "result": {
+        "energy": -460.7158599784238,
+        "forces": [
+          [
+            -6.306066779870889e-14,
+            7.72715225139109e-14,
+            26.2790295121024
+          ],
+          [
+            -16.801802398550162,
+            -5.129230373768223e-14,
+            5.216798932056319
+          ],
+          [
+            8.400901199275081,
+            -14.550787706510757,
+            5.216798932056352
+          ],
+          [
+            8.400901199275141,
+            14.55078770651073,
+            5.216798932056325
+          ],
+          [
+            1.5543122344752192e-15,
+            -2.220446049250313e-15,
+            -41.9294263082714
+          ]
+        ],
+        "charges": [
+          -0.21729433642232698,
+          0.1091905837984799,
+          0.10919058379847994,
+          0.10919058379847996,
+          -0.1102774149731128
+        ],
+        "components": {
+          "bond": -532.3184832263175,
+          "atom": -15.685123265653417,
+          "lone_pair": -1.89645294576285e-10,
+          "molecule": 0.0,
+          "angle": 6.66930619894566,
+          "penalty": 0.0,
+          "angle_conjugation": 0.0,
+          "hydrogen_bond": 0.0,
+          "torsion": 0.0,
+          "conjugation": 0.0,
+          "vdw": 84.59924017899802,
+          "coulomb": -12.066764561166755,
+          "electric_field": 0.0,
+          "qeq": 8.085964696959872
+        },
+        "dipole": [
+          -7.681296400134339e-17,
+          2.872583773235668e-17,
+          -0.3241228598785867
+        ],
+        "total_bond_orders": [
+          3.7490559749689822,
+          0.9698065281430891,
+          0.9698065281430891,
+          0.9698065281430891,
+          0.8980759565006158
+        ],
+        "lone_pairs": [
+          8.129590719598585e-09,
+          5.4842985410603e-11,
+          5.4842985410603e-11,
+          5.4842985410603e-11,
+          3.00000000029704
+        ],
+        "bond_counts": [
+          4,
+          1,
+          1,
+          1,
+          1
+        ],
+        "full_derivative": false,
+        "force_convention": "fixed_charge",
+        "bond_orders": [
+          [
+            0.0,
+            0.9567880758088995,
+            0.9567880758088995,
+            0.9567880758088995,
+            0.8786917475422842
+          ],
+          [
+            0.9567880758088995,
+            0.0,
+            0.0032785246740396003,
+            0.0032785246740395903,
+            0.0064614029861105385
+          ],
+          [
+            0.9567880758088995,
+            0.0032785246740396003,
+            0.0,
+            0.0032785246740396003,
+            0.0064614029861105385
+          ],
+          [
+            0.9567880758088995,
+            0.0032785246740395903,
+            0.0032785246740396003,
+            0.0,
+            0.0064614029861105385
+          ],
+          [
+            0.8786917475422842,
+            0.0064614029861105385,
+            0.0064614029861105385,
+            0.0064614029861105385,
+            0.0
+          ]
+        ],
+        "cell_repetitions": [
+          1,
+          1,
+          1
+        ],
+        "neighbor_backend": "ase"
+      },
+      "reference": {
+        "energy": -460.71585997842357,
+        "forces": [
+          [
+            -4.744815651491763e-14,
+            7.030487303438804e-14,
+            26.279029512102255
+          ],
+          [
+            -16.80180239855017,
+            -5.0279225227711777e-14,
+            5.216798932056367
+          ],
+          [
+            8.400901199275081,
+            -14.55078770651074,
+            5.216798932056395
+          ],
+          [
+            8.400901199275141,
+            14.550787706510715,
+            5.216798932056368
+          ],
+          [
+            2.886579864025407e-15,
+            -2.220446049250313e-15,
+            -41.92942630827139
+          ]
+        ],
+        "charges": [
+          -0.21729433642232915,
+          0.10919058379848015,
+          0.10919058379848023,
+          0.10919058379848015,
+          -0.11027741497311146
+        ],
+        "components": {
+          "bond": -532.3184832263175,
+          "atom": -15.685123265653417,
+          "lone_pair": -1.89645294576285e-10,
+          "molecule": 0.0,
+          "angle": 6.669306198945638,
+          "penalty": 0.0,
+          "angle_conjugation": 0.0,
+          "hydrogen_bond": 0.0,
+          "torsion": 0.0,
+          "conjugation": 0.0,
+          "vdw": 84.59924017899797,
+          "coulomb": -12.06676456116693,
+          "electric_field": 0.0,
+          "qeq": 8.085964696960012
+        },
+        "dipole": [
+          -6.92914474098604e-17,
+          1.2204732433807142e-16,
+          -0.3241228598785843
+        ],
+        "total_bond_orders": [
+          3.7490559749689822,
+          0.9698065281430891,
+          0.9698065281430891,
+          0.9698065281430891,
+          0.8980759565006158
+        ],
+        "lone_pairs": [
+          8.129590719598585e-09,
+          5.4842985410603e-11,
+          5.4842985410603e-11,
+          5.4842985410603e-11,
+          3.00000000029704
+        ],
+        "bond_counts": [
+          4,
+          1,
+          1,
+          1,
+          1
+        ],
+        "cell_repetitions": [
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    "chocl_hydrogen_chloride": {
+      "validation": {
+        "atoms": 2,
+        "force_field": "ffield.reax.CHOCl.2021",
+        "force_field_sha256": "d468f31f71c1ca429aef9e576bf2c5fda3d8eb8ad0c7c4ae433197692ee5825b",
+        "optional": false,
+        "energy": -103.38382197547355,
+        "evaluation_seconds": {
+          "replicated": 0.0036067496985197067,
+          "ase": 0.002922000363469124
+        },
+        "backend_comparison": {
+          "max_absolute_differences": {
+            "energy_per_atom": 0.0,
+            "components_per_atom": 0.0,
+            "forces": 0.0,
+            "charges": 0.0,
+            "bond_orders": 0.0,
+            "total_bond_orders": 0.0,
+            "lone_pairs": 0.0,
+            "bond_counts": 0.0,
+            "dipole": 0.0
+          },
+          "tolerances": {
+            "energy_per_atom": 1e-09,
+            "components_per_atom": 1e-09,
+            "forces": 2e-08,
+            "charges": 1e-10,
+            "bond_orders": 1e-10,
+            "total_bond_orders": 1e-10,
+            "lone_pairs": 1e-10,
+            "bond_counts": 0,
+            "dipole": 1e-09
+          },
+          "passed": true
+        },
+        "passed": true,
+        "total_charge": 0.0,
+        "reference_verified": true,
+        "reference_charge_mode": "equilibrated",
+        "lammps_comparison": {
+          "maximum_absolute_errors": {
+            "energy_per_atom": 1.4210854715202004e-14,
+            "components_per_atom": 6.217248937900877e-15,
+            "forces": 5.329070518200751e-15,
+            "charges": 9.71445146547012e-17,
+            "dipole": 1.3877787807814457e-16,
+            "total_bond_orders": 0.0,
+            "lone_pairs": 0.0,
+            "bond_counts": 0.0
+          },
+          "limits": {
+            "energy_per_atom": 1e-05,
+            "components_per_atom": 1e-05,
+            "forces": 0.0001,
+            "charges": 1e-06,
+            "dipole": 1e-06,
+            "total_bond_orders": 1e-08,
+            "lone_pairs": 1e-08,
+            "bond_counts": 0
+          },
+          "passed": true
+        },
+        "reference_version": "LAMMPS (22 Jul 2025 - Update 4)"
+      },
+      "structure": {
+        "symbols": [
+          "H",
+          "Cl"
+        ],
+        "positions": [
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            1.28,
+            0.0,
+            0.0
+          ]
+        ],
+        "cell": null,
+        "pbc": false,
+        "total_charge": 0.0
+      },
+      "result": {
+        "energy": -103.38382197547355,
+        "forces": [
+          [
+            -2.315254425919848,
+            -0.0,
+            -0.0
+          ],
+          [
+            2.315254425919848,
+            -0.0,
+            -0.0
+          ]
+        ],
+        "charges": [
+          0.11862043916678815,
+          -0.11862043916678817
+        ],
+        "components": {
+          "bond": -98.90340214544867,
+          "atom": -8.8387208038923,
+          "lone_pair": -5.548090517173911e-10,
+          "molecule": 0.0,
+          "angle": 0.0,
+          "penalty": 0.0,
+          "angle_conjugation": 0.0,
+          "hydrogen_bond": 0.0,
+          "torsion": 0.0,
+          "conjugation": 0.0,
+          "vdw": 6.452039283565885,
+          "coulomb": -2.451738183296419,
+          "electric_field": 0.0,
+          "qeq": 0.357999874152749
+        },
+        "dipole": [
+          -0.15183416213348885,
+          0.0,
+          0.0
+        ],
+        "total_bond_orders": [
+          0.8510534447342206,
+          0.8510534447342206
+        ],
+        "lone_pairs": [
+          8.689936746456487e-10,
+          3.0000000008689938
+        ],
+        "bond_counts": [
+          1,
+          1
+        ],
+        "full_derivative": false,
+        "force_convention": "fixed_charge",
+        "bond_orders": [
+          [
+            0.0,
+            0.8510534447342206
+          ],
+          [
+            0.8510534447342206,
+            0.0
+          ]
+        ],
+        "cell_repetitions": [
+          1,
+          1,
+          1
+        ],
+        "neighbor_backend": "ase"
+      },
+      "reference": {
+        "energy": -103.38382197547358,
+        "forces": [
+          [
+            -2.3152544259198535,
+            0.0,
+            0.0
+          ],
+          [
+            2.3152544259198535,
+            0.0,
+            0.0
+          ]
+        ],
+        "charges": [
+          0.11862043916678805,
+          -0.1186204391667881
+        ],
+        "components": {
+          "bond": -98.90340214544867,
+          "atom": -8.8387208038923,
+          "lone_pair": -5.548090517173911e-10,
+          "molecule": 0.0,
+          "angle": 0.0,
+          "penalty": 0.0,
+          "angle_conjugation": 0.0,
+          "hydrogen_bond": 0.0,
+          "torsion": 0.0,
+          "conjugation": 0.0,
+          "vdw": 6.4520392835658855,
+          "coulomb": -2.4517381832964316,
+          "electric_field": 0.0,
+          "qeq": 0.35799987415274614
+        },
+        "dipole": [
+          -0.15183416213348871,
+          0.0,
+          0.0
+        ],
+        "total_bond_orders": [
+          0.8510534447342206,
+          0.8510534447342206
+        ],
+        "lone_pairs": [
+          8.689936746456487e-10,
+          3.0000000008689938
+        ],
+        "bond_counts": [
+          1,
+          1
+        ],
+        "cell_repetitions": [
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    "chocl_formyl_chloride": {
+      "validation": {
+        "atoms": 4,
+        "force_field": "ffield.reax.CHOCl.2021",
+        "force_field_sha256": "d468f31f71c1ca429aef9e576bf2c5fda3d8eb8ad0c7c4ae433197692ee5825b",
+        "optional": false,
+        "energy": -421.81818157096774,
+        "evaluation_seconds": {
+          "replicated": 0.0056043751537799835,
+          "ase": 0.005315084010362625
+        },
+        "backend_comparison": {
+          "max_absolute_differences": {
+            "energy_per_atom": 0.0,
+            "components_per_atom": 0.0,
+            "forces": 0.0,
+            "charges": 0.0,
+            "bond_orders": 0.0,
+            "total_bond_orders": 0.0,
+            "lone_pairs": 0.0,
+            "bond_counts": 0.0,
+            "dipole": 0.0
+          },
+          "tolerances": {
+            "energy_per_atom": 1e-09,
+            "components_per_atom": 1e-09,
+            "forces": 2e-08,
+            "charges": 1e-10,
+            "bond_orders": 1e-10,
+            "total_bond_orders": 1e-10,
+            "lone_pairs": 1e-10,
+            "bond_counts": 0,
+            "dipole": 1e-09
+          },
+          "passed": true
+        },
+        "passed": true,
+        "total_charge": 0.0,
+        "reference_verified": true,
+        "reference_charge_mode": "equilibrated",
+        "lammps_comparison": {
+          "maximum_absolute_errors": {
+            "energy_per_atom": 2.842170943040401e-14,
+            "components_per_atom": 3.3334446314370325e-14,
+            "forces": 4.547473508864641e-13,
+            "charges": 2.0816681711721685e-15,
+            "dipole": 2.6367796834847468e-15,
+            "total_bond_orders": 0.0,
+            "lone_pairs": 0.0,
+            "bond_counts": 0.0
+          },
+          "limits": {
+            "energy_per_atom": 1e-05,
+            "components_per_atom": 1e-05,
+            "forces": 0.0001,
+            "charges": 1e-06,
+            "dipole": 1e-06,
+            "total_bond_orders": 1e-08,
+            "lone_pairs": 1e-08,
+            "bond_counts": 0
+          },
+          "passed": true
+        },
+        "reference_version": "LAMMPS (22 Jul 2025 - Update 4)"
+      },
+      "structure": {
+        "symbols": [
+          "C",
+          "H",
+          "O",
+          "Cl"
+        ],
+        "positions": [
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            -0.55,
+            -0.953,
+            0.0
+          ],
+          [
+            1.2,
+            0.0,
+            0.0
+          ],
+          [
+            -0.9,
+            1.559,
+            0.0
+          ]
+        ],
+        "cell": null,
+        "pbc": false,
+        "total_charge": 0.0
+      },
+      "result": {
+        "energy": -421.81818157096774,
+        "forces": [
+          [
+            -1114.444016654592,
+            -12.878460266005517,
+            -0.0
+          ],
+          [
+            -25.976299380061185,
+            -20.185429868950333,
+            -0.0
+          ],
+          [
+            1143.3928176873667,
+            18.465141869597915,
+            -0.0
+          ],
+          [
+            -2.972501652713449,
+            14.598748265357937,
+            -0.0
+          ]
+        ],
+        "charges": [
+          0.2080852297440246,
+          0.10558852634845908,
+          -0.3015520271435348,
+          -0.012121728948948862
+        ],
+        "components": {
+          "bond": -457.62324551798577,
+          "atom": -0.5158286275870432,
+          "lone_pair": 0.014820054191900849,
+          "molecule": 0.0,
+          "angle": 9.94855800404513,
+          "penalty": 0.0,
+          "angle_conjugation": -36.56439088781505,
+          "hydrogen_bond": 0.0,
+          "torsion": 0.0,
+          "conjugation": 0.0,
+          "vdw": 76.53516711803128,
+          "coulomb": -14.468958586259877,
+          "electric_field": 0.0,
+          "qeq": 0.855696872411747
+        },
+        "dipole": [
+          -0.4090265660098402,
+          -0.11952364104149282,
+          0.0
+        ],
+        "total_bond_orders": [
+          3.9192437638274944,
+          0.970927942719672,
+          2.08036619793014,
+          0.8963986547305599
+        ],
+        "lone_pairs": [
+          1.8160641976977613e-10,
+          5.338689793527234e-11,
+          1.9614354728896255,
+          3.0000000003087774
+        ],
+        "bond_counts": [
+          3,
+          1,
+          1,
+          1
+        ],
+        "full_derivative": false,
+        "force_convention": "fixed_charge",
+        "bond_orders": [
+          [
+            0.0,
+            0.9567034269432333,
+            2.0678474790897323,
+            0.8946928577945288
+          ],
+          [
+            0.9567034269432333,
+            0.0,
+            0.012518718840407523,
+            0.0017057969360311604
+          ],
+          [
+            2.0678474790897323,
+            0.012518718840407523,
+            0.0,
+            0.0
+          ],
+          [
+            0.8946928577945288,
+            0.0017057969360311604,
+            0.0,
+            0.0
+          ]
+        ],
+        "cell_repetitions": [
+          1,
+          1,
+          1
+        ],
+        "neighbor_backend": "ase"
+      },
+      "reference": {
+        "energy": -421.81818157096785,
+        "forces": [
+          [
+            -1114.4440166545924,
+            -12.87846026600558,
+            0.0
+          ],
+          [
+            -25.976299380061178,
+            -20.185429868950298,
+            0.0
+          ],
+          [
+            1143.392817687367,
+            18.465141869597947,
+            0.0
+          ],
+          [
+            -2.972501652713438,
+            14.598748265357942,
+            0.0
+          ]
+        ],
+        "charges": [
+          0.20808522974402252,
+          0.10558852634845936,
+          -0.3015520271435349,
+          -0.012121728948947101
+        ],
+        "components": {
+          "bond": -457.6232455179859,
+          "atom": -0.5158286275870412,
+          "lone_pair": 0.014820054191900847,
+          "molecule": 0.0,
+          "angle": 9.948558004045141,
+          "penalty": 0.0,
+          "angle_conjugation": -36.56439088781506,
+          "hydrogen_bond": 0.0,
+          "torsion": 0.0,
+          "conjugation": 0.0,
+          "vdw": 76.53516711803128,
+          "coulomb": -14.46895858625984,
+          "electric_field": 0.0,
+          "qeq": 0.8556968724116136
+        },
+        "dipole": [
+          -0.4090265660098421,
+          -0.11952364104149019,
+          0.0
+        ],
+        "total_bond_orders": [
+          3.9192437638274944,
+          0.970927942719672,
+          2.08036619793014,
+          0.8963986547305599
+        ],
+        "lone_pairs": [
+          1.8160641976977613e-10,
+          5.338689793527234e-11,
+          1.9614354728896255,
+          3.0000000003087774
+        ],
+        "bond_counts": [
+          3,
+          1,
+          1,
+          1
+        ],
+        "cell_repetitions": [
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    "chocl_sn2_reactant": {
+      "validation": {
+        "atoms": 6,
+        "force_field": "ffield.reax.CHOCl.2021",
+        "force_field_sha256": "d468f31f71c1ca429aef9e576bf2c5fda3d8eb8ad0c7c4ae433197692ee5825b",
+        "optional": false,
+        "energy": -533.137117672391,
+        "evaluation_seconds": {
+          "replicated": 0.004933958873152733,
+          "ase": 0.004727957770228386
+        },
+        "backend_comparison": {
+          "max_absolute_differences": {
+            "energy_per_atom": 0.0,
+            "components_per_atom": 0.0,
+            "forces": 0.0,
+            "charges": 0.0,
+            "bond_orders": 0.0,
+            "total_bond_orders": 0.0,
+            "lone_pairs": 0.0,
+            "bond_counts": 0.0,
+            "dipole": 0.0
+          },
+          "tolerances": {
+            "energy_per_atom": 1e-09,
+            "components_per_atom": 1e-09,
+            "forces": 2e-08,
+            "charges": 1e-10,
+            "bond_orders": 1e-10,
+            "total_bond_orders": 1e-10,
+            "lone_pairs": 1e-10,
+            "bond_counts": 0,
+            "dipole": 1e-09
+          },
+          "passed": true
+        },
+        "passed": true,
+        "total_charge": -1.0,
+        "reference_verified": true,
+        "reference_charge_mode": "supplied",
+        "independent_qeq": {
+          "method": "Independent ASE image assembly and charge-constraint elimination",
+          "maximum_absolute_errors": {
+            "total_charge": 0.0,
+            "charges": 2.498001805406602e-16,
+            "chemical_potential_spread": 1.7763568394002505e-15
+          },
+          "limits": {
+            "total_charge": 1e-08,
+            "charges": 1e-10,
+            "chemical_potential_spread": 1e-09
+          },
+          "minimum_reduced_curvature": 2.3858155561820062,
+          "passed": true
+        },
+        "reference_note": "LAMMPS uses supplied charges for energy/forces; QEq validated independently",
+        "lammps_comparison": {
+          "maximum_absolute_errors": {
+            "energy_per_atom": 1.7415118236385752e-09,
+            "components_per_atom": 1.741403761930845e-09,
+            "forces": 3.705662443564961e-08,
+            "charges": 0.0,
+            "dipole": 2.220446049250313e-16,
+            "total_bond_orders": 0.0,
+            "lone_pairs": 0.0,
+            "bond_counts": 0.0
+          },
+          "limits": {
+            "energy_per_atom": 1e-05,
+            "components_per_atom": 1e-05,
+            "forces": 0.0001,
+            "charges": 1e-06,
+            "dipole": 1e-06,
+            "total_bond_orders": 1e-08,
+            "lone_pairs": 1e-08,
+            "bond_counts": 0
+          },
+          "passed": true
+        },
+        "reference_version": "LAMMPS (22 Jul 2025 - Update 4)"
+      },
+      "structure": {
+        "symbols": [
+          "C",
+          "H",
+          "H",
+          "H",
+          "Cl",
+          "Cl"
+        ],
+        "positions": [
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            1.0370899457402698,
+            0.0,
+            -0.3666666666666667
+          ],
+          [
+            -0.5185449728701347,
+            0.8981462390204988,
+            -0.3666666666666667
+          ],
+          [
+            -0.5185449728701353,
+            -0.8981462390204984,
+            -0.3666666666666667
+          ],
+          [
+            0.0,
+            0.0,
+            1.85
+          ],
+          [
+            0.0,
+            0.0,
+            -3.15
+          ]
+        ],
+        "cell": null,
+        "pbc": false,
+        "total_charge": -1.0
+      },
+      "result": {
+        "energy": -533.137117672391,
+        "forces": [
+          [
+            -4.263256414560601e-14,
+            7.37188088351104e-14,
+            0.3770304647808267
+          ],
+          [
+            -12.13666901729793,
+            -4.884981308350689e-14,
+            5.441977598876256
+          ],
+          [
+            6.068334508648958,
+            -10.510663686303515,
+            5.44197759887628
+          ],
+          [
+            6.068334508649014,
+            10.510663686303491,
+            5.441977598876258
+          ],
+          [
+            5.551115123125783e-16,
+            -3.1086244689504383e-15,
+            -31.90185611341693
+          ],
+          [
+            -3.469446951953614e-17,
+            -4.2327252813834093e-16,
+            15.198892852007319
+          ]
+        ],
+        "charges": [
+          -0.12811915101682145,
+          0.009024837706808115,
+          0.009024837706808168,
+          0.009024837706808168,
+          -0.4364567465277997,
+          -0.4624986155758033
+        ],
+        "components": {
+          "bond": -540.2445504612125,
+          "atom": -15.157617782929636,
+          "lone_pair": -0.0004557535884634301,
+          "molecule": 0.0,
+          "angle": 15.001558893081475,
+          "penalty": 0.0,
+          "angle_conjugation": 0.0,
+          "hydrogen_bond": 0.0,
+          "torsion": 0.0,
+          "conjugation": 0.0,
+          "vdw": 84.63388026363069,
+          "coulomb": 15.947089657356077,
+          "electric_field": 0.0,
+          "qeq": -93.31702248872864
+        },
+        "dipole": [
+          -6.043631484268514e-17,
+          8.115603746877802e-18,
+          0.09024783606761044
+        ],
+        "total_bond_orders": [
+          3.8377354453189874,
+          0.9698065281430891,
+          0.9698065281430891,
+          0.9698065281430891,
+          0.8980759565006158,
+          0.08867947035000495
+        ],
+        "lone_pairs": [
+          1.1720115410723255e-09,
+          5.4842985410603e-11,
+          5.4842985410603e-11,
+          5.4842985410603e-11,
+          3.00000000029704,
+          3.000734044207249
+        ],
+        "bond_counts": [
+          4,
+          1,
+          1,
+          1,
+          1,
+          0
+        ],
+        "full_derivative": false,
+        "force_convention": "fixed_charge",
+        "bond_orders": [
+          [
+            0.0,
+            0.9567880758088995,
+            0.9567880758088995,
+            0.9567880758088995,
+            0.8786917475422842,
+            0.08867947035000495
+          ],
+          [
+            0.9567880758088995,
+            0.0,
+            0.0032785246740396003,
+            0.0032785246740395903,
+            0.0064614029861105385,
+            0.0
+          ],
+          [
+            0.9567880758088995,
+            0.0032785246740396003,
+            0.0,
+            0.0032785246740396003,
+            0.0064614029861105385,
+            0.0
+          ],
+          [
+            0.9567880758088995,
+            0.0032785246740395903,
+            0.0032785246740396003,
+            0.0,
+            0.0064614029861105385,
+            0.0
+          ],
+          [
+            0.8786917475422842,
+            0.0064614029861105385,
+            0.0064614029861105385,
+            0.0064614029861105385,
+            0.0,
+            0.0
+          ],
+          [
+            0.08867947035000495,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "cell_repetitions": [
+          1,
+          1,
+          1
+        ],
+        "neighbor_backend": "ase"
+      },
+      "reference": {
+        "energy": -533.1371176619419,
+        "forces": [
+          [
+            -3.3681391009565687e-14,
+            6.954159470495824e-14,
+            0.3770305013674585
+          ],
+          [
+            -12.13666901940674,
+            -4.872491299323656e-14,
+            5.441977599621823
+          ],
+          [
+            6.0683345097033445,
+            -10.510663688129775,
+            5.441977599621852
+          ],
+          [
+            6.068334509703404,
+            10.510663688129748,
+            5.441977599621826
+          ],
+          [
+            1.5543122344752192e-15,
+            -2.220446049250313e-15,
+            -31.90185611518325
+          ],
+          [
+            -1.2216315328396235e-16,
+            -3.639917837800188e-16,
+            15.198892814950694
+          ]
+        ],
+        "charges": [
+          -0.12811915101682145,
+          0.009024837706808115,
+          0.009024837706808168,
+          0.009024837706808168,
+          -0.4364567465277997,
+          -0.4624986155758033
+        ],
+        "components": {
+          "bond": -540.2445504612124,
+          "atom": -15.157617782929634,
+          "lone_pair": -0.0004557535884634301,
+          "molecule": 0.0,
+          "angle": 15.001558903529897,
+          "penalty": 0.0,
+          "angle_conjugation": 0.0,
+          "hydrogen_bond": 0.0,
+          "torsion": 0.0,
+          "conjugation": 0.0,
+          "vdw": 84.63388026363064,
+          "coulomb": 15.947089657356283,
+          "electric_field": 0.0,
+          "qeq": -93.31702248872864
+        },
+        "dipole": [
+          -6.022131722072203e-17,
+          9.437757381289545e-18,
+          0.09024783606761067
+        ],
+        "total_bond_orders": [
+          3.8377354453189874,
+          0.9698065281430891,
+          0.9698065281430891,
+          0.9698065281430891,
+          0.8980759565006158,
+          0.08867947035000495
+        ],
+        "lone_pairs": [
+          1.1720115410723255e-09,
+          5.4842985410603e-11,
+          5.4842985410603e-11,
+          5.4842985410603e-11,
+          3.00000000029704,
+          3.000734044207249
+        ],
+        "bond_counts": [
+          4,
+          1,
+          1,
+          1,
+          1,
+          0
+        ],
+        "cell_repetitions": [
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    "chocl_sn2_symmetric": {
+      "validation": {
+        "atoms": 6,
+        "force_field": "ffield.reax.CHOCl.2021",
+        "force_field_sha256": "d468f31f71c1ca429aef9e576bf2c5fda3d8eb8ad0c7c4ae433197692ee5825b",
+        "optional": false,
+        "energy": -512.443405057012,
+        "evaluation_seconds": {
+          "replicated": 0.004922667518258095,
+          "ase": 0.004679917357861996
+        },
+        "backend_comparison": {
+          "max_absolute_differences": {
+            "energy_per_atom": 0.0,
+            "components_per_atom": 0.0,
+            "forces": 0.0,
+            "charges": 0.0,
+            "bond_orders": 0.0,
+            "total_bond_orders": 0.0,
+            "lone_pairs": 0.0,
+            "bond_counts": 0.0,
+            "dipole": 0.0
+          },
+          "tolerances": {
+            "energy_per_atom": 1e-09,
+            "components_per_atom": 1e-09,
+            "forces": 2e-08,
+            "charges": 1e-10,
+            "bond_orders": 1e-10,
+            "total_bond_orders": 1e-10,
+            "lone_pairs": 1e-10,
+            "bond_counts": 0,
+            "dipole": 1e-09
+          },
+          "passed": true
+        },
+        "passed": true,
+        "total_charge": -1.0,
+        "reference_verified": true,
+        "reference_charge_mode": "supplied",
+        "independent_qeq": {
+          "method": "Independent ASE image assembly and charge-constraint elimination",
+          "maximum_absolute_errors": {
+            "total_charge": 1.1102230246251565e-16,
+            "charges": 5.551115123125783e-17,
+            "chemical_potential_spread": 1.7763568394002505e-15
+          },
+          "limits": {
+            "total_charge": 1e-08,
+            "charges": 1e-10,
+            "chemical_potential_spread": 1e-09
+          },
+          "minimum_reduced_curvature": 2.0888743619055736,
+          "passed": true
+        },
+        "reference_note": "LAMMPS uses supplied charges for energy/forces; QEq validated independently",
+        "lammps_comparison": {
+          "maximum_absolute_errors": {
+            "energy_per_atom": 5.313476473626603e-09,
+            "components_per_atom": 5.3132893640395196e-09,
+            "forces": 1.7183161560296867e-08,
+            "charges": 0.0,
+            "dipole": 8.761382427058806e-17,
+            "total_bond_orders": 0.0,
+            "lone_pairs": 0.0,
+            "bond_counts": 0.0
+          },
+          "limits": {
+            "energy_per_atom": 1e-05,
+            "components_per_atom": 1e-05,
+            "forces": 0.0001,
+            "charges": 1e-06,
+            "dipole": 1e-06,
+            "total_bond_orders": 1e-08,
+            "lone_pairs": 1e-08,
+            "bond_counts": 0
+          },
+          "passed": true
+        },
+        "reference_version": "LAMMPS (22 Jul 2025 - Update 4)"
+      },
+      "structure": {
+        "symbols": [
+          "C",
+          "H",
+          "H",
+          "H",
+          "Cl",
+          "Cl"
+        ],
+        "positions": [
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            1.08,
+            0.0,
+            0.0
+          ],
+          [
+            -0.5399999999999998,
+            0.9353074360871939,
+            0.0
+          ],
+          [
+            -0.5400000000000005,
+            -0.9353074360871935,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            2.35
+          ],
+          [
+            0.0,
+            0.0,
+            -2.35
+          ]
+        ],
+        "cell": null,
+        "pbc": false,
+        "total_charge": -1.0
+      },
+      "result": {
+        "energy": -512.443405057012,
+        "forces": [
+          [
+            3.6359804056473877e-14,
+            3.4283687000424834e-13,
+            -0.0
+          ],
+          [
+            13.999463612266943,
+            -9.281464485866309e-14,
+            -0.0
+          ],
+          [
+            -6.999731806133469,
+            12.123891127579032,
+            -0.0
+          ],
+          [
+            -6.999731806133515,
+            -12.123891127579281,
+            -0.0
+          ],
+          [
+            1.8041124150158794e-15,
+            -8.326672684688674e-16,
+            11.88643429535143
+          ],
+          [
+            1.8041124150158794e-15,
+            -8.326672684688674e-16,
+            -11.88643429535143
+          ]
+        ],
+        "charges": [
+          -0.1328880442853051,
+          0.014593709459690178,
+          0.014593709459690173,
+          0.014593709459690291,
+          -0.45544654204688273,
+          -0.45544654204688273
+        ],
+        "components": {
+          "bond": -567.0438327235186,
+          "atom": -5.221727234972624,
+          "lone_pair": -1.5030035827632188e-07,
+          "molecule": 0.0,
+          "angle": 46.72975830663747,
+          "penalty": 0.0,
+          "angle_conjugation": 0.0,
+          "hydrogen_bond": 0.0,
+          "torsion": 0.0,
+          "conjugation": 0.0,
+          "vdw": 88.80880888682937,
+          "coulomb": 16.345976394448815,
+          "electric_field": 0.0,
+          "qeq": -92.06238853613611
+        },
+        "dipole": [
+          -6.306924949060371e-17,
+          -9.937555289577747e-17,
+          0.0
+        ],
+        "total_bond_orders": [
+          4.1202361732228345,
+          0.9664031143985367,
+          0.9664031143985367,
+          0.9664031143985368,
+          0.6187235360304337,
+          0.6187235360304337
+        ],
+        "lone_pairs": [
+          1.294432360037122e-12,
+          5.950421940279588e-11,
+          5.950421940279588e-11,
+          5.950421940279546e-11,
+          3.0000001177077467,
+          3.0000001177077467
+        ],
+        "bond_counts": [
+          5,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "full_derivative": false,
+        "force_convention": "fixed_charge",
+        "bond_orders": [
+          [
+            0.0,
+            0.9617805019415769,
+            0.9617805019415769,
+            0.961780501941577,
+            0.6174473336990516,
+            0.6174473336990516
+          ],
+          [
+            0.9617805019415769,
+            0.0,
+            0.0018859054513524545,
+            0.0018859054513524457,
+            0.0004254007771273319,
+            0.0004254007771273319
+          ],
+          [
+            0.9617805019415769,
+            0.0018859054513524545,
+            0.0,
+            0.0018859054513524602,
+            0.0004254007771273319,
+            0.0004254007771273319
+          ],
+          [
+            0.961780501941577,
+            0.0018859054513524457,
+            0.0018859054513524602,
+            0.0,
+            0.0004254007771273319,
+            0.0004254007771273319
+          ],
+          [
+            0.6174473336990516,
+            0.0004254007771273319,
+            0.0004254007771273319,
+            0.0004254007771273319,
+            0.0,
+            0.0
+          ],
+          [
+            0.6174473336990516,
+            0.0004254007771273319,
+            0.0004254007771273319,
+            0.0004254007771273319,
+            0.0,
+            0.0
+          ]
+        ],
+        "cell_repetitions": [
+          1,
+          1,
+          1
+        ],
+        "neighbor_backend": "ase"
+      },
+      "reference": {
+        "energy": -512.4434050251311,
+        "forces": [
+          [
+            5.585809592645319e-14,
+            3.7891911830456593e-13,
+            1.6342482922482304e-13
+          ],
+          [
+            13.99946361296352,
+            -9.502121312010559e-14,
+            -4.440892098500626e-16
+          ],
+          [
+            -6.9997318064817575,
+            12.123891128182317,
+            -4.440892098500626e-16
+          ],
+          [
+            -6.999731806481819,
+            -12.123891128182583,
+            0.0
+          ],
+          [
+            1.6653345369377348e-15,
+            -9.992007221626409e-16,
+            11.886434312534591
+          ],
+          [
+            1.6653345369377348e-15,
+            -9.992007221626409e-16,
+            -11.886434312534591
+          ]
+        ],
+        "charges": [
+          -0.1328880442853051,
+          0.014593709459690178,
+          0.014593709459690173,
+          0.014593709459690291,
+          -0.45544654204688273,
+          -0.45544654204688273
+        ],
+        "components": {
+          "bond": -567.0438327235183,
+          "atom": -5.221727234972626,
+          "lone_pair": -1.5030035827632188e-07,
+          "molecule": 0.0,
+          "angle": 46.72975833851721,
+          "penalty": 0.0,
+          "angle_conjugation": 0.0,
+          "hydrogen_bond": 0.0,
+          "torsion": 0.0,
+          "conjugation": 0.0,
+          "vdw": 88.80880888682935,
+          "coulomb": 16.345976394449035,
+          "electric_field": 0.0,
+          "qeq": -92.0623885361361
+        },
+        "dipole": [
+          -6.290051896956358e-17,
+          -9.848083961138988e-17,
+          -8.761382427058806e-17
+        ],
+        "total_bond_orders": [
+          4.1202361732228345,
+          0.9664031143985367,
+          0.9664031143985367,
+          0.9664031143985368,
+          0.6187235360304337,
+          0.6187235360304337
+        ],
+        "lone_pairs": [
+          1.294432360037122e-12,
+          5.950421940279588e-11,
+          5.950421940279588e-11,
+          5.950421940279546e-11,
+          3.0000001177077467,
+          3.0000001177077467
+        ],
+        "bond_counts": [
+          5,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "cell_repetitions": [
+          1,
+          1,
+          1
+        ]
+      }
+    }
+  }
+}

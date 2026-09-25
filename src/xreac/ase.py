@@ -12,7 +12,7 @@ try:
 except ImportError as exc:
     raise ImportError("Install xreac[ase] to use the ASE calculator") from exc
 
-from .calculator import Calculator
+from .calculator import Calculator, validate_total_charge
 from .geometry import Boundary, validate_expansion_limit
 
 KCAL_MOL_TO_EV = kcal / mol
@@ -28,7 +28,7 @@ def _directed_neighbors(neighbor_list):
 
 
 class ReaxFFCalculator(ASECalculator):
-    """ReaxFF for neutral ASE Atoms, with optional fixed-cell periodicity.
+    """ReaxFF for ASE Atoms, with optional net charge and fixed-cell periodicity.
 
     Energies and forces use ASE units (eV, eV/A); charges and dipoles use e
     and e A. ``evaluation`` retains the last core result in kcal/mol units.
@@ -81,8 +81,8 @@ class ReaxFFCalculator(ASECalculator):
             raise ValueError(f"Unknown ReaxFF calculator parameters: {sorted(unknown)}")
         if "full_derivative" in kwargs and not isinstance(kwargs["full_derivative"], bool):
             raise ValueError("full_derivative must be a boolean")
-        if kwargs.get("total_charge", 0) != 0:
-            raise ValueError("Only neutral systems are supported")
+        if "total_charge" in kwargs:
+            validate_total_charge(kwargs["total_charge"])
         if "max_expanded_atoms" in kwargs:
             validate_expansion_limit(kwargs["max_expanded_atoms"])
         if kwargs.get("neighbor_backend", "ase") not in ("ase", "replicated"):
@@ -137,8 +137,10 @@ class ReaxFFCalculator(ASECalculator):
         if self.atoms is None:
             raise ValueError("An ASE Atoms object is required")
         initial_charges = self.atoms.get_initial_charges()
-        if not np.isfinite(initial_charges).all() or abs(initial_charges.sum()) > 1e-8:
-            raise ValueError("Initial charges must be finite and sum to zero; only neutral systems are supported")
+        if self.atoms.has("initial_charges") and (
+            not np.isfinite(initial_charges).all() or abs(initial_charges.sum() - self.parameters.total_charge) > 1e-8
+        ):
+            raise ValueError("Initial charges must be finite and sum to total_charge")
         neighbors = None
         if self.parameters.neighbor_backend == "ase":
             # Build integer topology here, before entering the core evaluator.
@@ -164,13 +166,15 @@ class ReaxFFCalculator(ASECalculator):
         }
 
 
-def relax_with_ase(core, symbols, positions, force_tolerance, max_iterations, *, cell=None, pbc=False):
+def relax_with_ase(core, symbols, positions, force_tolerance, max_iterations, *, cell=None, pbc=False, total_charge=0):
     """Internal bridge to ASE FIRE; retain xreac's Cartesian-component stop rule."""
     from ase import Atoms
     from ase.optimize import FIRE
 
     atoms = Atoms(symbols, positions=positions, cell=cell, pbc=pbc)
-    adapter = ReaxFFCalculator(core.force_field, full_derivative=False, max_expanded_atoms=core.max_expanded_atoms)
+    adapter = ReaxFFCalculator(
+        core.force_field, full_derivative=False, total_charge=total_charge, max_expanded_atoms=core.max_expanded_atoms
+    )
     # Reuse the caller's calculator, including any instrumentation/subclass.
     adapter.core = core
     atoms.calc = adapter

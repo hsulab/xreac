@@ -1,6 +1,21 @@
 # Water validation
 
-All 7 retained cases pass fresh LAMMPS comparisons. The largest force
+| Location | Retained records |
+| --- | --- |
+| Top level | Shared structures, numerical results, summary, independent baseline, and raw LAMMPS reference archive |
+| [charged/](charged/) | Charged-water checks with supplied-charge LAMMPS comparisons |
+| [diagnostics/](diagnostics/) | QEq, hydrogen-bond images, relaxation, and monomer/dimer reports |
+| [performance/](performance/) | CPU benchmarks, ASE-neighbor pilots, and optimization stages |
+| [md/](md/) | Bulk-water dynamics and QEq-cache measurements |
+| [surfaces/](surfaces/) | Two-layer Pt(111)/Ni(111) NEB examples, energy curves, raw outputs, and force-field provenance |
+
+The shared cases remain at the top level for regression tests and report
+generation. Files were moved without changing numerical data or archive
+contents. Paths inside historical JSON records and archives describe their
+original runs; current links and reproduction commands are provided here.
+Fresh calculations still go under ignored `validation/runs/`.
+
+All 7 core water cases pass fresh LAMMPS comparisons. The largest force
 difference is 7.941e-10 kcal/mol/Å. Both Python neighbor builders agree.
 
 | Case | Atoms | Checks |
@@ -23,26 +38,54 @@ python scripts/validate.py --verify --system water
 
 Use `--include-bulk` to include the optional 192-atom box.
 
+## Charged systems
+
+[Charged validation](charged/charged.json) retains four numerical checks: hydroxide
+(−1 e), hydronium (+1 e), and −1 e variants of the existing small cubic and
+partially periodic water cells. It includes structures, force-field checksums,
+numerical results, neighbor-backend comparisons, and independent QEq checks.
+All four pass charge conservation and chemical-potential checks, with positive
+curvature for charge-conserving redistributions. The same run passed six neutral
+LAMMPS cases. All four charged cases also pass LAMMPS energy, component,
+fixed-charge force, and property comparisons using identical supplied charges
+with LAMMPS QEq disabled. This does not independently validate the charges.
+[Raw charged LAMMPS inputs and outputs](charged/charged_reference.tar.gz) retain the
+replicated cells, supplied charges, logs, and metadata. These checks do not establish ionic chemical accuracy.
+
+```sh
+python scripts/validate.py --system water --include-charged --verify
+python examples/charged_water.py
+```
+
+Unit tests additionally cover both force derivatives, isolated and periodic
+relaxation, ASE charge initialization, center-of-mass dipoles, and supercell scaling.
+
+## Performance and other records
+
 The same box is the water performance pilot. Current benchmarks build fresh
 ASE neighbors on every timed evaluation, bypass result caching, and verify
-the result against LAMMPS. See [pilot timings](cpu_ase_pilot.json),
-[numerical results](cpu_ase_pilot_results.json.gz), and
-[raw reference runs](cpu_ase_pilot_reference.tar.gz).
+the result against LAMMPS. See [pilot timings](performance/cpu_ase_pilot.json),
+[numerical results](performance/cpu_ase_pilot_results.json.gz), and
+[raw reference runs](performance/cpu_ase_pilot_reference.tar.gz).
 The original bin-based baseline is retained there. The newer
-[tree/reuse comparison](cpu_ase_neighbors.json),
-[numerical results](cpu_ase_neighbors_results.json.gz), and
-[reference archive](cpu_ase_neighbors_reference.tar.gz) record both optimization
+[tree/reuse comparison](performance/cpu_ase_neighbors.json),
+[numerical results](performance/cpu_ase_neighbors_results.json.gz), and
+[reference archive](performance/cpu_ase_neighbors_reference.tar.gz) record both optimization
 commits and LAMMPS checks after movement, including a forced rebuild.
+
+The [CPU benchmark](performance/cpu_benchmark.json) and
+[optimization-stage record](performance/cpu_commit_stages.json) retain later
+measurements; their matching raw archives are in the same directory.
 
 ```sh
 python scripts/benchmark_lammps.py
 python scripts/benchmark_lammps.py --compare-neighbors
 ```
 
-- [Monomer/dimer PDF](report.pdf) and [CSV](report.csv).
-- [QEq audit](qeq.json): the shared monomer, with fresh QEq at each finite-difference displacement.
-- [Hydrogen-bond image diagnostic](hbond-images.json): the shared 4 Å cell versus its supercell.
-- [Raw diagnostic runs](diagnostics.tar.gz).
+- [Monomer/dimer PDF](diagnostics/report.pdf) and [CSV](diagnostics/report.csv).
+- [QEq audit](diagnostics/qeq.json): the shared monomer, with fresh QEq at each finite-difference displacement.
+- [Hydrogen-bond image diagnostic](diagnostics/hbond-images.json): the shared 4 Å cell versus its supercell.
+- [Raw diagnostic runs](diagnostics/diagnostics.tar.gz).
 
 ```sh
 python scripts/water_report.py
@@ -50,8 +93,8 @@ python scripts/audit_qeq.py
 python scripts/audit_small_cells.py
 ```
 
-[Relaxation](relaxation.json) compares ASE and native FIRE using the same
-starting geometry as the single-point suite. [Raw optimizer results](relaxation.tar.gz)
+[Relaxation](diagnostics/relaxation.json) compares ASE and native FIRE using the same
+starting geometry as the single-point suite. [Raw optimizer results](diagnostics/relaxation.tar.gz)
 include initial/final structures and LAMMPS verification.
 
 ```sh
@@ -137,9 +180,9 @@ a cache effect. The production calculator keeps its direct solver.
 
 Retained files:
 
-- [MD timings, QEq measurements, settings, checks, and source hashes](md_berendsen.json).
-- [Sampled numerical results](md_berendsen_results.json.gz).
-- [Raw LAMMPS MD and single-point inputs/outputs](md_berendsen_reference.tar.gz).
+- [MD timings, QEq measurements, settings, checks, and source hashes](md/md_berendsen.json).
+- [Sampled numerical results](md/md_berendsen_results.json.gz).
+- [Raw LAMMPS MD and single-point inputs/outputs](md/md_berendsen_reference.tar.gz).
 
 The initial geometry remains in `structures.json`; MD velocities and sampled
 coordinates are included in the raw inputs. Archives omit duplicate parameter
@@ -147,3 +190,68 @@ files: restore `data/ffield.reax.HO.2015` as `ffield` in each extracted referenc
 directory. `committed_revision` identifies the implementation verified against
 all recorded source hashes. The example is commit `47add41`; the cache experiment
 is `020d9ab` with its final-correction check in `2852301`.
+
+## Two-layer Pt(111) and Ni(111) water dissociation
+
+The retained examples use `data/ffield.reax.PtNiCHO.2026`, a Gai2016 derivative
+with only O–H–Pt `p_val4` changed from 1.0000 to 1.0250. Ni/O/H parameters are
+unchanged from the original. These are not Assowe2012 results. See
+[data/README.md](../../data/README.md#2026-experimental-revision) and `NOTICE`
+for provenance and CC BY-NC 4.0 terms. No DFT fitting is claimed.
+
+Both models contain p(2x2), two-layer slabs (eight metal atoms plus O/H/H),
+with the bottom four metal atoms fixed, seven NEB images, and total vacuum
+padding of 15 Angstrom. The bottom layer is at z=2.5 Angstrom: the slab and
+adsorbate have been translated together down 5 Angstrom, leaving more space
+above the surface. Direct checks show unchanged starting energies and forces.
+Only x/y are periodic. Fixed lattice parameters are Pt 3.95 and Ni 3.52 Angstrom.
+
+Endpoints are independently relaxed to 0.02 eV/Angstrom before IDPP and
+ordinary/climbing-image NEB at 0.05 eV/Angstrom. Optimization includes QEq
+charge-response derivatives; LAMMPS comparisons use fixed-charge derivatives
+at equilibrated charges. FIRE uses dtmax=0.1 for NEB.
+
+| Quantity | Ni(111) | Pt(111) |
+| --- | ---: | ---: |
+| Reactant/product relaxation steps | 177 / 257 | 107 / 688 |
+| Ordinary NEB / climbing-image steps | 77 / 57 | 1,462 / 348 |
+| NEB time, excluding endpoints and checks | 7.01 s | 83.71 s |
+| Forward barrier | 0.52115 eV | 0.98303 eV |
+| Final CI-NEB maximum force | 0.04919 eV/Angstrom | 0.04889 eV/Angstrom |
+| Final LAMMPS comparisons | All pass | Reactant and peak pass; product fails |
+
+Both bands meet their force targets, also checked by independent force
+reconstruction. Pt's product retains the LAMMPS equivalent-copy force
+consistency failure; its raw output and failed status are preserved. Numerical
+convergence does not establish DFT accuracy, a global adsorption minimum,
+or a global minimum-energy path. Molecular intermediates may lie below the
+chosen locally relaxed reactant. Slab convergence and saddle frequencies
+have not been checked.
+
+Earlier two-layer, 13-image barriers were 0.51873 eV for Ni and 0.98022 eV for
+Pt. Their compact comparison is retained in the current JSON reports; the
+superseded bands, plots, and raw runs have been removed. The seven-image
+agreement is specific to these examples, not a general resolution guarantee.
+
+- [Ni results and audit](surfaces/ni_2026_7images_lowered.json), [structures](surfaces/ni_2026_7images_lowered_band.extxyz), [raw archive](surfaces/ni_2026_7images_lowered_raw.tar.gz)
+- [Pt results and audit](surfaces/pt_2026_7images_lowered.json), [structures](surfaces/pt_2026_7images_lowered_band.extxyz), [raw archive](surfaces/pt_2026_7images_lowered_raw.tar.gz)
+- [Energy curves](surfaces/metal_2026_7images_lowered.png)
+- [Compact parameter-tuning evidence and original cutoff diagnostic](surfaces/pt_2026_parameter_tuning.json)
+- [Original Gai supplement and publisher metadata](surfaces/gai2016_source.tar.gz)
+
+The raw archives contain full-precision final bands, inputs, outputs, logs,
+parameter files, and script snapshots. Historical paths inside numerical reports
+identify the original runs; those scratch directories are not retained.
+
+```sh
+python scripts/neb_pt_water.py --metal Pt --ffield data/ffield.reax.PtNiCHO.2026 \
+  --layers 2 --vacuum 15 --bottom-height 2.5 --images 7 --neb-dtmax 0.1 --steps 2500 \
+  --output validation/runs/pt-water-example
+python scripts/neb_pt_water.py --metal Ni --ffield data/ffield.reax.PtNiCHO.2026 \
+  --layers 2 --vacuum 15 --bottom-height 2.5 --images 7 --neb-dtmax 0.1 --steps 2500 \
+  --output validation/runs/ni-water-example
+```
+
+Use fresh output directories. The script retains its historical defaults;
+the explicit options above define the kept examples. Further usage is described
+in [examples/README.md](../../examples/README.md#water-dissociation-on-pt111-and-ni111).

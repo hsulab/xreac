@@ -14,8 +14,9 @@ it must be a positive integer. The default core calculation and native FIRE do n
 `evaluate` takes atom labels and a finite `(N, 3)` coordinate array. Options are
 `total_charge=0`, `cell=None`, `pbc=None`, `full_derivative=False`, and
 `neighbors=None`. Pass `neighbors=(i, j, S)` to use externally built directed
-neighbor arrays; omit it to use native replication. Only neutral
-systems are supported. The return value is an `Evaluation`.
+neighbor arrays; omit it to use native replication. `total_charge` is a finite real
+scalar in e, including fractional values, and applies to the input cell. Booleans
+and arrays are rejected. The return value is an `Evaluation`.
 
 `relax` adds `force_tolerance=1e-4`, `max_iterations=500`, and `backend="ase"`.
 It always uses fixed-charge forces and returns a `Relaxation`.
@@ -76,6 +77,11 @@ and `hydrogen_bonds`. See [parameter format](force-fields.md) for supported file
 Implemented ASE properties are `energy`, `forces`, `charges`, and `dipole`.
 Supported calculator parameters are `full_derivative=False`, `total_charge=0`,
 `max_expanded_atoms=512`, `neighbor_backend="ase"`, and `neighbor_skin=0.3` (Å).
+Net charge must be specified explicitly with `total_charge`; it is not inferred
+from ASE initial charges. Initial charges may be absent. When supplied, they must
+be finite and sum to `total_charge` within `1e-8` e; their distribution does not
+constrain the fresh QEq solution.
+
 The skin controls ASE topology reuse; zero rebuilds at every evaluation.
 `neighbor_list_builds` counts builds over the adapter's lifetime.
 The expansion limit applies only when `neighbor_backend="replicated"`.
@@ -98,3 +104,9 @@ The result includes `energy`, `forces`, `charges`, `components`,
 `version`, and `directory`. It does not contain the full bond-order matrix.
 Its numerical units match the core calculator, including input-cell
 normalization. The executable is needed only when calling the function.
+
+Pass `supplied_charges=charges` to `evaluate_lammps` to use a finite `(N,)`
+array of charges in e, including nonzero net charge. This disables LAMMPS QEq
+and verifies energies and fixed-charge forces with the supplied values.
+Small-cell replication tiles the charges, and results are normalized back to
+the input cell. Omit the argument for the existing neutral QEq reference.

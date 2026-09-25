@@ -4,11 +4,11 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "xreac"
-version = "0.7.0"
+version = "0.8.0"
 description = "Parameter-driven Autograd ReaxFF for molecules and periodic supercells"
 readme = "README.md"
 requires-python = ">=3.10"
-license = "GPL-2.0-or-later AND CC-BY-NC-4.0"
+license = "GPL-2.0-or-later AND CC-BY-NC-4.0 AND CC-BY-NC-3.0"
 license-files = ["LICENSE", "NOTICE", "LICENSES/*.txt"]
 dependencies = ["numpy>=1.24,<3", "autograd>=1.9.1,<2"]
 

@@ -5,13 +5,48 @@ import numpy as np
 import pytest
 
 from cases import CASES
-from validate import validation_cases, backend_differences
+from validate import validation_cases, charged_validation_cases, backend_differences
 from water_cluster import comparison
 from xreac import Calculator, ForceField
 from xreac.ase import ReaxFFCalculator
 from xreac.reference import evaluate_lammps
 
 pytestmark = pytest.mark.reference
+
+
+@pytest.mark.parametrize("name", charged_validation_cases())
+def test_supplied_charged_reference(name, tmp_path):
+    filename, symbols, x, cell, pbc, charge = charged_validation_cases()[name]
+    ff = ForceField.bundled(filename)
+    # Exercise unwrapped branches and rotated cells as well as isolated ions.
+    if cell is not None:
+        x = x + np.array([[1, 0, 0], [0, -1, 0], [0, 0, 0]]) @ cell
+    actual = Calculator(ff).evaluate(symbols, x, cell=cell, pbc=pbc, total_charge=charge)
+    ref = evaluate_lammps(
+        ff, symbols, x, cell=cell, pbc=pbc, supplied_charges=actual.charges, directory=tmp_path / name
+    )
+    report = comparison(actual, ref, len(x))
+    assert report["passed"], report
+    script = (ref.directory / "in.lammps").read_text()
+    assert "checkqeq no" in script
+    assert "fix charges" not in script
+    metadata = json.loads((ref.directory / "metadata.json").read_text())
+    assert metadata["charge_mode"] == "supplied"
+    assert metadata["qeq_tolerance"] is None
+    assert metadata["total_charge"] == pytest.approx(charge * np.prod(ref.cell_repetitions), abs=1e-12)
+    np.testing.assert_allclose(ref.charges, actual.charges, atol=1e-12, rtol=0)
+
+
+@pytest.mark.parametrize("charges", [[0], [[0, 0]], [float("nan"), 0], [0, float("inf")]])
+def test_invalid_supplied_charges(charges, tmp_path):
+    with pytest.raises(ValueError, match="supplied_charges"):
+        evaluate_lammps(
+            ForceField.bundled("ffield.reax.ZnOH.2010"),
+            *CASES["zno"],
+            supplied_charges=charges,
+            directory=tmp_path,
+        )
+    assert not list(tmp_path.iterdir())
 
 
 def test_missing_executable(tmp_path):

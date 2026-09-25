@@ -53,7 +53,7 @@ def test_symmetries(calc, full_derivative):
         (["Zn", "O"], [[0, 0, 0], [0, 0, 0]], {}),
         (["Zn"], [[np.nan, 0, 0]], {}),
         (["Zn"], [[0, 0]], {}),
-        (["Zn"], [[0, 0, 0]], {"total_charge": 1}),
+        (["Zn"], [[0, 0, 0]], {"total_charge": float("nan")}),
         (["Zn"], [[0, 0, 0]], {"cell": np.eye(3)}),
         (["Zn"], [[0, 0, 0]], {"full_derivative": "false"}),
     ],

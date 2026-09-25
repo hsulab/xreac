@@ -1,5 +1,42 @@
 # Changelog
 
+## 0.8.0
+
+Add charged-system support and retained water-dissociation examples on
+two-layer Pt(111) and Ni(111) surfaces.
+
+- Bundle Hur et al. (2021) C/H/O/Cl parameters extracted from the published
+  supplement under CC BY-NC 3.0, with provenance and LAMMPS comparisons.
+- Support explicit finite `total_charge` in core and ASE evaluation and both
+  relaxation backends, including fractional charges and periodic input cells.
+  Keep zero as the default and preserve the center-of-mass dipole convention.
+- Add shared water-ion examples, independent constrained-QEq validation, and
+  tests for derivatives, periodic charge scaling, and ASE charge handling.
+- Add supplied-charge LAMMPS references for charged energy and fixed-charge
+  force comparisons, retaining independent validation of the QEq solve.
+- Bundle the original Gai2016 Pt/Ni/C/H/O parameters and a separately named
+  experimental 2026 derivative. Change only O–H–Pt p_val4 from 1.0000 to
+  1.0250 to reduce endpoint cutoff stalls; Ni parameters remain unchanged.
+  Retain attribution and the separate CC BY-NC 4.0 license.
+- Add ASE CI-NEB examples for two-layer p(2x2) Pt(111) and Ni(111), with a
+  fixed bottom layer, seven images, and 15 Angstrom total vacuum padding.
+  Both bands converge at 0.05 eV/Angstrom. Ni passes all retained LAMMPS
+  checks; Pt retains a product equivalent-copy force-consistency failure.
+  These are numerical examples, not DFT-fitted reaction barriers.
+- Retain exploratory chloride/methyl-chloride reaction scans and NEB results
+  with the Hur parameters, including their validation limitations.
+- Organize water validation into charged, diagnostics, performance, MD, and
+  surface records; keep shared regression fixtures at the top level and
+  remove superseded surface trials while preserving compact tuning evidence.
+
+Validation: all 233 tests pass locally, including LAMMPS reference tests.
+The retained Pt product-force failure is an explicitly documented limitation
+of the exploratory surface example, not a passing reference comparison.
+
+Licensing: code remains GPL-2.0-or-later. Bundled parameter files retain
+their individual licenses, including CC BY-NC 3.0 and CC BY-NC 4.0
+noncommercial restrictions; see `data/README.md` and `NOTICE`.
+
 ## 0.7.0
 
 Improve ASE neighbor performance and add a verified bulk-water molecular

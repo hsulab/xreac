@@ -2,15 +2,38 @@
 
 ## Charge equilibration
 
-Every evaluated geometry receives a fresh, neutral QEq solution. A dense linear
+Every evaluated geometry receives a fresh QEq solution. A dense linear
 system equalizes the charge chemical potentials while a Lagrange multiplier
-enforces zero net charge. Previous or initial atomic charges are not frozen
+enforces `sum(charges) = total_charge` (default zero, in e). Previous or initial atomic charges are not frozen
 across geometries.
 
 For small cells, translated copies share the input atom's charge. QEq includes
 coupling to nonzero images of the same atom and solves an `(N+1) × (N+1)` system
 for the `N` input atoms. Global QEq can transfer charge between separated
 fragments; it is not a guarantee of physically correct dissociation.
+
+## Charged systems
+
+Use `calc.evaluate(symbols, positions, total_charge=-1)` or
+`calc.relax(symbols, positions, total_charge=-1)`. ASE uses
+`ReaxFFCalculator(ff, total_charge=-1)`. Fractional charges are accepted.
+See `examples/charged_water.py` for hydroxide and hydronium demonstrations.
+
+For periodic systems the charge belongs to the input cell. Internal neighbor
+replication preserves it; explicitly repeating the physical cell requires
+multiplying `total_charge` by the number of copies. Electrostatics retain the
+existing shielded, finite-cutoff model, with no Ewald sum or compensating
+background. Numerical support does not establish accurate ionic chemistry or
+equivalence to charged periodic DFT.
+
+Bučko's *Ab initio calculations of free-energy reaction barriers*
+([2008, DOI](https://doi.org/10.1088/0953-8984/20/6/064211)) studies
+Cl⁻ + CH₃Cl → CH₃Cl + Cl⁻, with total charge −1. This is a possible future
+application. The bundled Hur `ffield.reax.CHOCl.2021` covers C/H/Cl, but using
+it for this reaction still requires validation of fragment charges and reaction
+energies, plus free-energy sampling.
+No reproduction of its barriers is claimed. Only a global charge constraint
+is supported; fragment constraints and spin states are not modeled.
 
 ## Force convention
 
@@ -50,8 +73,11 @@ atom `j`. The diagonal may be nonzero when an atom bonds to its own translated
 copies. Bond counts apply the threshold to each individual image **before**
 summing; counting entries of the aggregated matrix above `0.3` is not equivalent.
 
-The neutral dipole is independent of the coordinate origin, but individual
-atom wrapping changes its periodic coordinate branch. It is not a unique bulk
+Dipoles are evaluated relative to the force-field center of mass:
+`sum(q[i] * (x[i] - center_of_mass))`. This convention is translation invariant
+also for charged systems. A charged dipole depends on the choice of physical
+origin; xreac fixes that choice to the center of mass. Individual atom wrapping
+changes the periodic coordinate branch and the center of mass. It is not a unique bulk
 polarization.
 
 ## Branches and precision
@@ -62,5 +88,5 @@ Cutoff crossings and singular geometries require care when comparing numerical
 derivatives. An exactly collinear active torsion raises `ValueError`.
 
 The calculator rejects coincident atoms, nonfinite input, unknown atom labels,
-nonneutral charge, and singular QEq systems. The [API reference](api.md)
+invalid total charge, and singular QEq systems. The [API reference](api.md)
 documents result fields and available options.

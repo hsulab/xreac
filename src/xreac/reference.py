@@ -45,6 +45,7 @@ def evaluate_lammps(
     pbc=None,
     allow_small_cell=False,
     max_expanded_atoms=512,
+    supplied_charges=None,
 ):
     """Retain a single-point reference with fresh QEq and optional fixed-cell PBC.
 
@@ -54,9 +55,16 @@ def evaluate_lammps(
     preserve the supplied coordinate branch for dipole comparisons.
     allow_small_cell=True is for diagnostics outside LAMMPS's documented QEq
     cell-size range, not an accepted reference for validating small-cell support.
+    supplied_charges is an optional finite (N,) array in e. When provided,
+    disable LAMMPS QEq and use these charges unchanged, including nonzero net
+    charge. This validates energies and fixed-charge forces, not the QEq solve.
     """
     symbols, x = validate_input(symbols, positions, cell=cell, pbc=pbc)
     force_field.validate_model(symbols)
+    if supplied_charges is not None:
+        supplied_charges = np.array(supplied_charges, dtype=float, copy=True)
+        if supplied_charges.shape != (len(symbols),) or not np.isfinite(supplied_charges).all():
+            raise ValueError("supplied_charges must be a finite (N,) array")
     boundary = Boundary(cell, pbc)
     if not isinstance(allow_small_cell, bool):
         raise ValueError("allow_small_cell must be a boolean")
@@ -82,6 +90,7 @@ def evaluate_lammps(
                 timeout=timeout,
                 expected_version=expected_version,
                 max_expanded_atoms=max_expanded_atoms,
+                supplied_charges=None if supplied_charges is None else np.tile(supplied_charges, copies),
             )
             folded = {}
             for key, tolerance in (
@@ -103,12 +112,17 @@ def evaluate_lammps(
                 cell_repetitions=repetitions.tolist(),
                 energy_divisor=copies,
                 returned_results="Per input cell; forces/properties averaged across equivalent copies",
+                input_total_charge=0.0 if supplied_charges is None else float(supplied_charges.sum()),
             )
             metadata_path.write_text(json.dumps(metadata, indent=2) + "\n")
             (ref.directory / "primitive.json").write_text(
                 json.dumps(
                     dict(
-                        symbols=symbols, positions=x.tolist(), cell=boundary.cell.tolist(), pbc=boundary.pbc.tolist()
+                        symbols=symbols,
+                        positions=x.tolist(),
+                        cell=boundary.cell.tolist(),
+                        pbc=boundary.pbc.tolist(),
+                        supplied_charges=None if supplied_charges is None else supplied_charges.tolist(),
                     ),
                     indent=2,
                 )
@@ -118,7 +132,11 @@ def evaluate_lammps(
                 ref,
                 energy=ref.energy / copies,
                 components={key: value / copies for key, value in ref.components.items()},
-                dipole=np.sum((x - x.mean(axis=0)) * folded["charges"][:, None], axis=0),
+                dipole=np.sum(
+                    (x - np.average(x, axis=0, weights=[force_field.atoms[s]["mass"] for s in symbols]))
+                    * folded["charges"][:, None],
+                    axis=0,
+                ),
                 cell_repetitions=tuple(map(int, repetitions)),
                 **folded,
             )
@@ -170,8 +188,9 @@ def evaluate_lammps(
     lines += ["", "Masses", ""]
     lines += [f"{i + 1} {force_field.atoms[s]['mass']:.17g}" for i, s in enumerate(types)]
     lines += ["", "Atoms # charge", ""]
+    initial_charges = np.zeros(len(x)) if supplied_charges is None else supplied_charges
     lines += [
-        f"{i + 1} {types.index(s) + 1} 0 "
+        f"{i + 1} {types.index(s) + 1} {initial_charges[i]:.17g} "
         + " ".join(f"{v:.17g}" for v in pos)
         + " "
         + " ".join(str(v) for v in images[i])
@@ -179,13 +198,19 @@ def evaluate_lammps(
     ]
     (work / "atoms.data").write_text("\n".join(lines) + "\n")
     terms = " ".join(f"$(c_reax[{i}]:%.17g)" for i in range(1, 15))
+    qeq = (
+        f"fix charges all qeq/reaxff 1 0 {force_field.general[12]:.17g} 1e-12 reaxff maxiter 2000"
+        if supplied_charges is None
+        else "# Supplied charges; no QEq"
+    )
+    checkqeq = "" if supplied_charges is None else " checkqeq no"
     script = f"""units real
 atom_style charge
 boundary {" ".join("p" if flag else "f" for flag in boundary.pbc)}
 read_data atoms.data
-pair_style reaxff NULL tabulate 0 enobonds yes
+pair_style reaxff NULL tabulate 0 enobonds yes{checkqeq}
 pair_coeff * * ffield {" ".join(types)}
-fix charges all qeq/reaxff 1 0 {force_field.general[12]:.17g} 1e-12 reaxff maxiter 2000
+{qeq}
 neighbor 2.0 bin
 neigh_modify every 1 delay 0 check yes
 compute reax all pair reaxff
@@ -228,7 +253,9 @@ print "$(c_dipole[1]:%.17g) $(c_dipole[2]:%.17g) $(c_dipole[3]:%.17g)" file dipo
         "version": version,
         "command": command,
         "force_field_sha256": force_field.checksum,
-        "qeq_tolerance": 1e-12,
+        "qeq_tolerance": 1e-12 if supplied_charges is None else None,
+        "charge_mode": "equilibrated" if supplied_charges is None else "supplied",
+        "total_charge": float(initial_charges.sum()),
         "cell": boundary.cell.tolist() if boundary.periodic else None,
         "pbc": boundary.pbc.tolist(),
         "rotation": rotation.tolist(),
@@ -246,6 +273,8 @@ print "$(c_dipole[1]:%.17g) $(c_dipole[2]:%.17g) $(c_dipole[3]:%.17g)" file dipo
         or not all(np.isfinite(v).all() for v in (values, atoms, dipole))
     ):
         raise RuntimeError(f"Invalid or non-finite reference output; see {work}")
+    if supplied_charges is not None and not np.allclose(atoms[:, 2], supplied_charges, atol=1e-12, rtol=0):
+        raise RuntimeError(f"LAMMPS changed supplied charges; see {work}")
     return ReferenceResult(
         float(values[0]),
         atoms[:, 6:9] @ rotation.T,

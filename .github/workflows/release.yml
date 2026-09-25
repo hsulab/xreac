@@ -63,7 +63,11 @@ jobs:
           import numpy as np
           from xreac import Calculator, ForceField
 
-          for filename in ('ffield.reax.HO.2015', 'ffield.reax.CHO.2008', 'ffield.reax.ZnOH.2010', 'ffield.reax.CuOHCl.2010'):
+          for filename in (
+              'ffield.reax.HO.2015', 'ffield.reax.CHO.2008', 'ffield.reax.ZnOH.2010',
+              'ffield.reax.CuOHCl.2010', 'ffield.reax.CHOCl.2021',
+              'ffield.reax.PtNiCHO.2016', 'ffield.reax.PtNiCHO.2026',
+          ):
               ff = ForceField.bundled(filename)
               assert ff.path.is_file()
           ff = ForceField.bundled('ffield.reax.HO.2015')
@@ -71,6 +75,9 @@ jobs:
           assert abs(result.energy - (-248.34420920633704)) < 1e-8
           assert np.isfinite(result.forces).all()
           assert abs(result.charges.sum()) < 1e-12
+          ion = Calculator(ff).evaluate(['O', 'H'], [[0, 0, 0], [0.97, 0, 0]], total_charge=-1)
+          assert abs(ion.charges.sum() + 1) < 1e-12
+          assert np.isfinite(ion.forces).all()
           PY
       - name: Publish GitHub release
         if: startsWith(github.ref, 'refs/tags/')

@@ -1,0 +1,459 @@
+{
+  "force_field": "ffield.reax.PtNiCHO.2026",
+  "sha256": "4c4a54ee24565faf8fdfe0269da6b352e45ec7658bc2a64152a52e792be80209",
+  "lattice_angstrom": 3.52,
+  "metal": "Ni",
+  "slab": "p(2x2) Ni(111), 2 layers, bottom layer fixed",
+  "layers": 2,
+  "vacuum_padding_angstrom": 15.0,
+  "pbc": [
+    true,
+    true,
+    false
+  ],
+  "image_count": 7,
+  "bottom_height_angstrom": 2.5,
+  "total_charge": 0,
+  "full_derivative": true,
+  "comparison_units": {
+    "energy": "kcal/mol",
+    "forces": "kcal/mol/Angstrom",
+    "charges": "e",
+    "dipole": "e Angstrom"
+  },
+  "endpoint_fmax_tolerance_ev_angstrom": 0.02,
+  "max_steps_per_stage": 2500,
+  "restart_endpoints": null,
+  "restart_band": null,
+  "neb_dtmax": 0.1,
+  "fmax_tolerance_ev_angstrom": 0.05,
+  "references": {
+    "reference-reactant-initial": {
+      "maximum_absolute_errors": {
+        "energy_per_atom": 5.81869905793362e-12,
+        "components_per_atom": 4.1599047439045866e-13,
+        "forces": 1.809663530139005e-11,
+        "charges": 1.9617640845126516e-13,
+        "dipole": 2.662425835353588e-12,
+        "total_bond_orders": 1.0658141036401503e-14,
+        "lone_pairs": 4.440892098500626e-16,
+        "bond_counts": 0.0
+      },
+      "limits": {
+        "energy_per_atom": 1e-05,
+        "components_per_atom": 1e-05,
+        "forces": 0.0001,
+        "charges": 1e-06,
+        "dipole": 1e-06,
+        "total_bond_orders": 1e-08,
+        "lone_pairs": 1e-08,
+        "bond_counts": 0
+      },
+      "passed": true,
+      "cell_repetitions": [
+        3,
+        3,
+        1
+      ]
+    },
+    "reference-product-initial": {
+      "maximum_absolute_errors": {
+        "energy_per_atom": 3.3279237951236693e-12,
+        "components_per_atom": 3.979039320256561e-13,
+        "forces": 1.4658496638730867e-11,
+        "charges": 2.1321555632169975e-12,
+        "dipole": 8.52024006903207e-12,
+        "total_bond_orders": 8.881784197001252e-15,
+        "lone_pairs": 2.220446049250313e-16,
+        "bond_counts": 0.0
+      },
+      "limits": {
+        "energy_per_atom": 1e-05,
+        "components_per_atom": 1e-05,
+        "forces": 0.0001,
+        "charges": 1e-06,
+        "dipole": 1e-06,
+        "total_bond_orders": 1e-08,
+        "lone_pairs": 1e-08,
+        "bond_counts": 0
+      },
+      "passed": true,
+      "cell_repetitions": [
+        3,
+        3,
+        1
+      ]
+    },
+    "reference-image-0": {
+      "maximum_absolute_errors": {
+        "energy_per_atom": 3.3795996304516764e-12,
+        "components_per_atom": 1.5373561010082168e-13,
+        "forces": 1.0455372678741526e-11,
+        "charges": 3.68594044175552e-14,
+        "dipole": 3.8768988019910466e-13,
+        "total_bond_orders": 3.552713678800501e-15,
+        "lone_pairs": 4.440892098500626e-16,
+        "bond_counts": 0.0
+      },
+      "limits": {
+        "energy_per_atom": 1e-05,
+        "components_per_atom": 1e-05,
+        "forces": 0.0001,
+        "charges": 1e-06,
+        "dipole": 1e-06,
+        "total_bond_orders": 1e-08,
+        "lone_pairs": 1e-08,
+        "bond_counts": 0
+      },
+      "passed": true,
+      "cell_repetitions": [
+        3,
+        3,
+        1
+      ]
+    },
+    "reference-image-4": {
+      "maximum_absolute_errors": {
+        "energy_per_atom": 1.085192541888153e-12,
+        "components_per_atom": 2.4804400957443496e-13,
+        "forces": 1.974309604690916e-12,
+        "charges": 8.246875404793741e-15,
+        "dipole": 6.566969190657801e-14,
+        "total_bond_orders": 7.105427357601002e-15,
+        "lone_pairs": 4.440892098500626e-16,
+        "bond_counts": 0.0
+      },
+      "limits": {
+        "energy_per_atom": 1e-05,
+        "components_per_atom": 1e-05,
+        "forces": 0.0001,
+        "charges": 1e-06,
+        "dipole": 1e-06,
+        "total_bond_orders": 1e-08,
+        "lone_pairs": 1e-08,
+        "bond_counts": 0
+      },
+      "passed": true,
+      "cell_repetitions": [
+        3,
+        3,
+        1
+      ]
+    },
+    "reference-image-6": {
+      "maximum_absolute_errors": {
+        "energy_per_atom": 3.61730847296051e-13,
+        "components_per_atom": 5.923342624472835e-13,
+        "forces": 3.567315887131883e-11,
+        "charges": 3.174179669107602e-13,
+        "dipole": 3.587408148320037e-12,
+        "total_bond_orders": 5.329070518200751e-15,
+        "lone_pairs": 4.440892098500626e-16,
+        "bond_counts": 0.0
+      },
+      "limits": {
+        "energy_per_atom": 1e-05,
+        "components_per_atom": 1e-05,
+        "forces": 0.0001,
+        "charges": 1e-06,
+        "dipole": 1e-06,
+        "total_bond_orders": 1e-08,
+        "lone_pairs": 1e-08,
+        "bond_counts": 0
+      },
+      "passed": true,
+      "cell_repetitions": [
+        3,
+        3,
+        1
+      ]
+    }
+  },
+  "endpoints": {
+    "reactant": {
+      "converged": true,
+      "steps": 177,
+      "energy_ev": -43.44449586105507,
+      "fmax_ev_angstrom": 0.019428173056139992,
+      "oh_distances_angstrom": [
+        0.9727735235207493,
+        0.9727735235207499
+      ]
+    },
+    "product": {
+      "converged": true,
+      "steps": 257,
+      "energy_ev": -43.699301214130735,
+      "fmax_ev_angstrom": 0.019125977027784156,
+      "oh_distances_angstrom": [
+        0.9496989780687505,
+        2.3381025333733607
+      ]
+    }
+  },
+  "perturbation_angstrom": 0.0,
+  "endpoints_converged": true,
+  "stages": [
+    {
+      "climb": false,
+      "converged": true,
+      "steps": 77,
+      "wall_seconds": 3.946684709750116
+    },
+    {
+      "climb": true,
+      "converged": true,
+      "steps": 57,
+      "wall_seconds": 3.0594258327037096
+    }
+  ],
+  "energies_ev": [
+    -43.44449586105507,
+    -43.52608961506429,
+    -43.554147335109924,
+    -43.380612577592736,
+    -42.92334863379417,
+    -43.571276548241094,
+    -43.699301214130735
+  ],
+  "relative_energies_ev": [
+    0.0,
+    -0.08159375400922642,
+    -0.10965147405485709,
+    0.06388328346233152,
+    0.5211472272608972,
+    -0.1267806871860273,
+    -0.25480535307566754
+  ],
+  "barrier_ev": 0.5211472272608972,
+  "reaction_energy_ev": -0.25480535307566754,
+  "neb_fmax_ev_angstrom": 0.04919343778342946,
+  "status": "Converged CI-NEB",
+  "audit": {
+    "original_sha256": "a9769ca030d0a94b3a9d1d09acceb1d6e46b283e2fc701adb5aaaee3cc19588b",
+    "tuned_sha256": "4c4a54ee24565faf8fdfe0269da6b352e45ec7658bc2a64152a52e792be80209",
+    "band": "validation/runs/ni-water-2026-7-lowered/band.traj",
+    "parameter_changes": [
+      {
+        "table": "angles",
+        "key": [
+          "Pt",
+          "H",
+          "O"
+        ],
+        "index": [
+          0,
+          6
+        ],
+        "before": 1.0,
+        "after": 1.025
+      },
+      {
+        "table": "angles",
+        "key": [
+          "O",
+          "H",
+          "Pt"
+        ],
+        "index": [
+          0,
+          6
+        ],
+        "before": 1.0,
+        "after": 1.025
+      }
+    ],
+    "common_geometry_energies": [
+      {
+        "image": 0,
+        "original_energy_ev": -43.44449586105506,
+        "tuned_energy_ev": -43.44449586105506,
+        "difference_ev": 0.0
+      },
+      {
+        "image": 1,
+        "original_energy_ev": -43.52608961506429,
+        "tuned_energy_ev": -43.52608961506429,
+        "difference_ev": 0.0
+      },
+      {
+        "image": 2,
+        "original_energy_ev": -43.554147335109924,
+        "tuned_energy_ev": -43.554147335109924,
+        "difference_ev": 0.0
+      },
+      {
+        "image": 3,
+        "original_energy_ev": -43.380612577592736,
+        "tuned_energy_ev": -43.380612577592736,
+        "difference_ev": 0.0
+      },
+      {
+        "image": 4,
+        "original_energy_ev": -42.92334863379417,
+        "tuned_energy_ev": -42.92334863379417,
+        "difference_ev": 0.0
+      },
+      {
+        "image": 5,
+        "original_energy_ev": -43.571276548241094,
+        "tuned_energy_ev": -43.571276548241094,
+        "difference_ev": 0.0
+      },
+      {
+        "image": 6,
+        "original_energy_ev": -43.69930121413074,
+        "tuned_energy_ev": -43.69930121413074,
+        "difference_ev": 0.0
+      }
+    ],
+    "force_audits": [
+      {
+        "image": 0,
+        "analytic_ev_angstrom": -0.0020910981718497822,
+        "finite_differences": [
+          {
+            "step_angstrom": 1e-05,
+            "derivative_ev_angstrom": -0.0020910981390898087,
+            "error_ev_angstrom": 3.275997355334237e-11
+          },
+          {
+            "step_angstrom": 1e-06,
+            "derivative_ev_angstrom": -0.0020910988496325444,
+            "error_ev_angstrom": 6.777827622067578e-10
+          },
+          {
+            "step_angstrom": 1e-07,
+            "derivative_ev_angstrom": -0.002091304907025915,
+            "error_ev_angstrom": 2.067351761326358e-07
+          }
+        ],
+        "closest_ni_h_cutoff": {
+          "ni": 0,
+          "h": 9,
+          "bond_order": 0.0,
+          "distance_from_cutoff": 0.001
+        }
+      },
+      {
+        "image": 4,
+        "analytic_ev_angstrom": -0.013661883854317176,
+        "finite_differences": [
+          {
+            "step_angstrom": 1e-05,
+            "derivative_ev_angstrom": -0.01366188406848323,
+            "error_ev_angstrom": 2.1416605468227434e-10
+          },
+          {
+            "step_angstrom": 1e-06,
+            "derivative_ev_angstrom": -0.013661885844840072,
+            "error_ev_angstrom": 1.9905228958172483e-09
+          },
+          {
+            "step_angstrom": 1e-07,
+            "derivative_ev_angstrom": -0.01366188939755375,
+            "error_ev_angstrom": 5.543236574617749e-09
+          }
+        ],
+        "closest_ni_h_cutoff": {
+          "ni": 0,
+          "h": 9,
+          "bond_order": 0.0,
+          "distance_from_cutoff": 0.001
+        }
+      },
+      {
+        "image": 6,
+        "analytic_ev_angstrom": -0.0038510769710879485,
+        "finite_differences": [
+          {
+            "step_angstrom": 1e-05,
+            "derivative_ev_angstrom": -0.003851075547345317,
+            "error_ev_angstrom": 1.4237426316024426e-09
+          },
+          {
+            "step_angstrom": 1e-06,
+            "derivative_ev_angstrom": -0.003851102547969276,
+            "error_ev_angstrom": 2.5576881327715045e-08
+          },
+          {
+            "step_angstrom": 1e-07,
+            "derivative_ev_angstrom": -0.003851070573546167,
+            "error_ev_angstrom": 6.397541781489463e-09
+          }
+        ],
+        "closest_ni_h_cutoff": {
+          "ni": 0,
+          "h": 9,
+          "bond_order": 0.0,
+          "distance_from_cutoff": 0.001
+        }
+      }
+    ],
+    "controls": [
+      {
+        "name": "bare_slab",
+        "energy_change_ev": 0.0,
+        "max_force_change_ev_angstrom": 0.0
+      },
+      {
+        "name": "water",
+        "energy_change_ev": 0.0,
+        "max_force_change_ev_angstrom": 0.0
+      },
+      {
+        "name": "slab_plus_H",
+        "energy_change_ev": 0.0,
+        "max_force_change_ev_angstrom": 0.0
+      }
+    ],
+    "independently_recomputed_ci_neb_fmax_ev_angstrom": 0.04919343778342946,
+    "peak_physical_fmax_ev_angstrom": 0.046348744608816585
+  },
+  "translation_check": [
+    {
+      "metal": "Pt",
+      "product": false,
+      "energy_difference_ev": 0.0,
+      "maximum_force_difference_ev_angstrom": 0.0
+    },
+    {
+      "metal": "Pt",
+      "product": true,
+      "energy_difference_ev": 0.0,
+      "maximum_force_difference_ev_angstrom": 0.0
+    },
+    {
+      "metal": "Ni",
+      "product": false,
+      "energy_difference_ev": 0.0,
+      "maximum_force_difference_ev_angstrom": 0.0
+    },
+    {
+      "metal": "Ni",
+      "product": true,
+      "energy_difference_ev": 0.0,
+      "maximum_force_difference_ev_angstrom": 0.0
+    }
+  ],
+  "placement_note": "All atoms shifted down 5 Angstrom from centered starting geometry; bottom layer z=2.5 Angstrom. Cell and total vacuum padding unchanged.",
+  "limitations": "Exploratory Gai-derived parameters; force-converged band does not establish a global minimum path or DFT accuracy. Inspect reference results for Pt product failure.",
+  "thirteen_image_comparison": {
+    "barrier_ev": 0.5187332939023577,
+    "reaction_energy_ev": -0.25480535307565333,
+    "stages": [
+      {
+        "climb": false,
+        "converged": true,
+        "steps": 286
+      },
+      {
+        "climb": true,
+        "converged": true,
+        "steps": 86
+      }
+    ],
+    "neb_fmax_ev_angstrom": 0.04930737189063257,
+    "note": "Compact historical comparison; superseded trajectories removed during cleanup."
+  }
+}

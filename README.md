@@ -1,7 +1,7 @@
 # xreac
 
 A lightweight Python implementation of ReaxFF using NumPy and Autograd for
-small-to-medium neutral molecules, clusters, and periodic cells. It computes
+small-to-medium neutral or charged molecules, clusters, and periodic cells. It computes
 energies, QEq charges, forces, and bond properties from standard parameter files,
 with optional ASE integration for geometry optimization and fixed-volume MD.
 
@@ -39,7 +39,8 @@ See the [documentation](docs/index.md) for the API and supported features,
 [validation results](validation/README.md) for comparisons with `lmp_mpi`.
 LAMMPS is needed only for verification.
 
-The code is GPL-2.0-or-later. Bundled `ffield.reax.CuOHCl.2010` data is
-separately licensed under **CC BY-NC 4.0**, including a noncommercial restriction.
+The code is GPL-2.0-or-later. Bundled `ffield.reax.CuOHCl.2010` and
+`ffield.reax.CHOCl.2021` data are separately licensed under **CC BY-NC 4.0**
+and **CC BY-NC 3.0**, respectively, including noncommercial restrictions.
 See [parameter licenses](data/README.md), [LICENSE](LICENSE), and [NOTICE](NOTICE)
 for the license scope, attribution, and parameter-file provenance.

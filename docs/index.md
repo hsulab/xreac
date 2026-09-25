@@ -1,6 +1,6 @@
 # xreac
 
-xreac is a NumPy + Autograd implementation of ReaxFF for neutral molecules,
+xreac is a NumPy + Autograd implementation of ReaxFF for neutral or charged molecules,
 clusters, and periodic cells. It targets small-to-medium systems, roughly
 1–200 atoms, and computes energies, equilibrated charges, forces, and bond
 properties from standard parameter files.

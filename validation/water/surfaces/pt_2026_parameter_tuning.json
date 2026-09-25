@@ -1,0 +1,1267 @@
+{
+  "parameter_selection": "Smallest tested exponent for which both constructed endpoints reached 0.02 eV/Angstrom within 800 FIRE steps; no DFT fit.",
+  "parameter_screen": {
+    "source_sha256": "a9769ca030d0a94b3a9d1d09acceb1d6e46b283e2fc701adb5aaaee3cc19588b",
+    "parameter": "O-H-Pt p_val4",
+    "source_value": 1.0,
+    "fmax_target_ev_angstrom": 0.02,
+    "full_derivative": true,
+    "cases": [
+      {
+        "value": 1.0,
+        "sha256": "a9769ca030d0a94b3a9d1d09acceb1d6e46b283e2fc701adb5aaaee3cc19588b",
+        "endpoints": {
+          "reactant": {
+            "converged": false,
+            "fmax_ev_angstrom": 0.07152196248519167,
+            "energy_ev": -74.85451515642612,
+            "steps": 136,
+            "geometry": {
+              "o_pt_angstrom": 2.1479566092077675,
+              "plane_tilt_degrees": 5.625965479903029,
+              "oh_angstrom": [
+                0.9740414001723874,
+                0.9740414001723874
+              ],
+              "hoh_degrees": 101.2094053779292
+            },
+            "closest_pt_h_cutoff": {
+              "pt": 8,
+              "h": 13,
+              "bond_order": 0.0010000000000002745,
+              "distance_from_cutoff": 2.745199900733297e-16
+            }
+          },
+          "product": {
+            "converged": false,
+            "fmax_ev_angstrom": 0.04493754818773889,
+            "energy_ev": -74.01616439233682,
+            "steps": 302,
+            "geometry": {
+              "o_pt_angstrom": 1.8074231157659628,
+              "plane_tilt_degrees": 50.94497323568694,
+              "oh_angstrom": [
+                0.9587672917643316,
+                2.4149562144585306
+              ],
+              "hoh_degrees": 154.23806529103285
+            },
+            "closest_pt_h_cutoff": {
+              "pt": 0,
+              "h": 13,
+              "bond_order": 0.0,
+              "distance_from_cutoff": 0.001
+            }
+          }
+        }
+      },
+      {
+        "value": 1.01,
+        "sha256": "483c54f9c3bbf0f1d68d43ab507bec0444b476070693b126e75ea956075c6508",
+        "endpoints": {
+          "reactant": {
+            "converged": false,
+            "fmax_ev_angstrom": 0.03540065704435608,
+            "energy_ev": -74.85678510484833,
+            "steps": 800,
+            "geometry": {
+              "o_pt_angstrom": 2.150053702982458,
+              "plane_tilt_degrees": 5.229762842116511,
+              "oh_angstrom": [
+                0.9741584087285567,
+                0.9741584087285592
+              ],
+              "hoh_degrees": 100.9880851534018
+            },
+            "closest_pt_h_cutoff": {
+              "pt": 8,
+              "h": 14,
+              "bond_order": 0.001000000033655469,
+              "distance_from_cutoff": 3.3655469036664165e-11
+            }
+          },
+          "product": {
+            "converged": false,
+            "fmax_ev_angstrom": 0.038286100382221196,
+            "energy_ev": -74.02846147847974,
+            "steps": 564,
+            "geometry": {
+              "o_pt_angstrom": 1.8071889135453778,
+              "plane_tilt_degrees": 54.28266395060754,
+              "oh_angstrom": [
+                0.9592163514374576,
+                2.4146688334113877
+              ],
+              "hoh_degrees": 155.08785322578737
+            },
+            "closest_pt_h_cutoff": {
+              "pt": 0,
+              "h": 13,
+              "bond_order": 0.0,
+              "distance_from_cutoff": 0.001
+            }
+          }
+        }
+      },
+      {
+        "value": 1.025,
+        "sha256": "4c4a54ee24565faf8fdfe0269da6b352e45ec7658bc2a64152a52e792be80209",
+        "endpoints": {
+          "reactant": {
+            "converged": true,
+            "fmax_ev_angstrom": 0.019756495358255938,
+            "energy_ev": -74.85806152857748,
+            "steps": 134,
+            "geometry": {
+              "o_pt_angstrom": 2.150998375317334,
+              "plane_tilt_degrees": 4.793727145863019,
+              "oh_angstrom": [
+                0.9740107603380391,
+                0.9740107603380447
+              ],
+              "hoh_degrees": 100.96864156287099
+            },
+            "closest_pt_h_cutoff": {
+              "pt": 8,
+              "h": 14,
+              "bond_order": 0.0010010823437466385,
+              "distance_from_cutoff": 1.0823437466384814e-06
+            }
+          },
+          "product": {
+            "converged": true,
+            "fmax_ev_angstrom": 0.019704220320640144,
+            "energy_ev": -74.04335483336145,
+            "steps": 462,
+            "geometry": {
+              "o_pt_angstrom": 1.8078650344704554,
+              "plane_tilt_degrees": 54.35120033146754,
+              "oh_angstrom": [
+                0.9590700336935807,
+                2.414661542928253
+              ],
+              "hoh_degrees": 155.11403110265425
+            },
+            "closest_pt_h_cutoff": {
+              "pt": 0,
+              "h": 13,
+              "bond_order": 0.0,
+              "distance_from_cutoff": 0.001
+            }
+          }
+        }
+      },
+      {
+        "value": 1.05,
+        "sha256": "41d879651778864515e2d8423306dc6af0985c459ff7ee6c18c2ee41d8c1ce9d",
+        "endpoints": {
+          "reactant": {
+            "converged": true,
+            "fmax_ev_angstrom": 0.016965276660685483,
+            "energy_ev": -74.86025278180468,
+            "steps": 106,
+            "geometry": {
+              "o_pt_angstrom": 2.1478018405353527,
+              "plane_tilt_degrees": 3.739853733314652,
+              "oh_angstrom": [
+                0.9742963011580269,
+                0.9742963011580257
+              ],
+              "hoh_degrees": 100.9376638859173
+            },
+            "closest_pt_h_cutoff": {
+              "pt": 8,
+              "h": 13,
+              "bond_order": 0.0010734456258884952,
+              "distance_from_cutoff": 7.344562588849522e-05
+            }
+          },
+          "product": {
+            "converged": true,
+            "fmax_ev_angstrom": 0.019480057689433485,
+            "energy_ev": -74.06819484188357,
+            "steps": 393,
+            "geometry": {
+              "o_pt_angstrom": 1.8083569771293753,
+              "plane_tilt_degrees": 55.8228169858985,
+              "oh_angstrom": [
+                0.9593200839075384,
+                2.4145669782474837
+              ],
+              "hoh_degrees": 155.51838377238138
+            },
+            "closest_pt_h_cutoff": {
+              "pt": 0,
+              "h": 13,
+              "bond_order": 0.0,
+              "distance_from_cutoff": 0.001
+            }
+          }
+        }
+      },
+      {
+        "value": 1.1,
+        "sha256": "9610af6d6b44d1433e26e48f6777497080ab6d3de2c49482e6c7b163a03fe8e9",
+        "endpoints": {
+          "reactant": {
+            "converged": true,
+            "fmax_ev_angstrom": 0.017684313828648858,
+            "energy_ev": -74.85861985782061,
+            "steps": 62,
+            "geometry": {
+              "o_pt_angstrom": 2.1390069065286155,
+              "plane_tilt_degrees": 4.78683755028693,
+              "oh_angstrom": [
+                0.9749063146992653,
+                0.9749063146992653
+              ],
+              "hoh_degrees": 101.01342412927953
+            },
+            "closest_pt_h_cutoff": {
+              "pt": 8,
+              "h": 13,
+              "bond_order": 0.001283103908987205,
+              "distance_from_cutoff": 0.000283103908987205
+            }
+          },
+          "product": {
+            "converged": true,
+            "fmax_ev_angstrom": 0.01951661492886446,
+            "energy_ev": -74.11420059939867,
+            "steps": 237,
+            "geometry": {
+              "o_pt_angstrom": 1.8091302897909622,
+              "plane_tilt_degrees": 54.01473063236275,
+              "oh_angstrom": [
+                0.9600591777672289,
+                2.4146700862809416
+              ],
+              "hoh_degrees": 155.04900030264102
+            },
+            "closest_pt_h_cutoff": {
+              "pt": 0,
+              "h": 13,
+              "bond_order": 0.0,
+              "distance_from_cutoff": 0.001
+            }
+          }
+        }
+      },
+      {
+        "value": 1.2,
+        "sha256": "eda98bb9adefe587dbcbd3f6d0117f0e8323318fc1f4b3ebb57d01cd2d9c2b3c",
+        "endpoints": {
+          "reactant": {
+            "converged": true,
+            "fmax_ev_angstrom": 0.016690091919129898,
+            "energy_ev": -74.86099006011818,
+            "steps": 76,
+            "geometry": {
+              "o_pt_angstrom": 2.127267938329252,
+              "plane_tilt_degrees": 4.451326038377712,
+              "oh_angstrom": [
+                0.9755858438883565,
+                0.9755858438883567
+              ],
+              "hoh_degrees": 101.02885605341457
+            },
+            "closest_pt_h_cutoff": {
+              "pt": 8,
+              "h": 14,
+              "bond_order": 0.0016012358360964383,
+              "distance_from_cutoff": 0.0006012358360964383
+            }
+          },
+          "product": {
+            "converged": true,
+            "fmax_ev_angstrom": 0.019201218690825844,
+            "energy_ev": -74.19827524643536,
+            "steps": 183,
+            "geometry": {
+              "o_pt_angstrom": 1.8073706701635397,
+              "plane_tilt_degrees": 52.421400042745525,
+              "oh_angstrom": [
+                0.9630712710924176,
+                2.414711941089763
+              ],
+              "hoh_degrees": 154.64768790058602
+            },
+            "closest_pt_h_cutoff": {
+              "pt": 0,
+              "h": 13,
+              "bond_order": 0.0,
+              "distance_from_cutoff": 0.001
+            }
+          }
+        }
+      }
+    ]
+  },
+  "orientation_screen": {
+    "force_field": "ffield",
+    "sha256": "4c4a54ee24565faf8fdfe0269da6b352e45ec7658bc2a64152a52e792be80209",
+    "full_derivative": true,
+    "fmax_target_ev_angstrom": 0.02,
+    "max_steps": 800,
+    "cases": [
+      {
+        "label": "azimuth-0-tilt--15",
+        "start": {
+          "o_pt_angstrom": 2.34,
+          "plane_tilt_degrees": 14.999999999999897,
+          "oh_angstrom": [
+            0.9699999999999998,
+            0.9699999999999998
+          ],
+          "hoh_degrees": 104.50000000000001
+        },
+        "final": {
+          "o_pt_angstrom": 2.1507626977572527,
+          "plane_tilt_degrees": 4.321226121986244,
+          "oh_angstrom": [
+            0.9741291178562933,
+            0.9741291178562933
+          ],
+          "hoh_degrees": 100.96257040693337
+        },
+        "energy_ev": -74.85881012051532,
+        "fmax_ev_angstrom": 0.019959069121259315,
+        "converged": true,
+        "steps": 116,
+        "closest_pt_h_cutoff": {
+          "pt": 8,
+          "h": 13,
+          "bond_order": 0.0010054228248492852,
+          "distance_from_cutoff": 5.4228248492851645e-06
+        }
+      },
+      {
+        "label": "azimuth-0-tilt-0",
+        "start": {
+          "o_pt_angstrom": 2.34,
+          "plane_tilt_degrees": 0.0,
+          "oh_angstrom": [
+            0.97,
+            0.97
+          ],
+          "hoh_degrees": 104.49999999999999
+        },
+        "final": {
+          "o_pt_angstrom": 2.15101913175453,
+          "plane_tilt_degrees": 5.32381646594,
+          "oh_angstrom": [
+            0.9740055916483696,
+            0.974005591648369
+          ],
+          "hoh_degrees": 100.98055382545999
+        },
+        "energy_ev": -74.85714420201357,
+        "fmax_ev_angstrom": 0.01975856372834343,
+        "converged": true,
+        "steps": 105,
+        "closest_pt_h_cutoff": {
+          "pt": 8,
+          "h": 13,
+          "bond_order": 0.001003832997974309,
+          "distance_from_cutoff": 3.832997974308932e-06
+        }
+      },
+      {
+        "label": "azimuth-0-tilt-15",
+        "start": {
+          "o_pt_angstrom": 2.34,
+          "plane_tilt_degrees": 14.999999999999897,
+          "oh_angstrom": [
+            0.9699999999999998,
+            0.9699999999999998
+          ],
+          "hoh_degrees": 104.50000000000001
+        },
+        "final": {
+          "o_pt_angstrom": 2.1516054155460353,
+          "plane_tilt_degrees": 5.356727517442295,
+          "oh_angstrom": [
+            0.9742271472200803,
+            0.9742271472200803
+          ],
+          "hoh_degrees": 100.9801090169647
+        },
+        "energy_ev": -74.85697326640228,
+        "fmax_ev_angstrom": 0.019496815200917107,
+        "converged": true,
+        "steps": 135,
+        "closest_pt_h_cutoff": {
+          "pt": 8,
+          "h": 13,
+          "bond_order": 0.0010036440792137353,
+          "distance_from_cutoff": 3.6440792137353104e-06
+        }
+      },
+      {
+        "label": "azimuth-30-tilt--15",
+        "start": {
+          "o_pt_angstrom": 2.34,
+          "plane_tilt_degrees": 14.999999999999897,
+          "oh_angstrom": [
+            0.9699999999999998,
+            0.9699999999999998
+          ],
+          "hoh_degrees": 104.50000000000001
+        },
+        "final": {
+          "o_pt_angstrom": 2.150665394992677,
+          "plane_tilt_degrees": 4.2858975793024925,
+          "oh_angstrom": [
+            0.9740570596869621,
+            0.9740757562266208
+          ],
+          "hoh_degrees": 100.96857362387574
+        },
+        "energy_ev": -74.85891468814003,
+        "fmax_ev_angstrom": 0.019625173856210782,
+        "converged": true,
+        "steps": 260,
+        "closest_pt_h_cutoff": {
+          "pt": 8,
+          "h": 14,
+          "bond_order": 0.001003501847428811,
+          "distance_from_cutoff": 3.501847428810873e-06
+        }
+      },
+      {
+        "label": "azimuth-30-tilt-0",
+        "start": {
+          "o_pt_angstrom": 2.34,
+          "plane_tilt_degrees": 0.0,
+          "oh_angstrom": [
+            0.9699999999999999,
+            0.9699999999999999
+          ],
+          "hoh_degrees": 104.49999999999999
+        },
+        "final": {
+          "o_pt_angstrom": 2.151225410284666,
+          "plane_tilt_degrees": 4.971612529386917,
+          "oh_angstrom": [
+            0.9740760884142589,
+            0.9740943826569225
+          ],
+          "hoh_degrees": 100.97551117068446
+        },
+        "energy_ev": -74.85782261881063,
+        "fmax_ev_angstrom": 0.019240055135508832,
+        "converged": true,
+        "steps": 170,
+        "closest_pt_h_cutoff": {
+          "pt": 8,
+          "h": 14,
+          "bond_order": 0.0010045362623076158,
+          "distance_from_cutoff": 4.536262307615812e-06
+        }
+      },
+      {
+        "label": "azimuth-30-tilt-15",
+        "start": {
+          "o_pt_angstrom": 2.34,
+          "plane_tilt_degrees": 14.999999999999897,
+          "oh_angstrom": [
+            0.9699999999999998,
+            0.9699999999999998
+          ],
+          "hoh_degrees": 104.50000000000001
+        },
+        "final": {
+          "o_pt_angstrom": 2.1514205959947197,
+          "plane_tilt_degrees": 4.404805773252664,
+          "oh_angstrom": [
+            0.974066565834804,
+            0.9740818803589146
+          ],
+          "hoh_degrees": 100.97499203491498
+        },
+        "energy_ev": -74.8588449331635,
+        "fmax_ev_angstrom": 0.019949926241997644,
+        "converged": true,
+        "steps": 256,
+        "closest_pt_h_cutoff": {
+          "pt": 8,
+          "h": 14,
+          "bond_order": 0.0010045372222029839,
+          "distance_from_cutoff": 4.5372222029838646e-06
+        }
+      },
+      {
+        "label": "azimuth-60-tilt--15",
+        "start": {
+          "o_pt_angstrom": 2.34,
+          "plane_tilt_degrees": 14.999999999999897,
+          "oh_angstrom": [
+            0.9699999999999999,
+            0.9699999999999999
+          ],
+          "hoh_degrees": 104.50000000000001
+        },
+        "final": {
+          "o_pt_angstrom": 2.150712555024295,
+          "plane_tilt_degrees": 4.412814494636699,
+          "oh_angstrom": [
+            0.9739584673151467,
+            0.9739584673151459
+          ],
+          "hoh_degrees": 100.96560897218696
+        },
+        "energy_ev": -74.85765910719428,
+        "fmax_ev_angstrom": 0.018964773415784054,
+        "converged": true,
+        "steps": 116,
+        "closest_pt_h_cutoff": {
+          "pt": 8,
+          "h": 14,
+          "bond_order": 0.001000993550242472,
+          "distance_from_cutoff": 9.935502424719429e-07
+        }
+      },
+      {
+        "label": "azimuth-60-tilt-0",
+        "start": {
+          "o_pt_angstrom": 2.34,
+          "plane_tilt_degrees": 0.0,
+          "oh_angstrom": [
+            0.97,
+            0.97
+          ],
+          "hoh_degrees": 104.5
+        },
+        "final": {
+          "o_pt_angstrom": 2.151134630767445,
+          "plane_tilt_degrees": 5.014771157545177,
+          "oh_angstrom": [
+            0.9740367767744147,
+            0.9740367767744147
+          ],
+          "hoh_degrees": 100.96256470200032
+        },
+        "energy_ev": -74.8568432885083,
+        "fmax_ev_angstrom": 0.019490213743596174,
+        "converged": true,
+        "steps": 167,
+        "closest_pt_h_cutoff": {
+          "pt": 8,
+          "h": 13,
+          "bond_order": 0.0010058171278282564,
+          "distance_from_cutoff": 5.817127828256418e-06
+        }
+      },
+      {
+        "label": "azimuth-60-tilt-15",
+        "start": {
+          "o_pt_angstrom": 2.34,
+          "plane_tilt_degrees": 14.999999999999897,
+          "oh_angstrom": [
+            0.9699999999999999,
+            0.9699999999999999
+          ],
+          "hoh_degrees": 104.50000000000001
+        },
+        "final": {
+          "o_pt_angstrom": 2.151747972339866,
+          "plane_tilt_degrees": 5.437883997467576,
+          "oh_angstrom": [
+            0.9741874520121431,
+            0.974187452012143
+          ],
+          "hoh_degrees": 100.94784014931967
+        },
+        "energy_ev": -74.85589818909847,
+        "fmax_ev_angstrom": 0.019437864943523883,
+        "converged": true,
+        "steps": 174,
+        "closest_pt_h_cutoff": {
+          "pt": 8,
+          "h": 13,
+          "bond_order": 0.0010058961600209527,
+          "distance_from_cutoff": 5.896160020952678e-06
+        }
+      }
+    ]
+  },
+  "original_band_audit": {
+    "original_sha256": "a9769ca030d0a94b3a9d1d09acceb1d6e46b283e2fc701adb5aaaee3cc19588b",
+    "tuned_sha256": "4c4a54ee24565faf8fdfe0269da6b352e45ec7658bc2a64152a52e792be80209",
+    "parameter_changes": [
+      {
+        "table": "angles",
+        "key": [
+          "Pt",
+          "H",
+          "O"
+        ],
+        "index": [
+          0,
+          6
+        ],
+        "before": 1.0,
+        "after": 1.025
+      },
+      {
+        "table": "angles",
+        "key": [
+          "O",
+          "H",
+          "Pt"
+        ],
+        "index": [
+          0,
+          6
+        ],
+        "before": 1.0,
+        "after": 1.025
+      }
+    ],
+    "common_geometry_energies": [
+      {
+        "image": 0,
+        "original_energy_ev": -74.86428873404114,
+        "tuned_energy_ev": -74.86428896671342,
+        "difference_ev": -2.3267227788892342e-07
+      },
+      {
+        "image": 1,
+        "original_energy_ev": -74.85423171389431,
+        "tuned_energy_ev": -74.85423171389431,
+        "difference_ev": 0.0
+      },
+      {
+        "image": 2,
+        "original_energy_ev": -74.7984143174033,
+        "tuned_energy_ev": -74.7984143174033,
+        "difference_ev": 0.0
+      },
+      {
+        "image": 3,
+        "original_energy_ev": -74.1981099576027,
+        "tuned_energy_ev": -74.20610874717272,
+        "difference_ev": -0.0079987895700242
+      },
+      {
+        "image": 4,
+        "original_energy_ev": -73.81134166219216,
+        "tuned_energy_ev": -73.84201362164315,
+        "difference_ev": -0.030671959450984332
+      },
+      {
+        "image": 5,
+        "original_energy_ev": -73.98571154685132,
+        "tuned_energy_ev": -74.01178496323647,
+        "difference_ev": -0.026073416385145265
+      },
+      {
+        "image": 6,
+        "original_energy_ev": -74.02448415399842,
+        "tuned_energy_ev": -74.04928686785064,
+        "difference_ev": -0.024802713852224656
+      }
+    ],
+    "force_audits": [
+      {
+        "image": 0,
+        "analytic_ev_angstrom": 0.008147825457517976,
+        "finite_differences": [
+          {
+            "step_angstrom": 1e-05,
+            "derivative_ev_angstrom": -0.002935640708301434,
+            "error_ev_angstrom": 0.01108346616581941
+          },
+          {
+            "step_angstrom": 1e-06,
+            "derivative_ev_angstrom": -0.0037873277847211284,
+            "error_ev_angstrom": 0.011935153242239104
+          },
+          {
+            "step_angstrom": 1e-07,
+            "derivative_ev_angstrom": -0.0042373926589789335,
+            "error_ev_angstrom": 0.01238521811649691
+          }
+        ]
+      },
+      {
+        "image": 4,
+        "analytic_ev_angstrom": 0.0048985869970802585,
+        "finite_differences": [
+          {
+            "step_angstrom": 1e-05,
+            "derivative_ev_angstrom": 0.004898586070112287,
+            "error_ev_angstrom": 9.269679711321199e-10
+          },
+          {
+            "step_angstrom": 1e-06,
+            "derivative_ev_angstrom": 0.00489860241259521,
+            "error_ev_angstrom": 1.5415514951350184e-08
+          },
+          {
+            "step_angstrom": 1e-07,
+            "derivative_ev_angstrom": 0.004898552674603707,
+            "error_ev_angstrom": 3.432247655185683e-08
+          }
+        ]
+      },
+      {
+        "image": 6,
+        "analytic_ev_angstrom": 0.003090802835903574,
+        "finite_differences": [
+          {
+            "step_angstrom": 1e-05,
+            "derivative_ev_angstrom": 0.0030908012149666315,
+            "error_ev_angstrom": 1.620936942395984e-09
+          },
+          {
+            "step_angstrom": 1e-06,
+            "derivative_ev_angstrom": 0.0030907969517102174,
+            "error_ev_angstrom": 5.884193356522904e-09
+          },
+          {
+            "step_angstrom": 1e-07,
+            "derivative_ev_angstrom": 0.0030906477377357078,
+            "error_ev_angstrom": 1.5509816786614394e-07
+          }
+        ]
+      }
+    ],
+    "controls": [
+      {
+        "name": "bare_slab",
+        "energy_change_ev": 0.0,
+        "max_force_change_ev_angstrom": 0.0
+      },
+      {
+        "name": "water",
+        "energy_change_ev": 0.0,
+        "max_force_change_ev_angstrom": 0.0
+      },
+      {
+        "name": "slab_plus_H",
+        "energy_change_ev": 0.0,
+        "max_force_change_ev_angstrom": 0.0
+      }
+    ]
+  },
+  "final_band_audit": {
+    "original_sha256": "a9769ca030d0a94b3a9d1d09acceb1d6e46b283e2fc701adb5aaaee3cc19588b",
+    "tuned_sha256": "4c4a54ee24565faf8fdfe0269da6b352e45ec7658bc2a64152a52e792be80209",
+    "parameter_changes": [
+      {
+        "table": "angles",
+        "key": [
+          "O",
+          "H",
+          "Pt"
+        ],
+        "index": [
+          0,
+          6
+        ],
+        "before": 1.0,
+        "after": 1.025
+      },
+      {
+        "table": "angles",
+        "key": [
+          "Pt",
+          "H",
+          "O"
+        ],
+        "index": [
+          0,
+          6
+        ],
+        "before": 1.0,
+        "after": 1.025
+      }
+    ],
+    "common_geometry_energies": [
+      {
+        "image": 0,
+        "original_energy_ev": -74.85805631008684,
+        "tuned_energy_ev": -74.85806152895472,
+        "difference_ev": -5.218867883627354e-06
+      },
+      {
+        "image": 1,
+        "original_energy_ev": -74.86199566293057,
+        "tuned_energy_ev": -74.8619967873085,
+        "difference_ev": -1.1243779312053448e-06
+      },
+      {
+        "image": 2,
+        "original_energy_ev": -74.83498957916846,
+        "tuned_energy_ev": -74.83499165134,
+        "difference_ev": -2.0721715401350593e-06
+      },
+      {
+        "image": 3,
+        "original_energy_ev": -73.94223754798813,
+        "tuned_energy_ev": -73.97048584280577,
+        "difference_ev": -0.028248294817643682
+      },
+      {
+        "image": 4,
+        "original_energy_ev": -73.94084254521981,
+        "tuned_energy_ev": -73.96576358711957,
+        "difference_ev": -0.02492104189975919
+      },
+      {
+        "image": 5,
+        "original_energy_ev": -74.02566811283188,
+        "tuned_energy_ev": -74.05270738315873,
+        "difference_ev": -0.027039270326852716
+      },
+      {
+        "image": 6,
+        "original_energy_ev": -74.01880514129795,
+        "tuned_energy_ev": -74.04373116592691,
+        "difference_ev": -0.02492602462896798
+      }
+    ],
+    "force_audits": [
+      {
+        "image": 0,
+        "analytic_ev_angstrom": 0.0061857833665724185,
+        "finite_differences": [
+          {
+            "step_angstrom": 1e-05,
+            "derivative_ev_angstrom": 0.0061852709620779925,
+            "error_ev_angstrom": 5.124044944260567e-07
+          },
+          {
+            "step_angstrom": 1e-06,
+            "derivative_ev_angstrom": 0.006185771894706704,
+            "error_ev_angstrom": 1.1471865714318685e-08
+          },
+          {
+            "step_angstrom": 1e-07,
+            "derivative_ev_angstrom": 0.006185771894706704,
+            "error_ev_angstrom": 1.1471865714318685e-08
+          }
+        ],
+        "closest_pt_h_cutoff": {
+          "pt": 8,
+          "h": 13,
+          "bond_order": 0.001001082470796853,
+          "distance_from_cutoff": 1.0824707968530144e-06
+        }
+      },
+      {
+        "image": 4,
+        "analytic_ev_angstrom": -0.0025829588996374945,
+        "finite_differences": [
+          {
+            "step_angstrom": 1e-05,
+            "derivative_ev_angstrom": -0.00258295926869323,
+            "error_ev_angstrom": 3.6905573562451277e-10
+          },
+          {
+            "step_angstrom": 1e-06,
+            "derivative_ev_angstrom": -0.002582964953035116,
+            "error_ev_angstrom": 6.053397621705314e-09
+          },
+          {
+            "step_angstrom": 1e-07,
+            "derivative_ev_angstrom": -0.002583036007308692,
+            "error_ev_angstrom": 7.710767119771533e-08
+          }
+        ],
+        "closest_pt_h_cutoff": {
+          "pt": 0,
+          "h": 13,
+          "bond_order": 0.0,
+          "distance_from_cutoff": 0.001
+        }
+      },
+      {
+        "image": 6,
+        "analytic_ev_angstrom": -0.004020745479795361,
+        "finite_differences": [
+          {
+            "step_angstrom": 1e-05,
+            "derivative_ev_angstrom": -0.0021212670731074468,
+            "error_ev_angstrom": 0.0018994784066879138
+          },
+          {
+            "step_angstrom": 1e-06,
+            "derivative_ev_angstrom": -0.001361058821203187,
+            "error_ev_angstrom": 0.0026596866585921735
+          },
+          {
+            "step_angstrom": 1e-07,
+            "derivative_ev_angstrom": -0.0007279510327862226,
+            "error_ev_angstrom": 0.003292794447009138
+          }
+        ],
+        "closest_pt_h_cutoff": {
+          "pt": 0,
+          "h": 13,
+          "bond_order": 0.0,
+          "distance_from_cutoff": 0.001
+        }
+      }
+    ],
+    "controls": [
+      {
+        "name": "bare_slab",
+        "energy_change_ev": 0.0,
+        "max_force_change_ev_angstrom": 0.0
+      },
+      {
+        "name": "water",
+        "energy_change_ev": 0.0,
+        "max_force_change_ev_angstrom": 0.0
+      },
+      {
+        "name": "slab_plus_H",
+        "energy_change_ev": 0.0,
+        "max_force_change_ev_angstrom": 0.0
+      }
+    ],
+    "independently_recomputed_ci_neb_fmax_ev_angstrom": 0.04999084868451032,
+    "peak_physical_fmax_ev_angstrom": 0.016842063756478898
+  },
+  "limitations": [
+    "Experimental modification, not published Gai2016 or a DFT fit.",
+    "Residual finite-difference discrepancy at product: up to 0.0033 eV/Angstrom over tested steps. Cutoff sensitivity is not globally removed.",
+    "No frequency, slab-size, coverage, or alternate-path convergence study. Barrier meets the stated NEB force tolerance only."
+  ],
+  "purpose": "Historical evidence for the sole O-H-Pt p_val4 change; current retained examples are the two-layer seven-image Pt and Ni bands.",
+  "original_cutoff_diagnostic": {
+    "force_field": "ffield.reax.PtNiCHO.2016",
+    "sha256": "a9769ca030d0a94b3a9d1d09acceb1d6e46b283e2fc701adb5aaaee3cc19588b",
+    "lattice_angstrom": 3.95,
+    "slab": "p(2x2) Pt(111), three layers, bottom layer fixed",
+    "total_charge": 0,
+    "full_derivative": true,
+    "fmax_tolerance_ev_angstrom": 0.05,
+    "references": {
+      "reference-reactant-initial": {
+        "maximum_absolute_errors": {
+          "energy_per_atom": 2.076679569048186e-12,
+          "components_per_atom": 5.608550660933058e-13,
+          "forces": 1.3589419520232404e-11,
+          "charges": 1.0141739878455347e-12,
+          "dipole": 1.6872059305228504e-12,
+          "total_bond_orders": 1.3322676295501878e-14,
+          "lone_pairs": 5.773159728050814e-15,
+          "bond_counts": 0.0
+        },
+        "limits": {
+          "energy_per_atom": 1e-05,
+          "components_per_atom": 1e-05,
+          "forces": 0.0001,
+          "charges": 1e-06,
+          "dipole": 1e-06,
+          "total_bond_orders": 1e-08,
+          "lone_pairs": 1e-08,
+          "bond_counts": 0
+        },
+        "passed": true,
+        "cell_repetitions": [
+          3,
+          3,
+          1
+        ]
+      },
+      "reference-product-initial": {
+        "maximum_absolute_errors": {
+          "energy_per_atom": 6.199722217085461e-12,
+          "components_per_atom": 6.442254137558242e-13,
+          "forces": 3.040129259446189e-11,
+          "charges": 1.756650380713154e-13,
+          "dipole": 4.684308496649692e-13,
+          "total_bond_orders": 2.098321516541546e-14,
+          "lone_pairs": 1.7771458472818954e-23,
+          "bond_counts": 0.0
+        },
+        "limits": {
+          "energy_per_atom": 1e-05,
+          "components_per_atom": 1e-05,
+          "forces": 0.0001,
+          "charges": 1e-06,
+          "dipole": 1e-06,
+          "total_bond_orders": 1e-08,
+          "lone_pairs": 1e-08,
+          "bond_counts": 0
+        },
+        "passed": true,
+        "cell_repetitions": [
+          3,
+          3,
+          1
+        ]
+      },
+      "reference-image-0": {
+        "maximum_absolute_errors": {
+          "energy_per_atom": 3.865352482534945e-12,
+          "components_per_atom": 3.637978807091713e-13,
+          "forces": 3.7198007519028002,
+          "charges": 1.0076548970228139e-12,
+          "dipole": 1.6265322422270856e-12,
+          "total_bond_orders": 1.5987211554602254e-14,
+          "lone_pairs": 2.220446049250313e-16,
+          "bond_counts": 0.0
+        },
+        "limits": {
+          "energy_per_atom": 1e-05,
+          "components_per_atom": 1e-05,
+          "forces": 0.0001,
+          "charges": 1e-06,
+          "dipole": 1e-06,
+          "total_bond_orders": 1e-08,
+          "lone_pairs": 1e-08,
+          "bond_counts": 0
+        },
+        "passed": false,
+        "cell_repetitions": [
+          3,
+          3,
+          1
+        ]
+      },
+      "reference-image-4": {
+        "maximum_absolute_errors": {
+          "energy_per_atom": 6.9424762235333526e-12,
+          "components_per_atom": 6.366462912410497e-13,
+          "forces": 2.6199487024314294e-11,
+          "charges": 1.5204287481807022e-13,
+          "dipole": 2.461142400989047e-12,
+          "total_bond_orders": 1.3100631690576847e-14,
+          "lone_pairs": 2.747790597324589e-23,
+          "bond_counts": 0.0
+        },
+        "limits": {
+          "energy_per_atom": 1e-05,
+          "components_per_atom": 1e-05,
+          "forces": 0.0001,
+          "charges": 1e-06,
+          "dipole": 1e-06,
+          "total_bond_orders": 1e-08,
+          "lone_pairs": 1e-08,
+          "bond_counts": 0
+        },
+        "passed": true,
+        "cell_repetitions": [
+          3,
+          3,
+          1
+        ]
+      },
+      "reference-image-6": {
+        "maximum_absolute_errors": {
+          "energy_per_atom": 6.199722217085461e-12,
+          "components_per_atom": 6.442254137558242e-13,
+          "forces": 3.040129259446189e-11,
+          "charges": 1.756650380713154e-13,
+          "dipole": 4.684308496649692e-13,
+          "total_bond_orders": 2.098321516541546e-14,
+          "lone_pairs": 1.7771458472818954e-23,
+          "bond_counts": 0.0
+        },
+        "limits": {
+          "energy_per_atom": 1e-05,
+          "components_per_atom": 1e-05,
+          "forces": 0.0001,
+          "charges": 1e-06,
+          "dipole": 1e-06,
+          "total_bond_orders": 1e-08,
+          "lone_pairs": 1e-08,
+          "bond_counts": 0
+        },
+        "passed": true,
+        "cell_repetitions": [
+          3,
+          3,
+          1
+        ]
+      }
+    },
+    "endpoints": {
+      "reactant": {
+        "converged": false,
+        "steps": 300,
+        "energy_ev": -74.86428873356877,
+        "fmax_ev_angstrom": 0.1387627424975807,
+        "oh_distances_angstrom": [
+          0.9741524213530868,
+          0.9742248533476516
+        ]
+      },
+      "product": {
+        "converged": true,
+        "steps": 0,
+        "energy_ev": -74.02448415399842,
+        "fmax_ev_angstrom": 0.01948377669356224,
+        "oh_distances_angstrom": [
+          0.959665977614615,
+          2.41456827769984
+        ]
+      }
+    },
+    "perturbation_angstrom": 0.0,
+    "endpoints_converged": false,
+    "stages": [
+      {
+        "climb": false,
+        "converged": false,
+        "steps": 300
+      }
+    ],
+    "energies_ev": [
+      -74.86428873356877,
+      -74.85423171346406,
+      -74.79841431553699,
+      -74.19810996201629,
+      -73.81134166133057,
+      -73.98571154658245,
+      -74.02448415399842
+    ],
+    "relative_energies_ev": [
+      0.0,
+      0.010057020104710546,
+      0.06587441803178251,
+      0.666178771552481,
+      1.0529470722381973,
+      0.8785771869863197,
+      0.8398045795703553
+    ],
+    "barrier_ev": 1.0529470722381973,
+    "reaction_energy_ev": 0.8398045795703553,
+    "neb_fmax_ev_angstrom": 0.21041419619951013,
+    "status": "Unconverged reaction path",
+    "comparison_units": {
+      "energy": "kcal/mol",
+      "forces": "kcal/mol/Angstrom",
+      "charges": "e",
+      "dipole": "e Angstrom"
+    },
+    "endpoint_fmax_tolerance_ev_angstrom": 0.02,
+    "max_steps_per_stage": 300,
+    "restart_endpoints": "validation/runs/pt-water-gai2016-perturbed",
+    "cutoff_diagnostic": {
+      "source": "validation/runs/pt-water-gai2016-neb/reference-image-0/primitive.json",
+      "cutoff": 0.001,
+      "units": "comparison errors in kcal/mol, Angstrom, e",
+      "rows": [
+        {
+          "h13_z_offset_angstrom": -1e-06,
+          "pt8_h13_bond_order": 0.0010000179660008216,
+          "energy_ev": -74.86428867862917,
+          "h13_force_ev_angstrom": [
+            -0.012279229052417217,
+            0.02672972125434389,
+            0.05501508181187391
+          ],
+          "comparison": {
+            "maximum_absolute_errors": {
+              "energy_per_atom": 4.517157018805544e-12,
+              "components_per_atom": 3.562187581943969e-13,
+              "forces": 1.2347678435276066e-11,
+              "charges": 1.0129952432436085e-12,
+              "dipole": 1.6693868509776166e-12,
+              "total_bond_orders": 1.5987211554602254e-14,
+              "lone_pairs": 8.881784197001252e-16,
+              "bond_counts": 0.0
+            },
+            "limits": {
+              "energy_per_atom": 1e-05,
+              "components_per_atom": 1e-05,
+              "forces": 0.0001,
+              "charges": 1e-06,
+              "dipole": 1e-06,
+              "total_bond_orders": 1e-08,
+              "lone_pairs": 1e-08,
+              "bond_counts": 0
+            },
+            "passed": true
+          }
+        },
+        {
+          "h13_z_offset_angstrom": 0,
+          "pt8_h13_bond_order": 0.0010000000000000076,
+          "energy_ev": -74.86428873356877,
+          "h13_force_ev_angstrom": [
+            -0.012279585720247744,
+            0.02672456219900889,
+            0.05497348299344103
+          ],
+          "comparison": {
+            "maximum_absolute_errors": {
+              "energy_per_atom": 3.865352482534945e-12,
+              "components_per_atom": 3.637978807091713e-13,
+              "forces": 3.7198007519028002,
+              "charges": 1.0076548970228139e-12,
+              "dipole": 1.6265322422270856e-12,
+              "total_bond_orders": 1.5987211554602254e-14,
+              "lone_pairs": 2.220446049250313e-16,
+              "bond_counts": 0.0
+            },
+            "limits": {
+              "energy_per_atom": 1e-05,
+              "components_per_atom": 1e-05,
+              "forces": 0.0001,
+              "charges": 1e-06,
+              "dipole": 1e-06,
+              "total_bond_orders": 1e-08,
+              "lone_pairs": 1e-08,
+              "bond_counts": 0
+            },
+            "passed": false
+          }
+        },
+        {
+          "h13_z_offset_angstrom": 1e-06,
+          "pt8_h13_bond_order": 0.0009999820342242174,
+          "energy_ev": -74.86428863963691,
+          "h13_force_ev_angstrom": [
+            0.025727055800266692,
+            -0.033785271492418924,
+            -0.09389316076183399
+          ],
+          "comparison": {
+            "maximum_absolute_errors": {
+              "energy_per_atom": 3.622820562062164e-12,
+              "components_per_atom": 5.456968210637569e-13,
+              "forces": 1.2226442080986999e-11,
+              "charges": 1.0298749700266008e-12,
+              "dipole": 1.803168725444948e-12,
+              "total_bond_orders": 1.5987211554602254e-14,
+              "lone_pairs": 6.661338147750939e-16,
+              "bond_counts": 0.0
+            },
+            "limits": {
+              "energy_per_atom": 1e-05,
+              "components_per_atom": 1e-05,
+              "forces": 0.0001,
+              "charges": 1e-06,
+              "dipole": 1e-06,
+              "total_bond_orders": 1e-08,
+              "lone_pairs": 1e-08,
+              "bond_counts": 0
+            },
+            "passed": true
+          }
+        }
+      ]
+    },
+    "interpretation": "Unconverged exploratory seven-image NEB, not a validated activation barrier. Pt-H bond order reaches the 0.001 angle cutoff; forces are discontinuous and exact-threshold comparison depends on roundoff. Both displaced checks agree with LAMMPS.",
+    "source_sha256": {
+      "src/xreac/ase.py": "e608647b169235adfb594b9e09f369321258d5d742a364e3c722dc7a56f4c240",
+      "src/xreac/neighbors.py": "46e6db68ac8223c13db53ef7ca475ef183b341bb3cabdc27cd025f210a8c53ee",
+      "src/xreac/__init__.py": "042f04a1863f7c98a8704683a71099794097c97fc48574fb07bfdfa8ccfa0ad5",
+      "src/xreac/energy.py": "8f2bbd10af243db286af3f310399fe0ff378594009f0777f788e78c12fd4be1a",
+      "src/xreac/calculator.py": "4d86c33f64328c2ce8c7a95a92a9d1fc2c5226f605fb7747f0bc7d1828f69096",
+      "src/xreac/geometry.py": "179db73ce1385f55d938e791ac75014fb696e79979a4bad89affdac279c7e75c",
+      "src/xreac/reference.py": "be677473156ab4ad282602e5684e94ed619fc2323a4eae6d6b2f979e6ad04788",
+      "src/xreac/forcefield.py": "f214ce7f30d0a8d07acfaef1f45c8d1b0545430f051153aa710ee8c4e218b6e8",
+      "scripts/neb_pt_water.py": "0d5b60d1ead711cb2d0e975a3d0e1b0066f1c562ecd67a0e9a21ab3806a57039",
+      "scripts/check_pt_cutoff.py": "46c29a7851c469797ff5abc41fc93b53e739889a9c9195129545e2bf2c0a2190",
+      "scripts/extract_gai_parameters.py": "e576d2937b855f4be06df1ee6177481fdf9bfbb79c12ff4bc1f974c2b231f4b2"
+    }
+  }
+}

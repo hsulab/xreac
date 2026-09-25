@@ -115,8 +115,8 @@ system folders contain the selected reproducible records.
 
 Download the water {download}`structures <../validation/water/structures.json>`,
 {download}`results <../validation/water/results.json.gz>`, and
-{download}`illustrated monomer/dimer report <../validation/water/report.pdf>`.
-The {download}`water relaxation summary <../validation/water/relaxation.json>` and
+{download}`illustrated monomer/dimer report <../validation/water/diagnostics/report.pdf>`.
+The {download}`water relaxation summary <../validation/water/diagnostics/relaxation.json>` and
 {download}`Zn/O relaxation summary <../validation/zno/relaxation.json>` compare
 ASE and native FIRE on the same monomer and dimer used by the single-point checks.
 
@@ -137,16 +137,45 @@ same input atom. Python agrees with normalized larger LAMMPS supercells.
 The pinned LAMMPS primitive-cell implementation excludes hydrogen-bond
 acceptors sharing the donor's original atom ID. This omits a contribution of
 -0.370052 kcal/mol/cell present in the equivalent supercell. QEq charges agree.
-The retained {download}`hydrogen-bond diagnostic <../validation/water/hbond-images.json>`
+The retained {download}`hydrogen-bond diagnostic <../validation/water/diagnostics/hbond-images.json>`
 uses only this cell; the full-cell/partial-cell symmetry tests reuse the same
 small triclinic monomer. See the
 [LAMMPS QEq restriction](https://docs.lammps.org/fix_qeq_reaxff.html#restrictions).
 
 ## QEq audit
 
-The {download}`QEq audit <../validation/water/qeq.json>` reuses the isolated
+The {download}`QEq audit <../validation/water/diagnostics/qeq.json>` reuses the isolated
 monomer. It compares LAMMPS forces with finite differences of its energies,
 solving QEq again at each displaced geometry. Controls repeat QEq at fixed
 coordinates and change the initial neutral charge guess. The charge-response
 difference persists and follows the conversion-constant mismatch described in
 [force conventions](calculations.md#force-convention).
+
+## Charged-system checks
+
+`python scripts/validate.py --system water --include-charged` adds hydroxide,
+hydronium, and charged variants of existing periodic water fixtures. It compares
+neighbor backends and independently assembles the QEq matrix using ASE image
+distances, eliminating one charge to enforce the total. Reports check charge
+conservation, chemical-potential equality, and positive reduced curvature.
+These are numerical checks, not validation against ionic experimental data.
+
+`--verify` runs LAMMPS for both neutral and charged cases. Neutral cases use
+fresh LAMMPS QEq. Charged cases supply the xreac charges and disable LAMMPS
+QEq with `checkqeq no`, comparing energies, energy components, fixed-charge
+forces, and properties. Charge agreement here checks preservation of the
+supplied values; the independent constrained solve validates QEq itself.
+The compact charged results and raw reference archive are retained under
+`validation/water/charged/charged.json` and `validation/water/charged/charged_reference.tar.gz`. Unit tests also check both force conventions against
+finite differences, charge propagation during relaxation, and supercell scaling.
+
+## Hur C/H/O/Cl parameters
+
+`python scripts/validate.py --system cho --include-chocl --verify` checks five
+shared Hur-force-field fixtures. Neutral molecules use fresh LAMMPS QEq; the
+charged SN2 geometries use supplied charges. The
+{download}`results <../validation/cho/hur2021.json>` and
+{download}`raw LAMMPS archive <../validation/cho/hur2021_reference.tar.gz>`
+record numerical implementation checks, not a validated reaction barrier.
+The {download}`source parameter pages and provenance <../validation/cho/hur2021_source.tar.gz>`
+document extraction from the published supplementary information.

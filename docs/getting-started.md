@@ -48,7 +48,7 @@ to LAMMPS `compute pair reaxff`, including zeros for inactive terms.
 | Dipole | e Å | `(3,)` |
 | Bond-order matrix | Dimensionless | `(N, N)` |
 
-Calculations use float64 and require a neutral system. Atom labels must match
+Calculations use float64. Set `total_charge` (in e) for a charged system; the default is zero. Atom labels must match
 the parameter file. Use `ForceField.from_file("path/to/ffield")` for another
 supported file; the bundled water file does not contain Zn parameters.
 

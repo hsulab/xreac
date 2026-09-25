@@ -24,16 +24,21 @@ print(ff.checksum)
 | `ffield.reax.CHO.2008` | Chenoweth C/H/O |
 | `ffield.reax.ZnOH.2010` | Raymand 2010 Zn/O/H |
 | `ffield.reax.CuOHCl.2010` | van Duin 2010 Cu/O/H/Cl; one CuO(010) surface |
+| `ffield.reax.CHOCl.2021` | Hur 2021 C/H/O/Cl; includes dummy X; chlorinated molecules and charged SN2 fixtures |
 
 The Cu/O/H/Cl file is separately licensed under **CC BY-NC 4.0**, which includes
-a noncommercial restriction. The xreac code and the other three parameter
+a noncommercial restriction. The Hur C/H/O/Cl file is **CC BY-NC 3.0**, also
+noncommercial. The xreac code and the original three parameter
 files retain their GPL-2.0-or-later licenses. See
 {download}`file-specific license notes <../data/README.md>`,
 {download}`attribution <../NOTICE>`, and the
 {download}`Cu/O/H/Cl license <../LICENSES/CC-BY-NC-4.0.txt>`.
+The {download}`C/H/O/Cl license <../LICENSES/CC-BY-NC-3.0.txt>` is retained too.
 
 Source files live under the repository's `data/` directory. Wheels include
-them as `xreac.data`. Their original contents and citation headers are retained.
+them as `xreac.data`. Original contents and citation headers are retained, except
+the Hur set which is extracted from PDF tables with a new attribution header;
+its numerical entries are preserved. See the extraction provenance in `data/README.md`.
 Bundled filenames follow `ffield.reax.[elements].[year]`, using chemical
 symbols and the citation's publication year rather than the file revision date.
 Dummy labels such as `X` are parameter metadata, not additional chemical
@@ -43,6 +48,12 @@ Standard shielded vdW, inner-wall vdW, and their combination are implemented.
 Five-line atom extensions, lgvdW, a nonzero lower taper radius, and charge models
 such as ACKS2 are not supported. Successfully parsing a file does not establish
 its physical suitability or implementation coverage.
+
+Load the Hur set with `ForceField.bundled("ffield.reax.CHOCl.2021")`.
+It was developed for organic oxidation by oxychlorine species, not specifically
+the chloride–chloromethane SN2 barrier. The supplied-charge LAMMPS comparisons
+check numerical implementation; the idealized SN2 fixtures are not optimized
+stationary points and do not establish a reaction barrier.
 
 ## Cutoff values and their sources
 

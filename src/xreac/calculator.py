@@ -1,6 +1,7 @@
 """Public calculator and force-based geometry relaxation."""
 
 from dataclasses import dataclass
+from numbers import Real
 
 import autograd.numpy as anp
 from autograd import make_vjp
@@ -41,12 +42,21 @@ class Relaxation:
     message: str
 
 
+def validate_total_charge(total_charge):
+    """Validate a net charge in elementary-charge units, including fractions."""
+    if (
+        isinstance(total_charge, (bool, np.bool_))
+        or not isinstance(total_charge, Real)
+        or not np.isfinite(total_charge)
+    ):
+        raise ValueError("total_charge must be a finite real scalar")
+
+
 def validate_input(symbols, positions, total_charge=0, cell=None, pbc=None):
     symbols = tuple(symbols)
     if not symbols or any(not isinstance(s, str) or not s for s in symbols):
         raise ValueError("A nonempty sequence of parameter-file atom labels is required")
-    if total_charge != 0:
-        raise ValueError("Only neutral systems are validated")
+    validate_total_charge(total_charge)
     x = np.array(positions, dtype=np.float64, copy=True)
     if x.shape != (len(symbols), 3) or not np.isfinite(x).all():
         raise ValueError("positions must be a finite (N, 3) array in Angstrom")
@@ -73,6 +83,11 @@ class Calculator:
         to True for charge-response forces: the full reported energy derivative
         through QEq. Only the selected derivative is evaluated.
 
+        total_charge is a finite real scalar in elementary-charge units and
+        constrains the sum of charges in the input cell (default zero).
+        Fractional charges are allowed. Periodic electrostatics use the existing
+        finite cutoff, without a compensating background or Ewald summation.
+
         cell contains three lengths or three row vectors in Angstrom. Supplying
         it enables all periodic directions unless pbc is explicitly set to a
         boolean or three flags. Pass neighbors=(i, j, S) for a full directed
@@ -87,7 +102,8 @@ class Calculator:
         Energies and properties refer to the input cell. cell_repetitions records
         neighbor-search replication. Both paths use the same input-cell energy
         model. bond_orders sums over images; bond_counts counts each image.
-        Dipoles use the supplied coordinate branch and change upon wrapping.
+        Dipoles use the force-field center of mass as origin and the supplied
+        coordinate branch; they change upon individual atom wrapping.
         """
         if not isinstance(full_derivative, bool):
             raise ValueError("full_derivative must be a boolean")
@@ -101,7 +117,7 @@ class Calculator:
                 x, self.force_field.general[12], cell, pbc, max_expanded_atoms=self.max_expanded_atoms
             )
             neighbor_backend = "replicated"
-        model = EnergyModel(self.force_field, symbols, neighbors, cell, pbc)
+        model = EnergyModel(self.force_field, symbols, neighbors, cell, pbc, total_charge=total_charge)
         try:
             # Solve QEq outside the trace for fixed-charge forces. The traced
             # energy pass supplies both values and forces, without replaying
@@ -125,7 +141,7 @@ class Calculator:
             raise ValueError("Singular QEq system; check the geometry and parameters") from exc
         if not all(np.isfinite(v).all() for v in (components, charges, force)):
             raise ValueError("Non-finite energy, charges, or forces; check the geometry")
-        if abs(charges.sum()) > 1e-8:
+        if abs(charges.sum() - total_charge) > 1e-8:
             raise ValueError("QEq charge constraint failed")
         properties = model.properties(x, charges, bond_state)
         return Evaluation(
@@ -174,7 +190,14 @@ class Calculator:
             from .ase import relax_with_ase
 
             x, result, converged, iterations = relax_with_ase(
-                self, symbols, x, force_tolerance, max_iterations, cell=cell, pbc=boundary.pbc
+                self,
+                symbols,
+                x,
+                force_tolerance,
+                max_iterations,
+                cell=cell,
+                pbc=boundary.pbc,
+                total_charge=total_charge,
             )
             message = "Fixed-charge force tolerance reached" if converged else "Maximum relaxation iterations reached"
             return Relaxation(x, result, converged, iterations, message)
@@ -183,7 +206,7 @@ class Calculator:
         velocity = np.zeros_like(x)
         dt, dt_max, alpha = 0.02, 0.2, 0.1
         positive_steps = 0
-        result = self.evaluate(symbols, x, cell=cell, pbc=pbc, full_derivative=False)
+        result = self.evaluate(symbols, x, total_charge=total_charge, cell=cell, pbc=pbc, full_derivative=False)
         for iteration in range(max_iterations + 1):
             force = result.forces
             if np.max(np.abs(force)) <= force_tolerance:
@@ -210,5 +233,5 @@ class Calculator:
             if largest_step > 0.1:
                 displacement *= 0.1 / largest_step
             x = x + displacement
-            result = self.evaluate(symbols, x, cell=cell, pbc=pbc, full_derivative=False)
+            result = self.evaluate(symbols, x, total_charge=total_charge, cell=cell, pbc=pbc, full_derivative=False)
         return Relaxation(x, result, False, max_iterations, "Maximum relaxation iterations reached")

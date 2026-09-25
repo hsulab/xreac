@@ -52,9 +52,10 @@ class EnergyModel:
     charges, and energies refer to the input cell, regardless of the builder.
     """
 
-    def __init__(self, ff, symbols, neighbors, cell=None, pbc=None):
+    def __init__(self, ff, symbols, neighbors, cell=None, pbc=None, *, total_charge=0):
         ff.validate_model(symbols)
         self.ff, self.symbols, self.n = ff, tuple(symbols), len(symbols)
+        self.total_charge = total_charge
         self.g, self.vdw_type = ff.general, ff.vdw_type
         self.edges = Neighbors(neighbors, self.n, cell, pbc)
         self.i, self.j = self.edges.i, self.edges.j
@@ -87,7 +88,7 @@ class EnergyModel:
         kkt = np.concatenate(
             (np.concatenate((h, ones), axis=1), np.concatenate((ones.T, np.zeros((1, 1))), axis=1)), axis=0
         )
-        q = np.linalg.solve(kkt, np.concatenate((-self.a["chi"], np.zeros(1))))[: self.n]
+        q = np.linalg.solve(kkt, np.concatenate((-self.a["chi"], np.array([self.total_charge]))))[: self.n]
         return q, taper, shield
 
     def bond_orders(self, r):

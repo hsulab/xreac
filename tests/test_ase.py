@@ -83,7 +83,7 @@ def test_charge_validation(atoms):
     atoms.set_initial_charges([-0.8, 0.4, 0.4])
     assert atoms.get_potential_energy() == pytest.approx(energy, abs=1e-12)
     atoms.set_initial_charges([0.0, 0.5, 0.5])
-    with pytest.raises(ValueError, match="neutral"):
+    with pytest.raises(ValueError, match="total_charge"):
         atoms.get_charges()
     assert not atoms.calc.results
 
@@ -92,7 +92,7 @@ def test_charge_validation(atoms):
     "kwargs",
     [
         {"full_derivative": "false"},
-        {"total_charge": 1},
+        {"total_charge": float("nan")},
         {"misspelled_option": True},
         {"neighbor_skin": -0.1},
         {"neighbor_skin": float("inf")},

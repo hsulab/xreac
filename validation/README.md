@@ -42,7 +42,7 @@ contains one native result per default case. The optional bulk cases have fresh
 LAMMPS verification but is outside the routine baseline suite.
 
 Water and Zn/O also retain ASE/native FIRE relaxation on their shared monomer
-and dimer. Water contains two targeted diagnostics and a [PDF report](water/report.pdf).
+and dimer. Water contains two targeted diagnostics and a [PDF report](water/diagnostics/report.pdf).
 Historical Zn/O cluster sizes are retained in [performance benchmarks](zno/benchmarks.json).
 
 ## ASE-neighbor performance pilots
@@ -82,7 +82,7 @@ new baseline and do not replace or extend the historical native speedup tables.
 
 Each system has `cpu_ase_pilot.json`, `cpu_ase_pilot_results.json.gz`, and
 `cpu_ase_pilot_reference.tar.gz`:
-[water](water/cpu_ase_pilot.json), [ZnO](zno/cpu_ase_pilot.json),
+[water](water/performance/cpu_ase_pilot.json), [ZnO](zno/cpu_ase_pilot.json),
 [CuO](cuo/cpu_ase_pilot.json). Coordinates remain in the existing system
 `structures.json` files. Raw archives omit duplicate `ffield` files; restore
 the named bundled file from `data/` before replaying their LAMMPS inputs.
@@ -143,7 +143,7 @@ python scripts/benchmark_lammps.py --compare-neighbors --repeats 5 --batch-secon
 ```
 
 Per-commit timings, source hashes, rebuild counts, and numerical checks:
-[water](water/cpu_ase_neighbors.json), [ZnO](zno/cpu_ase_neighbors.json),
+[water](water/performance/cpu_ase_neighbors.json), [ZnO](zno/cpu_ase_neighbors.json),
 [CuO](cuo/cpu_ase_neighbors.json). Each system also retains
 `cpu_ase_neighbors_results.json.gz` and `cpu_ase_neighbors_reference.tar.gz`.
 The archives contain initial, reuse, and rebuild reference inputs/outputs;
@@ -167,7 +167,7 @@ python scripts/benchmark_water_qeq.py --steps 4000 --warmup 100
 ## Historical native-neighbor benchmarks
 
 Single-CPU comparisons with `lmp_mpi` are recorded for
-[water](water/cpu_benchmark.json), [Zn/O](zno/cpu_benchmark.json), and
+[water](water/performance/cpu_benchmark.json), [Zn/O](zno/cpu_benchmark.json), and
 [C/H/O](cho/cpu_benchmark.json). Each record contains the baseline and optimized
 runs, their source checksums, and the measured speedup. These records used
 native neighbors. Reproduce them with the driver at the recorded historical
@@ -240,7 +240,7 @@ All seven benchmark cases pass fresh LAMMPS verification at every stage.
 
 Detailed per-commit timings, sample ranges, incremental and cumulative
 speedups, source checksums, and numerical discrepancies are retained for
-[water](water/cpu_commit_stages.json), [Zn/O](zno/cpu_commit_stages.json), and
+[water](water/performance/cpu_commit_stages.json), [Zn/O](zno/cpu_commit_stages.json), and
 [C/H/O](cho/cpu_commit_stages.json). Each system's `cpu_commit_stages.tar.gz`
 contains the corresponding raw reference inputs and outputs. Reproduce the
 measurement at any listed commit with:

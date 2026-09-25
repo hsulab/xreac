@@ -157,3 +157,41 @@ LAMMPS calculations. The full experimental timer includes both solvers and
 verification overhead. The report separates their costs and gives an estimated
 fraction of MD time that caching could save; this is not an independently
 measured production speedup. The production calculator keeps its direct solver.
+
+## Charged water ions
+
+Run `python examples/charged_water.py` to evaluate and relax hydroxide and
+hydronium with explicit net charge through the core and ASE interfaces.
+These demonstrate numerical support rather than validated ionic chemistry.
+Periodic charge is specified per input cell. Validate shared charged fixtures
+with `python scripts/validate.py --system water --include-charged`.
+
+## Water dissociation on Pt(111) and Ni(111)
+
+The retained ASE NEB example is [scripts/neb_pt_water.py](../scripts/neb_pt_water.py).
+It supports both metals despite its historical filename. The bundled
+`ffield.reax.PtNiCHO.2026` is the experimental Gai2016 derivative documented in
+[data/README.md](../data/README.md#2026-experimental-revision); only O–H–Pt
+`p_val4` changed, so Ni/O/H calculations use the original numerical parameters.
+
+These commands construct p(2x2), two-layer slabs with the bottom four atoms
+fixed, 15 Angstrom total vacuum padding, and seven NEB images.
+The bottom layer is placed at z=2.5 Angstrom, leaving more space above the
+adsorbate. The entire slab and adsorbate are translated together. Both endpoints
+are minimized to 0.02 eV/Angstrom before starting NEB at 0.05 eV/Angstrom.
+The z direction is nonperiodic. ASE and the supported LAMMPS executable are
+required; use a fresh output directory for each run.
+
+```sh
+python scripts/neb_pt_water.py --metal Pt --ffield data/ffield.reax.PtNiCHO.2026 \
+  --layers 2 --vacuum 15 --bottom-height 2.5 --images 7 --neb-dtmax 0.1 --steps 2500 \
+  --output validation/runs/pt-water-example
+python scripts/neb_pt_water.py --metal Ni --ffield data/ffield.reax.PtNiCHO.2026 \
+  --layers 2 --vacuum 15 --bottom-height 2.5 --images 7 --neb-dtmax 0.1 --steps 2500 \
+  --output validation/runs/ni-water-example
+```
+
+The default lattice parameters are Pt 3.95 and Ni 3.52 Angstrom; override with
+`--lattice`. These are fixed-cell exploratory potential-energy calculations,
+not DFT fits or free-energy barriers. Results and numerical validation limits
+are retained in [validation/water/README.md](../validation/water/README.md).
