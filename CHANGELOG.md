@@ -1,5 +1,28 @@
 # Changelog
 
+## 0.9.0
+
+Add lossless numerical force-field export and a reproducible Ag4/ZnO smoke test.
+
+- Add `ForceField.to_file` for unmodified parsed objects and `section_counts`
+  for explicit source records. Preserve unused fields and wildcard records;
+  reject edits to derived tables rather than silently discarding them.
+- Preserve the public Ag/Zn/O copy attributed to Lloyd et al. unchanged, with
+  pinned provenance and the author-download verification limitation recorded.
+- Verify exact numerical round trips and matching LAMMPS energy, forces and
+  charges. Retain converged bulk ZnO and Ag4/ZnO FIRE inputs and outputs; the
+  supported cluster remains three-dimensional without oxide penetration.
+- Retain Pd/Ce/O source comparisons and Pd/ceria and Pd/titania starting
+  structures. Their incomplete or unavailable force fields remain documented
+  blockers; no successful Pd relaxation is claimed.
+- Move parameter notices and Creative Commons license texts under `data/`,
+  retaining the code license and LAMMPS/PuReMD code attribution at the root.
+  Update documentation and source/wheel distribution contents accordingly.
+
+
+Validation: all 237 tests pass locally, including LAMMPS references. Formatting,
+documentation, source/wheel metadata, and an independent wheel smoke test pass.
+
 ## 0.8.0
 
 Add charged-system support and retained water-dissociation examples on

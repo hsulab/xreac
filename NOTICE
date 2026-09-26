@@ -1,9 +1,6 @@
 xreac code is distributed under GPL-2.0-or-later. See LICENSE.
-Bundled parameter data has the file-specific licenses described below and
-in data/README.md. The Cu/O/H/Cl and C/H/O/Cl parameter files are separately
-licensed under CC BY-NC 4.0 and CC BY-NC 3.0, respectively, not GPL.
-Their noncommercial restrictions apply to those data, without changing the
-license of the xreac code or the other parameter files.
+Bundled parameter files have separate, file-specific terms and attribution;
+see data/NOTICE, data/README.md and data/LICENSES/.
 
 The ReaxFF equations, parameter mappings, and numerical conventions in
 src/xreac/energy.py and src/xreac/forcefield.py are adapted from LAMMPS
@@ -19,96 +16,3 @@ Reference methodology:
 H. M. Aktulga, J. C. Fogarty, S. A. Pandit, A. Y. Grama,
 Parallel Reactive Molecular Dynamics: Numerical Methods and Algorithmic
 Techniques, Parallel Computing 38 (4-5), 245-259 (2012).
-
-Bundled parameter data:
-data/ffield.reax.CHOCl.2021 is extracted from supporting information for:
-J. Hur, Y. N. Abousleiman, K. L. Hull, M. J. Abdolhosseini Qomi,
-Reactive force fields for modeling oxidative degradation of organic matter in
-geological formations, RSC Advances 11, 29298-29307 (2021).
-Copyright 2021 The Royal Society of Chemistry.
-Paper: https://doi.org/10.1039/D1RA04397H
-Supplement: https://www.rsc.org/suppdata/d1/ra/d1ra04397h/d1ra04397h2.pdf
-Archive: https://www.ebi.ac.uk/europepmc/webservices/rest/PMC9040638/supplementaryFiles
-Member: RA-011-D1RA04397H-s002.pdf, pages S10-S12.
-Source SHA256: 867348b9395826206919eb3922ff5dba2f1a3301c307f0225e41b5a995fb1cfb
-Parameter SHA256: d468f31f71c1ca429aef9e576bf2c5fda3d8eb8ad0c7c4ae433197692ee5825b
-License metadata: https://www.ebi.ac.uk/europepmc/webservices/rest/PMC9040638/fullTextXML
-Licensed under CC BY-NC 3.0, including attribution and noncommercial use terms.
-See LICENSES/CC-BY-NC-3.0.txt and https://creativecommons.org/licenses/by-nc/3.0/.
-Changes: added attribution header; removed PDF page furniture, blank lines,
-and outer whitespace. Numerical tokens and record order are unchanged.
-This extraction does not imply endorsement by the authors or publisher.
-
-data/ffield.reax.ZnOH.2010 is an unmodified copy of potentials/ffield.reax.ZnOH
-from LAMMPS stable_22Jul2025_update4, distributed with LAMMPS under its GPL
-license. Its original citation and contributor header are preserved.
-https://github.com/lammps/lammps/blob/stable_22Jul2025_update4/potentials/ffield.reax.ZnOH
-SHA256: b5af5a65573ce60f32405a973e33f7cc89a90bc69e624a8ca89811eb67b1a07b
-
-D. Raymand, A. C. T. van Duin, D. Spangberg, W. A. Goddard, K. Hermansson,
-Surface Science 604 (9-10), 741-752 (2010), as cited in the parameter file.
-Contributor: Aidan Thompson, athomps@sandia.gov. File date: 2011-02-18.
-This is the 2010 ZnOH set, not the earlier 2008 ZnO parameterization.
-All original entries remain in the unmodified source data.
-
-data/ffield.reax.CuOHCl.2010 is an unmodified, renamed copy of
-jp102272z_si_001.txt, supporting information for:
-A. C. T. van Duin, V. S. Bryantsev, M. S. Diallo, W. A. Goddard,
-O. Rahaman, D. J. Doren, D. Raymand, and K. Hermansson,
-Development and Validation of a ReaxFF Reactive Force Field for Cu Cation/Water
-Interactions and Copper Metal/Metal Oxide/Metal Hydroxide Condensed Phases,
-Journal of Physical Chemistry A 114, 9507-9514 (2010).
-Paper: https://doi.org/10.1021/jp102272z
-Supplement: https://doi.org/10.1021/jp102272z.s001
-Source: https://ndownloader.figshare.com/files/4408471
-License metadata: https://api.figshare.com/v2/articles/2732188
-SHA256: 8b1a57a6945be8b1d9df3b69df8f329dc32561393ed1f02221a5ef0c21e8c07e
-
-ACS Figshare distributes this supplement under Creative Commons
-Attribution-NonCommercial 4.0 International (CC BY-NC 4.0).
-Retain attribution and license notices, indicate modifications, and comply
-with the noncommercial condition. See LICENSES/CC-BY-NC-4.0.txt and
-https://creativecommons.org/licenses/by-nc/4.0/ for the terms and disclaimer
-of warranties. xreac does not relicense this file or grant commercial-use
-permission. Only its filename has changed; its contents are byte-for-byte
-identical to the published supplement, including its original header.
-
-data/ffield.reax.HO.2015 is an unmodified copy of examples/reaxff/water/qeq_ff.water
-from the same LAMMPS release and distribution.
-https://github.com/lammps/lammps/blob/stable_22Jul2025_update4/examples/reaxff/water/qeq_ff.water
-SHA256: 526dea2d55d748caed94734139dda66064e194f74f46eee9b0f511eead38b7d1
-Original header citation: Achtyl et al., Nature Communications 6, 6539 (2015).
-The example uses its QEq model, not the separate ACKS2 parameter file.
-
-data/ffield.reax.CHO.2008 is an unmodified copy of potentials/ffield.reax.cho
-from the same LAMMPS release and distribution.
-https://github.com/lammps/lammps/blob/stable_22Jul2025_update4/potentials/ffield.reax.cho
-SHA256: c5240c07e664dde5626fcdb740be1bdbe5e7e34d919902603db0bf962fea9aee
-Original header citation: K. Chenoweth, A. C. T. van Duin, W. A. Goddard,
-Journal of Physical Chemistry A 112, 1040-1053 (2008).
-Contributor: Aidan Thompson, athomps@sandia.gov. File date: 2011-02-18.
-
-Gai2016 Pt/O/H parameters
--------------------------
-data/ffield.reax.PtNiCHO.2016 is extracted from pp. S7-S10 of
-jp6b01064_si_001.pdf, copyright 2016 American Chemical Society, distributed
-under CC BY-NC 4.0 according to publisher metadata:
-https://api.figshare.com/v2/articles/3204151
-https://ndownloader.figshare.com/files/5029120
-L. Gai, Y. K. Shin, M. Raju, A. C. T. van Duin, and S. Raman,
-Atomistic Adsorption of Oxygen and Hydrogen on Platinum Catalysts by Hybrid
-Grand Canonical Monte Carlo/Reactive Molecular Dynamics,
-J. Phys. Chem. C 120, 9780-9793 (2016), DOI:10.1021/acs.jpcc.6b01064.
-Changes: removed PDF page furniture and restored a separator between
-5.0000 and 9999.9999 in dummy X. Original header and numerical values retained.
-Parameter SHA256: a9769ca030d0a94b3a9d1d09acceb1d6e46b283e2fc701adb5aaaee3cc19588b
-Source SHA256: ab99e02eb876347637c084b1741028851513e640b2879920483fe42a4bb5fc71
-See LICENSES/CC-BY-NC-4.0.txt for license and warranty disclaimer.
-
-data/ffield.reax.PtNiCHO.2026 is an experimental derivative
-made in xreac on 2026-09-25, under the same CC BY-NC 4.0 terms and attribution.
-Changes relative to the extracted Gai2016 file: replace the header to mark
-the derivative; change only O-H-Pt p_val4 from 1.0000 to 1.0250 and whitespace
-on that record. This is a numerical convergence experiment, not a DFT fit
-or an author-endorsed revision of the published force field.
-SHA256: 4c4a54ee24565faf8fdfe0269da6b352e45ec7658bc2a64152a52e792be80209

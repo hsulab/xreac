@@ -4,10 +4,11 @@ Parameter conventions follow LAMMPS stable_22Jul2025_update4 (GPL-2.0+).
 Element labels, interactions, and mixing rules are read from the parameter file.
 """
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from hashlib import sha256
 from itertools import combinations_with_replacement
 from pathlib import Path
+import pickle
 
 import numpy as np
 
@@ -33,6 +34,51 @@ class ForceField:
     angles: dict
     torsions: dict
     hydrogen_bonds: dict
+    _sections: tuple = field(default=(), repr=False, compare=False)
+    _parsed_state: bytes = field(default=b"", repr=False, compare=False)
+
+    def _state(self):
+        # Mutation guard only; serialized Python objects are never loaded.
+        return sha256(
+            pickle.dumps((self.general, self.atoms, self.pairs, self.angles, self.torsions, self.hydrogen_bonds))
+        ).digest()
+
+    @property
+    def section_counts(self):
+        """Explicit source entry counts, before mixing, symmetry or wildcard expansion."""
+        if not self._sections:
+            raise ValueError("Source parameter records are unavailable; load with from_file")
+        return dict(
+            zip(
+                ("general", "atoms", "bonds", "off_diagonal", "angles", "torsions", "hydrogen_bonds"),
+                map(len, self._sections),
+            )
+        )
+
+    def to_file(self, path):
+        """Write retained parsed source parameters, including unused fields.
+
+        This lossless exporter supports unmodified objects loaded by from_file.
+        It is not a parameter-editing API: modifying the derived model tables
+        is rejected because mixing and wildcard expansion are not invertible.
+        The source file need not still exist. Comments/layout are not preserved.
+        """
+        if not self._sections or self._state() != self._parsed_state:
+            raise ValueError("Writing requires an unmodified ForceField loaded by from_file")
+        lines = [self.citation]
+        for section, records in enumerate(self._sections):
+            lines.append(f"{len(records)} ! {tuple(self.section_counts)[section]}")
+            lines.extend(["! parameter columns"] * (3 if section == 1 else 1 if section == 2 else 0))
+            for record in records:
+                tokens = [str(v) if isinstance(v, (str, int)) else format(v, ".17g") for v in record]
+                if section == 1:
+                    lines.append(" ".join(tokens[:9]))
+                    lines.extend(" ".join(tokens[i : i + 8]) for i in (9, 17, 25))
+                elif section == 2:
+                    lines.extend((" ".join(tokens[:10]), " ".join(tokens[10:])))
+                else:
+                    lines.append(" ".join(tokens))
+        Path(path).write_text("\n".join(lines) + "\n")
 
     @classmethod
     def bundled(cls, name):
@@ -80,6 +126,7 @@ class ForceField:
             raise ValueError(f"Empty ReaxFF parameter file: {path}")
         citation = lines.pop(0)
         rows = iter(lines)
+        sections = [[] for _ in range(7)]
 
         def row():
             while True:
@@ -106,6 +153,7 @@ class ForceField:
             if ng != 39:
                 raise ValueError("Only the standard 39-global-parameter format is supported")
             g = np.array([floats(row()[:1], 1)[0] for _ in range(ng)])
+            sections[0] = [(v,) for v in g]
             na = count()
             if na == 0:
                 raise ValueError("A force field must define at least one atom type")
@@ -118,6 +166,7 @@ class ForceField:
                 if any(name.casefold() == existing.casefold() for existing in atoms):
                     raise ValueError(f"Duplicate element {name}")
                 vals = floats(first[1:] + row() + row() + row(), 32)
+                sections[1].append((name, *vals))
                 a = dict(zip(ATOM_NAMES, vals))
                 a["eta"] *= 2
                 a["p_hbond"] = int(a["p_hbond"])
@@ -149,6 +198,7 @@ class ForceField:
                 if len(second) == 7:
                     second.append("0")
                 vals = floats(first[2:] + second, 16)
+                sections[2].append((*map(int, first[:2]), *vals))
                 p = dict(zip(BOND_NAMES, vals))
                 pairs[key] = pairs[key[::-1]] = p
             # Nonbonded mixing is defined for every pair, independently of
@@ -183,6 +233,7 @@ class ForceField:
                 values = row()
                 key = indices(values[:2])
                 vals = floats(values[2:], 6)
+                sections[3].append((*map(int, values[:2]), *vals))
                 if key not in pairs:
                     raise ValueError("Off-diagonal entry without bond parameters")
                 for field, value in zip(("D", "r_vdW", "alpha", "r_s", "r_p", "r_pp"), vals):
@@ -193,6 +244,7 @@ class ForceField:
                 values = row()
                 key = indices(values[:3])
                 vals = floats(values[3:], 7)
+                sections[4].append((*map(int, values[:3]), *vals))
                 for k in {key, key[::-1]}:
                     angles.setdefault(k, []).append(vals)
             torsions = {}
@@ -202,7 +254,9 @@ class ForceField:
                 key = indices(values[:4], wildcard=True)
                 if len(values[4:]) not in (5, 6, 7):
                     raise ValueError("Expected 5 to 7 torsion parameters")
-                vals = floats(values[4:], len(values[4:]))[:5]
+                full_vals = floats(values[4:], len(values[4:]))
+                sections[5].append((*map(int, values[:4]), *full_vals))
+                vals = full_vals[:5]
                 if "*" not in key:
                     torsions[key] = torsions[key[::-1]] = vals
                     explicit_torsions.update((key, key[::-1]))
@@ -225,13 +279,27 @@ class ForceField:
             for _ in range(nh):
                 values = row()
                 hydrogen[indices(values[:3])] = floats(values[3:], 4)
+                sections[6].append((*map(int, values[:3]), *hydrogen[indices(values[:3])]))
             if any(line.split("!")[0].split("#")[0].strip() for line in rows):
                 raise ValueError("Unsupported trailing parameter section")
             if not np.isfinite(g).all():
                 raise ValueError("Non-finite general parameters")
         except (StopIteration, IndexError, ValueError) as exc:
             raise ValueError(f"Invalid or unsupported ReaxFF file {path}: {exc}") from exc
-        return cls(path, sha256(raw).hexdigest(), citation, g, atoms, pairs, angles, torsions, hydrogen)
+        result = cls(
+            path,
+            sha256(raw).hexdigest(),
+            citation,
+            g,
+            atoms,
+            pairs,
+            angles,
+            torsions,
+            hydrogen,
+            tuple(tuple(records) for records in sections),
+        )
+        object.__setattr__(result, "_parsed_state", result._state())
+        return result
 
     def validate_model(self, elements=None):
         """Conservatively reject models not covered by the implemented equations."""

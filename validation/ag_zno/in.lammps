@@ -1,0 +1,23 @@
+units real
+atom_style charge
+boundary p p f
+read_data initial.data
+pair_style reaxff NULL safezone 3 mincap 100
+pair_coeff * * ../../data/ffield.AgZnO Zn O Ag
+neighbor 2.0 bin
+neigh_modify every 1 delay 0 check yes
+fix charge all qeq/reaxff 1 0.0 10.0 1.0e-10 reaxff maxiter 1000
+group bottom id 1 2 3 4 17 18 19 20 33 34 35 36 49 50 51 52 65 66 67 68 81 82 83 84 97 98 99 100 113 114 115 116 129 130 131 132 145 146 147 148 161 162 163 164 177 178 179 180
+fix freeze bottom setforce 0 0 0
+thermo 100
+thermo_style custom step pe fmax fnorm
+thermo_modify lost error flush yes
+run 0
+print "INITIAL_ENERGY $(pe:%.16g)"
+timestep 0.1
+min_style fire
+min_modify dmax 0.05
+minimize 0.0 0.23060548012069 20000 200000
+run 0
+print "FINAL_ENERGY $(pe:%.16g)"
+write_dump all custom relaxed.dump id type x y z q fx fy fz modify sort id format float %.16g

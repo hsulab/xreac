@@ -1,0 +1,5 @@
+# Preserve published parameter bytes, including original line endings and padding.
+data/ffield* -text -whitespace
+*.pdf binary
+# Retain LAMMPS's original tabular output formatting.
+validation/ag_zno/*log.lammps -whitespace

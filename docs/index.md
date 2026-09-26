@@ -59,4 +59,4 @@ undefined. A parsed force field still needs validation for its intended use.
 
 The code is GPL-2.0-or-later. Equations and conventions follow LAMMPS/PuReMD;
 bundled parameter files retain their citations. Download the
-{download}`license <../LICENSE>` and {download}`attribution notice <../NOTICE>`.
+{download}`license <../LICENSE>` and {download}`code attribution <../NOTICE>` and {download}`parameter attribution <../data/NOTICE>`.

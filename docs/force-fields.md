@@ -31,9 +31,9 @@ a noncommercial restriction. The Hur C/H/O/Cl file is **CC BY-NC 3.0**, also
 noncommercial. The xreac code and the original three parameter
 files retain their GPL-2.0-or-later licenses. See
 {download}`file-specific license notes <../data/README.md>`,
-{download}`attribution <../NOTICE>`, and the
-{download}`Cu/O/H/Cl license <../LICENSES/CC-BY-NC-4.0.txt>`.
-The {download}`C/H/O/Cl license <../LICENSES/CC-BY-NC-3.0.txt>` is retained too.
+{download}`attribution <../data/NOTICE>`, and the
+{download}`Cu/O/H/Cl license <../data/LICENSES/CC-BY-NC-4.0.txt>`.
+The {download}`C/H/O/Cl license <../data/LICENSES/CC-BY-NC-3.0.txt>` is retained too.
 
 Source files live under the repository's `data/` directory. Wheels include
 them as `xreac.data`. Original contents and citation headers are retained, except

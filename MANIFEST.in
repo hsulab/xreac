@@ -2,7 +2,8 @@ recursive-include examples *.py *.md
 recursive-include scripts *.py
 recursive-include tests *.py
 include CHANGELOG.md
-recursive-include docs *.md *.py *.txt Makefile make.bat
+recursive-include docs *.md *.py *.txt Makefile
 prune docs/_build
 recursive-include validation *.md *.json *.gz *.pdf *.csv *.patch *.png *.extxyz
+recursive-include validation/ag_zno *.py *.xyz *.data *.lammps
 prune validation/runs

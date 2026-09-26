@@ -1,0 +1,56 @@
+{
+  "elements": [
+    "C",
+    "H",
+    "O",
+    "N",
+    "Si",
+    "Cu",
+    "Ag",
+    "Zn"
+  ],
+  "counts": {
+    "general": 39,
+    "atoms": 8,
+    "bonds": 29,
+    "off_diagonal": 20,
+    "angles": 116,
+    "torsions": 49,
+    "hydrogen_bonds": 4
+  },
+  "sha256": "bad189f45e07047512a2b243f15b86f6aedadfb4d07b4d671058588a3bfdbdfb",
+  "roundtrip_numerical_tokens": 2711,
+  "roundtrip": "PASS: all source records and model tables exact; LAMMPS energy/forces/charges agree",
+  "bulk": {
+    "initial_energy_eV": -495.23403317880593,
+    "final_energy_eV": -495.5050925608717,
+    "maximum_mobile_force_eV_A": 0.002482548384278655,
+    "Zn_O_nearest_range_A": [
+      1.973965285305848,
+      1.974059423162048
+    ],
+    "Zn_coordination_range_2.5_A": [
+      4,
+      4
+    ]
+  },
+  "surface": {
+    "initial_energy_eV": -715.7043864592182,
+    "final_energy_eV": -718.3938820423408,
+    "maximum_mobile_force_eV_A": 0.002827922182407073,
+    "Ag_Ag_A": [
+      2.8600675141732093,
+      3.0987890321463802,
+      2.774023555342591,
+      3.0978570084293664,
+      2.774579377761564,
+      2.7690235116053357
+    ],
+    "minimum_Ag_O_A": 2.296661605242306,
+    "minimum_Ag_Zn_A": 2.993454892357287,
+    "minimum_Zn_O_A": 1.9055124293703114,
+    "Ag_height_span_A": 2.5528506182448893,
+    "lowest_Ag_minus_highest_oxide_A": 1.5230802690107623,
+    "maximum_oxide_displacement_A": 0.5029244958462101
+  }
+}
