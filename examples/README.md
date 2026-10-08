@@ -30,7 +30,7 @@ charge-response forces. Those are available through
 `calc.evaluate(symbols, positions, full_derivative=True)` and are checked
 separately by finite differences in the tests.
 
-See [saved results](../validation/water/summary.json) and the
+See [saved results](../validation/water/README.md) and the
 [package README](../README.md) for supported formats and limitations.
 
 `ase_water.py` uses the optional `ReaxFFCalculator` adapter with ASE optimizers:
@@ -217,3 +217,20 @@ intact-water/Ti-O <=2.6 Angstrom screen fails. This screen applies no restraint.
 The [minimal validation record](../validation/anatase/README.md) keeps only
 input structures and the main results. Shared numerical checks use
 `python scripts/validate.py --system anatase --verify`.
+
+## Supported metal clusters
+
+The structure builders and LAMMPS drivers live here; generated files go to
+ignored `validation/runs/` directories. Retained validation folders contain
+only inputs and brief results summaries.
+
+```sh
+python examples/ag_zno.py --lammps lmp_serial
+python examples/ag_zno_build.py --output validation/runs/ag-zno-build
+python examples/pd_ceria_build.py --output validation/runs/pd-ceria/initial.xyz
+python examples/pd_tio2_build.py --output validation/runs/pd-tio2/initial.xyz
+```
+
+`examples/pd_ceria.py` requires an authenticated `data/ffield.PdCeO`, which
+is not currently available. Neither Pd/CeO2 nor Pd/TiO2 has a completed
+relaxation; see their validation READMEs and the parameter provenance in data.

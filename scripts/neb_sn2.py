@@ -6,7 +6,7 @@ from pathlib import Path
 
 import numpy as np
 from ase import Atoms
-from ase.io import write
+from ase.io import read, write
 from ase.mep import NEB
 from ase.optimize import BFGS, FIRE
 
@@ -18,7 +18,7 @@ EV_TO_KJ_MOL = 96.4853321233
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--scan", type=Path, default=ROOT / "validation/cho/sn2_scan.json")
+    parser.add_argument("--scan", type=Path, default=ROOT / "validation/cho/sn2_path.xyz")
     parser.add_argument("--output", type=Path, default=ROOT / "validation/runs/sn2-neb")
     parser.add_argument("--images", type=int, default=9)
     parser.add_argument("--steps", type=int, default=200)
@@ -26,7 +26,16 @@ def main():
     parser.add_argument("--perturbation", type=float, default=0.015)
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=False)
-    scan = json.loads(args.scan.read_text())
+    if args.scan.suffix == ".json":
+        scan = json.loads(args.scan.read_text())
+        original = np.array([r["positions"] for r in scan["continuous"]])
+        scan_barrier = scan["continuous_barrier"] * 4.184
+    else:
+        frames = read(args.scan, index=":", format="extxyz")
+        if len(frames) < 2 or any(a.get_chemical_symbols() != list(SYMBOLS) for a in frames):
+            parser.error("Scan path requires at least two frames with the SN2 atom ordering")
+        original = np.array([a.positions for a in frames])
+        scan_barrier = None
     ff = ForceField.bundled(CHOCL_FORCE_FIELD)
 
     def atoms(x):
@@ -34,7 +43,6 @@ def main():
         a.calc = ReaxFFCalculator(ff, total_charge=-1, full_derivative=True)
         return a
 
-    original = np.array([r["positions"] for r in scan["continuous"]])
     start = atoms(original[0])
     opt = BFGS(start, logfile=str(args.output / "endpoint.log"), maxstep=0.03)
     endpoint_converged = opt.run(fmax=0.01, steps=250)
@@ -55,7 +63,7 @@ def main():
         images.append(atoms(x))
     neb = NEB(images, method="improvedtangent", k=0.1, remove_rotation_and_translation=True)
     initial_energies = [a.get_potential_energy() for a in images]
-    write(args.output / "initial.extxyz", images)
+    write(args.output / "initial.xyz", images, format="extxyz")
     history = []
 
     def record():
@@ -122,7 +130,7 @@ def main():
         relative_energies_kj_mol=((energies - energies[0]) * EV_TO_KJ_MOL).tolist(),
         barrier_kj_mol=float((energies.max() - energies[0]) * EV_TO_KJ_MOL),
         initial_barrier_kj_mol=float((max(initial_energies) - initial_energies[0]) * EV_TO_KJ_MOL),
-        scan_barrier_kj_mol=scan["continuous_barrier"] * 4.184,
+        scan_barrier_kj_mol=scan_barrier,
         endpoint_energy_ev=float(energies[0]),
         c_cl_distances=distances,
         positions=[a.positions.tolist() for a in images],
@@ -140,7 +148,8 @@ def main():
     ax.plot(
         [r["image_coordinate"] for r in dense], [r["energy_kj_mol"] for r in dense], label="Interpolated path check"
     )
-    ax.axhline(report["scan_barrier_kj_mol"], ls="--", color="gray", label="Previous constrained scan barrier")
+    if report["scan_barrier_kj_mol"] is not None:
+        ax.axhline(report["scan_barrier_kj_mol"], ls="--", color="gray", label="Previous constrained scan barrier")
     ax.set(
         xlabel="Image index",
         ylabel="Potential energy above reactant (kJ/mol)",

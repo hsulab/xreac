@@ -1,0 +1,4 @@
+2
+Properties=species:S:1:pos:R:3 total_charge=-1.0 force_field=ffield.reax.HO.2015 pbc="F F F"
+O        0.00000000       0.00000000       0.00000000
+H        0.97000000       0.00000000       0.00000000

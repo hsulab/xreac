@@ -251,8 +251,10 @@ def detail(pdf, case, number):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--input", type=Path, default=ROOT / "validation/water")
-    parser.add_argument("--output", type=Path, default=ROOT / "validation/water/diagnostics/report.pdf")
+    parser.add_argument(
+        "--input", type=Path, required=True, help="Fresh verified water output directory from scripts/validate.py"
+    )
+    parser.add_argument("--output", type=Path, default=ROOT / "validation/runs/water-report/report.pdf")
     args = parser.parse_args()
     summary = json.loads((args.input / "summary.json").read_text())
     if not summary.get("reference_verified"):

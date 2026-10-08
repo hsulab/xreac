@@ -1,0 +1,5 @@
+3
+Properties=species:S:1:pos:R:3 case=cluster_water_monomer pbc="F F F"
+O        0.00000000       0.00000000       0.00000000
+H        0.97000000       0.00000000       0.00000000
+H       -0.24300000       0.94000000       0.00000000

@@ -1,3 +1,0 @@
-case,atoms,python_energy_kcal_mol,lammps_energy_kcal_mol,delta_energy_kcal_mol,max_force_component_error_kcal_mol_A,rms_force_component_error_kcal_mol_A
-monomer,3,-248.34420920633704,-248.34420920633718,1.4210854715202004e-13,4.085620730620576e-14,2.236768017326571e-14
-distorted_dimer,6,-498.80720305169757,-498.8072030516979,3.410605131648481e-13,4.241051954068098e-13,1.5370356985786008e-13

@@ -50,7 +50,7 @@ NIST Ce/O rows into the candidate establishes the published combined model.
 
 **`ffield.PdCeO` has not been assembled and no relaxation has been run.**
 The exact Ce/O version used in the published combined model remains unresolved.
-See the [source search and numerical comparison](../validation/pd_ceria/parameters.md)
+See the [source search and numerical comparison](PdCeO.parameters.md)
 for candidate provenance, checksums, and the complete list of conflicts.
 The [minimal starting structure and runner](../validation/pd_ceria/README.md)
 are prepared for use once this is resolved.
@@ -80,7 +80,7 @@ python scripts/extract_gai_parameters.py jp6b01064_si_001.pdf data/ffield.reax.P
 
 Source PDF SHA256: `ab99e02eb876347637c084b1741028851513e640b2879920483fe42a4bb5fc71`.
 Parameter SHA256: `a9769ca030d0a94b3a9d1d09acceb1d6e46b283e2fc701adb5aaaee3cc19588b`.
-The source and metadata are retained in `validation/water/surfaces/gai2016_source.tar.gz`.
+Use the publisher supplement linked above for the original PDF and metadata.
 Pt(111)/water test results are described in `validation/water/README.md`.
 
 ### 2026 experimental revision
@@ -98,7 +98,7 @@ and CC BY-NC 4.0 terms above. SHA256:
 The change permits the tested Pt(111)/water endpoints to reach 0.02 eV/Angstrom
 and the seven-image CI-NEB to reach 0.05 eV/Angstrom. It was selected for
 numerical convergence, **not fitted to DFT energies or barriers**. Residual
-cutoff sensitivity remains; see the retained tuning report in
+cutoff sensitivity remains; see the brief results summary in
 `validation/water/README.md`. Select it explicitly with
 `ForceField.bundled("ffield.reax.PtNiCHO.2026")`.
 
@@ -117,10 +117,10 @@ comparisons; Pt retains a product equivalent-copy force-consistency failure.
 These numerical tests do not establish DFT accuracy.
 
 - [Validation notes and reproduction commands](../validation/water/README.md#two-layer-pt111-and-ni111-water-dissociation)
-- [Ni results](../validation/water/surfaces/ni_2026_7images_lowered.json) and [structures](../validation/water/surfaces/ni_2026_7images_lowered_band.extxyz)
-- [Pt results](../validation/water/surfaces/pt_2026_7images_lowered.json) and [structures](../validation/water/surfaces/pt_2026_7images_lowered_band.extxyz)
-- [Energy curves](../validation/water/surfaces/metal_2026_7images_lowered.png)
-- [Compact tuning provenance](../validation/water/surfaces/pt_2026_parameter_tuning.json)
+- [Ni reactant input](../validation/water/ni_reactant_initial.xyz) and [product input](../validation/water/ni_product_initial.xyz)
+- [Pt reactant input](../validation/water/pt_reactant_initial.xyz) and [product input](../validation/water/pt_product_initial.xyz)
+
+Calculation outputs and historical tuning reports remain in Git history.
 
 ## Cu/O/H/Cl parameters
 
@@ -172,8 +172,8 @@ Extracted from archive member `RA-011-D1RA04397H-s002.pdf`, SHA256
 `867348b9395826206919eb3922ff5dba2f1a3301c307f0225e41b5a995fb1cfb`.
 The bundled file adds an attribution header and removes PDF page furniture,
 blank lines, and outer whitespace. Numerical entries and their order, including
-repeated angle/torsion entries and dummy X, are unchanged. Both archived
-supplements yield identical extracted parameter text. Bundled file SHA256:
+repeated angle/torsion entries and dummy X, are unchanged. Both publisher
+supplements yielded identical extracted parameter text. Bundled file SHA256:
 `d468f31f71c1ca429aef9e576bf2c5fda3d8eb8ad0c7c4ae433197692ee5825b`.
 
 Reproduce with Poppler's `pdftotext` and:
@@ -182,9 +182,8 @@ Reproduce with Poppler's `pdftotext` and:
 python scripts/extract_hur_parameters.py RA-011-D1RA04397H-s002.pdf data/ffield.reax.CHOCl.2021
 ```
 
-The source parameter pages and provenance are archived in
-`validation/cho/hur2021_source.tar.gz`. Numerical comparisons and raw LAMMPS
-runs are retained alongside it. The original fit targets organic oxidation by
+The publisher sources above document the extraction; validation retains
+only input structures and a brief results summary. The original fit targets organic oxidation by
 oxychlorine species; numerical agreement does not establish an accurate
 chloride–chloromethane SN2 barrier.
 

@@ -36,7 +36,7 @@ xreac = "src/xreac"
 "xreac.data" = "data"
 
 [tool.setuptools.package-data]
-"xreac.data" = ["ffield.reax.*", "ffield.AgZnO", "README.md", "NOTICE", "LICENSES/*.txt"]
+"xreac.data" = ["ffield.reax.*", "ffield.AgZnO", "*.md", "NOTICE", "LICENSES/*.txt"]
 
 [tool.pytest.ini_options]
 pythonpath = ["src", "examples", "scripts"]

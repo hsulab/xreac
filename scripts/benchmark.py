@@ -1,7 +1,7 @@
 """Run the three ASE-neighbor pilot benchmarks with mandatory LAMMPS checks.
 
 This entry point shares the implementation and options of benchmark_lammps.py.
-Historical cluster/native-FIRE timings remain in validation/zno and Git history.
+Historical cluster/native-FIRE timings remain in Git history.
 """
 
 from benchmark_lammps import main

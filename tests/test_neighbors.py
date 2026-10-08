@@ -1,9 +1,5 @@
-import gzip
-import json
-from pathlib import Path
 import subprocess
 import sys
-from types import SimpleNamespace
 
 import numpy as np
 import pytest
@@ -20,23 +16,12 @@ from xreac.energy import EnergyModel
 CASES = validation_cases()
 
 
-@pytest.fixture(scope="module")
-def archived_results():
-    # Preserve an independent regression target from before model unification.
-    root = Path(__file__).resolve().parents[1] / "validation"
-    results = {}
-    for system in ("water", "zno", "cho"):
-        with gzip.open(root / system / "baseline.json.gz", "rt") as stream:
-            results.update(json.load(stream))
-    return results
-
-
 def build_neighbors(symbols, x, cell, pbc, cutoff):
     return neighbor_list("ijS", Atoms(symbols, positions=x, cell=cell, pbc=pbc), np.nextafter(cutoff, np.inf))
 
 
 @pytest.mark.parametrize("name", CASES)
-def test_neighbor_backends(name, archived_results, case_results):
+def test_neighbor_backends(name, case_results):
     filename, symbols, x, cell, pbc = CASES[name]
     ff = ForceField.bundled(filename)
     native_list, _ = replicated_neighbors(x, ff.general[12], cell, pbc)
@@ -62,14 +47,7 @@ def test_neighbor_backends(name, archived_results, case_results):
     assert actual.cell_repetitions == (1, 1, 1)
     report = backend_differences(actual, expected, len(x))
     assert report["passed"], report
-    archived = SimpleNamespace(
-        **{
-            key: np.asarray(value) if isinstance(value, list) else value
-            for key, value in archived_results[name].items()
-        }
-    )
-    report = backend_differences(expected, archived, len(x))
-    assert report["passed"], report
+    # Independent numerical checks use fresh LAMMPS runs in test_reference.py.
     supplied = Calculator(ff).evaluate(
         symbols, x, cell=cell, pbc=pbc, neighbors=build_neighbors(symbols, x, cell, pbc, ff.general[12])
     )
