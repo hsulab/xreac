@@ -9,6 +9,7 @@ from hashlib import sha256
 from itertools import combinations_with_replacement
 from pathlib import Path
 import pickle
+import warnings
 
 import numpy as np
 
@@ -101,14 +102,20 @@ class ForceField:
     @property
     def vdw_type(self):
         """Standard LAMMPS vdW variant: 1 shielded, 2 inner wall, 3 both."""
-        types = set()
+        types = []
         for a in self.atoms.values():
             shield = a["gamma_w"] > 0.5
             core = a["rcore"] > 0.01 and a["acore"] > 0.01
-            types.add(3 if shield and core else 1 if shield else 2 if core else 0)
-        if len(types) != 1 or 0 in types:
+            types.append(3 if shield and core else 1 if shield else 2 if core else 0)
+        if not types or 0 in types:
             raise ValueError("Inconsistent or unsupported van der Waals method across atom types")
-        return types.pop()
+        if len(set(types)) != 1:
+            warnings.warn(
+                "Mixed van der Waals methods; using the first atom type's method, as LAMMPS does",
+                RuntimeWarning,
+                stacklevel=2,
+            )
+        return types[0]
 
     @classmethod
     def from_file(cls, path):
@@ -222,8 +229,14 @@ class ForceField:
                     ("acore", "acore"),
                 ]:
                     if a[field] * b[field] < 0:
-                        raise ValueError(f"Invalid mixing parameters for {s}/{t}: {field}")
-                    p[out] = np.sqrt(a[field] * b[field])
+                        if out not in ("p_boc3", "p_boc4", "p_boc5"):
+                            raise ValueError(f"Invalid mixing parameters for {s}/{t}: {field}")
+                        # LAMMPS stores NaN here but never consumes it for
+                        # absent bonds or pairs with both corrections off.
+                        # Validate at the point of use, not for unused types.
+                        p[out] = np.nan
+                    else:
+                        p[out] = np.sqrt(a[field] * b[field])
                 p["r_vdW"] *= 2
                 if a["gamma"] * b["gamma"] <= 0:
                     raise ValueError("Charge shielding parameters must be positive")

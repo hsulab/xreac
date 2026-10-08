@@ -202,3 +202,22 @@ The file contains C/H/O/N/Si/Cu/Ag/Zn; only Ag/Zn/O are used in this example.
 SHA256: `bad189f45e07047512a2b243f15b86f6aedadfb4d07b4d671058588a3bfdbdfb`.
 See [the compact validation report](../validation/ag_zno/README.md) for source
 counts, numerical round-trip and LAMMPS checks, and bulk/surface relaxations.
+
+## Ti/O/H parameters
+
+All three published parameter files are retained unchanged numerically.
+They carry **CC BY-NC 4.0**, independently of the code license; see
+[attribution and checksums](NOTICE) and [license](LICENSES/CC-BY-NC-4.0.txt).
+
+| File | Publisher source | Preparation |
+| --- | --- | --- |
+| `ffield.reax.TiOH.Monti2012` | [Supplement](https://doi.org/10.1021/jp2121593.s001) | `scripts/extract_monti_parameters.py`: PDF whitespace/page-number removal and header attribution |
+| `ffield.reax.TiOH.Kim2013` | [Supplement](https://doi.org/10.1021/la4006983.s002) | `scripts/extract_kim_parameters.py`: PDF whitespace removal and header attribution |
+| `ffield.reax.TiOH.Ganeshan2020` | [Supplement](https://doi.org/10.1021/acsami.0c17536.s002) | Unchanged publisher text file |
+
+All source atom types are retained. Filenames identify the Ti/O/H application,
+not validation of every element combination. Only Monti2012 is used in the
+retained [anatase tests](../validation/anatase/README.md). Ganeshan2020 can
+contain invalid mixed bond-order parameters for active short Ti-H bonds;
+xreac rejects these when used and warns about mixed van der Waals settings.
+Source PDFs and calculation outputs are not bundled in validation.

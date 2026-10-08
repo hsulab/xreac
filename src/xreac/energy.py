@@ -10,6 +10,7 @@ from itertools import combinations
 import autograd.numpy as np
 import numpy as onp
 from autograd.tracer import getval
+from autograd.extend import primitive, defvjp
 
 from .neighbors import Neighbors, scatter_sum
 
@@ -45,6 +46,15 @@ def positive_power(x, p):
     return np.where(x > 0, np.where(x > 0, x, 1.0) ** p, 0.0)
 
 
+@primitive
+def lammps_angle(cosine):
+    """LAMMPS angle value, with its regularised near-collinear force rule."""
+    return onp.arccos(onp.clip(cosine, -1.0, 1.0))
+
+
+defvjp(lammps_angle, lambda angle, cosine: lambda g: -g / np.maximum(np.sin(angle), 1e-5))
+
+
 class EnergyModel:
     """One ReaxFF implementation consuming fixed directed ``(i, j, S)`` arrays.
 
@@ -52,10 +62,11 @@ class EnergyModel:
     charges, and energies refer to the input cell, regardless of the builder.
     """
 
-    def __init__(self, ff, symbols, neighbors, cell=None, pbc=None, *, total_charge=0):
+    def __init__(self, ff, symbols, neighbors, cell=None, pbc=None, *, total_charge=0, lammps_forces=True):
         ff.validate_model(symbols)
         self.ff, self.symbols, self.n = ff, tuple(symbols), len(symbols)
         self.total_charge = total_charge
+        self.lammps_forces = lammps_forces
         self.g, self.vdw_type = ff.general, ff.vdw_type
         self.edges = Neighbors(neighbors, self.n, cell, pbc)
         self.i, self.j = self.edges.i, self.edges.j
@@ -127,6 +138,13 @@ class EnergyModel:
         pp = np.where(pp_ok, np.exp(p["p_bo5"] * (r / np.where(pp_ok, p["r_pp"], 1)) ** p["p_bo6"]), 0)
         raw = sigma + pi + pp
         mask = getval(raw) >= cutoff
+        corrected = mask & ((p["ovc"] >= 0.001) | (p["v13cor"] >= 0.001))
+        for key in ("p_boc3", "p_boc4", "p_boc5"):
+            if onp.any(corrected & ~onp.isfinite(p[key])):
+                raise ValueError(f"Invalid {key} mixing for an active bond-order correction")
+            # Unlike C++ branches, numpy.where evaluates both arms. Keep
+            # unused NaNs out of both the energy and its autograd derivative.
+            p[key] = np.where(corrected, p[key], 0.0)
         bo = np.where(mask, raw - cutoff, 0)
         pi, pp = np.where(mask, pi, 0), np.where(mask, pp, 0)
         total = scatter_sum(bo, i, self.n)
@@ -283,7 +301,7 @@ class EnergyModel:
         )
         theta0 = (180 - theta00 * (1 - np.exp(-g[17] * (2 - sbo2[j])))) * (3.14159265 / 180)
         cos = np.sum(vectors[left] * vectors[right], axis=1) / (r[left] * r[right])
-        theta = np.arccos(np.clip(cos, -1 + 1e-14, 1 - 1e-14))
+        theta = lammps_angle(cos) if self.lammps_forces else np.arccos(np.clip(cos, -1 + 1e-14, 1 - 1e-14))
         bij, bjk = bo[left] - THB_CUT, bo[right] - THB_CUT
         f7 = (1 - np.exp(-a["p_val3"][j] * bij**v4)) * (1 - np.exp(-a["p_val3"][j] * bjk**v4))
         ex6, ex7 = np.exp(g[14] * db[j]), np.exp(-v7 * db[j])

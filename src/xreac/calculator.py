@@ -79,7 +79,8 @@ class Calculator:
         """Return energy, equilibrated charges, and the selected forces.
 
         By default, fixed-charge forces hold the freshly equilibrated charges
-        constant during differentiation, matching LAMMPS. Set full_derivative
+        constant during differentiation, with LAMMPS's near-collinear angle
+        force regularisation. Set full_derivative
         to True for charge-response forces: the full reported energy derivative
         through QEq. Only the selected derivative is evaluated.
 
@@ -117,7 +118,15 @@ class Calculator:
                 x, self.force_field.general[12], cell, pbc, max_expanded_atoms=self.max_expanded_atoms
             )
             neighbor_backend = "replicated"
-        model = EnergyModel(self.force_field, symbols, neighbors, cell, pbc, total_charge=total_charge)
+        model = EnergyModel(
+            self.force_field,
+            symbols,
+            neighbors,
+            cell,
+            pbc,
+            total_charge=total_charge,
+            lammps_forces=not full_derivative,
+        )
         try:
             # Solve QEq outside the trace for fixed-charge forces. The traced
             # energy pass supplies both values and forces, without replaying

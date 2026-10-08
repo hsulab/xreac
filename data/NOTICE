@@ -134,3 +134,34 @@ ResearchGate download was unavailable, so direct identity remains unverified.
 No explicit parameter-file redistribution license was located; this file is
 not relicensed under the xreac code license. Provenance and validation details
 are recorded in validation/ag_zno/README.md.
+
+Ti/O/H parameters (Kim2013)
+-------------------------
+data/ffield.reax.TiOH.Kim2013 is extracted from la4006983_si_002.pdf:
+Sung-Yup Kim, Nitin Kumar, Petter Persson, Jorge Sofo, Adri C. T. van Duin,
+and James D. Kubicki, Development of a ReaxFF Reactive Force Field for
+Titanium Dioxide/Water Systems, Langmuir 29, 7838-7846 (2013).
+DOI:10.1021/la4006983; supplement DOI:10.1021/la4006983.s002.
+Source: https://ndownloader.figshare.com/files/4041775
+Publisher license metadata: https://api.figshare.com/v2/articles/2402068
+CC BY-NC 4.0; see data/LICENSES/CC-BY-NC-4.0.txt for terms and disclaimer.
+Changes: PDF page-break/whitespace removal and attribution appended to the
+original header. No numerical parameters changed; all atom types retained.
+SHA256: b1568da9a894c1f12bc419bf968b1450251e86a20690a8177f1554928006721d
+
+Alternative Ti/O/H parameters
+----------------------------
+data/ffield.reax.TiOH.Monti2012: Monti2012, DOI:10.1021/jp2121593.s001.
+Source: https://ndownloader.figshare.com/files/4188823
+Changes: PDF whitespace/page-number removal and attribution appended to header. No numerical edits.
+SHA256: 44c810f0fe1f3a1f15d9f50cbb57d95ec5a115a20358cb582413f35b94ccddb7
+data/ffield.reax.TiOH.Ganeshan2020: Ganeshan2020, DOI:10.1021/acsami.0c17536.s002.
+Source: https://ndownloader.figshare.com/files/25821015
+Changes: None; byte-for-byte original text. No numerical edits.
+SHA256: b801fc77eac4625778ba0b25ba31d199f9b13280e269af60366a76ed60152bcc
+Both: CC BY-NC 4.0 per publisher metadata:
+https://api.figshare.com/v2/articles/2545768 (Monti2012)
+https://api.figshare.com/v2/articles/13416435 (Ganeshan2020)
+See data/LICENSES/CC-BY-NC-4.0.txt for terms and disclaimer.
+Ganeshan2020 is retained unchanged. xreac checks invalid bond-order mixing
+when used by an active correction; close Ti-H contacts can remain unsupported.

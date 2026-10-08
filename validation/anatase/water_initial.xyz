@@ -1,0 +1,5 @@
+3
+Lattice="20.0 0.0 0.0 0.0 20.0 0.0 0.0 0.0 20.0" Properties=species:S:1:pos:R:3:spacegroup_kinds:I:1:tags:I:1 spacegroup="I 41/a m d" unit_cell=conventional pbc="F F F"
+O        9.70705886      10.00000000      10.00000000        0        0
+H       10.29294114      10.75695033      10.00000000        0        0
+H       10.29294114       9.24304967      10.00000000        0        0

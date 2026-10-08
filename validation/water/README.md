@@ -255,3 +255,9 @@ python scripts/neb_pt_water.py --metal Ni --ffield data/ffield.reax.PtNiCHO.2026
 Use fresh output directories. The script retains its historical defaults;
 the explicit options above define the kept examples. Further usage is described
 in [examples/README.md](../../examples/README.md#water-dissociation-on-pt111-and-ni111).
+
+## Water on anatase (101)
+
+The separate [anatase tests](../anatase/README.md) cover 1/2/4/8 waters on a
+192-atom slab with Monti2012. Only input structures and a brief summary are
+retained; fresh outputs go to ignored `validation/runs/`.

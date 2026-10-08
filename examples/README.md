@@ -195,3 +195,25 @@ The default lattice parameters are Pt 3.95 and Ni 3.52 Angstrom; override with
 `--lattice`. These are fixed-cell exploratory potential-energy calculations,
 not DFT fits or free-energy barriers. Results and numerical validation limits
 are retained in [validation/water/README.md](../validation/water/README.md).
+
+## Water minimisation on anatase (101)
+
+```sh
+python examples/anatase_water.py --waters 1 2 4 8 --verify
+```
+
+Uses Monti2012 by default on a p(1x4), four-repeat anatase (101) slab:
+192 slab atoms and 48 fixed bottom atoms. Four waters fill one Ti5c row;
+eight fill both rows. Water starts 2.3 Angstrom above Ti5c, with O-H=0.9572
+Angstrom and H-O-H=104.52 degrees. ASE FIRE relaxes the mobile atoms with
+fixed-charge forces and fmax=0.02 eV/Angstrom.
+
+`--waters` selects cases (default 1 and 2), `--build-only` writes inputs,
+`--ffield` selects a parameter file, and `--output` selects a fresh directory.
+Runs write structures, trajectories, logs and comparisons under ignored
+`validation/runs/`. The command exits nonzero if convergence or the broad
+intact-water/Ti-O <=2.6 Angstrom screen fails. This screen applies no restraint.
+
+The [minimal validation record](../validation/anatase/README.md) keeps only
+input structures and the main results. Shared numerical checks use
+`python scripts/validate.py --system anatase --verify`.

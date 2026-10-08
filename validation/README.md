@@ -45,6 +45,11 @@ Water and Zn/O also retain ASE/native FIRE relaxation on their shared monomer
 and dimer. Water contains two targeted diagnostics and a [PDF report](water/diagnostics/report.pdf).
 Historical Zn/O cluster sizes are retained in [performance benchmarks](zno/benchmarks.json).
 
+The [anatase tests](anatase/README.md) retain only input structures and a
+brief results summary for 1/2/4/8 waters with Monti2012. Calculation outputs
+belong in ignored `validation/runs/`. Run numerical checks with
+`python scripts/validate.py --system anatase --verify`.
+
 ## ASE-neighbor performance pilots
 
 ```sh

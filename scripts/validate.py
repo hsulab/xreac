@@ -70,7 +70,7 @@ def cuo_surface_case():
     return CUO_FORCE_FIELD, slab.get_chemical_symbols(), slab.positions, slab.cell.array, slab.pbc.tolist()
 
 
-def validation_cases(include_bulk=False, *, include_cuo=False):
+def validation_cases(include_bulk=False, *, include_cuo=False, include_anatase=False):
     cases = {
         "zno_" + name: ("ffield.reax.ZnOH.2010", s, np.asarray(x, dtype=float), None, False)
         for name, (s, x) in CASES.items()
@@ -102,6 +102,18 @@ def validation_cases(include_bulk=False, *, include_cuo=False):
     )
     if include_cuo:
         cases["surface_cuo_010"] = cuo_surface_case()
+    if include_anatase:
+        from anatase_water import FORCE_FIELD, geometry
+
+        for waters in (1, 2, 4, 8):
+            atoms = geometry(waters)
+            cases[f"anatase_101_{waters}water"] = (
+                FORCE_FIELD,
+                atoms.get_chemical_symbols(),
+                atoms.positions,
+                atoms.cell.array,
+                atoms.pbc.tolist(),
+            )
     if include_bulk:
         cases["periodic_bulk_zno_128"] = zno_bulk_case()
     return cases
@@ -250,6 +262,7 @@ SYSTEMS = {
     "ffield.reax.CHO.2008": "cho",
     CUO_FORCE_FIELD: "cuo",
     CHOCL_FORCE_FIELD: "cho",
+    "ffield.reax.TiOH.Monti2012": "anatase",
 }
 
 
@@ -258,6 +271,7 @@ def main():
     parser.add_argument("--verify", action="store_true", help="Also run fresh LAMMPS single points")
     parser.add_argument("--include-charged", action="store_true", help="Also validate net charge with independent QEq")
     parser.add_argument("--include-chocl", action="store_true", help="Include the bundled Hur C/H/O/Cl parameters")
+    parser.add_argument("--include-anatase", action="store_true", help="Include 1/2/4/8 waters on anatase (101)")
     parser.add_argument("--executable", help="Override lmp_mpi executable")
     parser.add_argument("--system", choices=tuple(SYSTEMS.values()), help="Validate one chemical system")
     parser.add_argument(
@@ -275,7 +289,9 @@ def main():
         parser.error("CuO validation requires --verify for a fresh LAMMPS comparison")
     args.output.mkdir(parents=True, exist_ok=False)
     all_passed = True
-    cases = validation_cases(args.include_bulk, include_cuo=include_cuo)
+    cases = validation_cases(
+        args.include_bulk, include_cuo=include_cuo, include_anatase=args.include_anatase or args.system == "anatase"
+    )
     charged = charged_validation_cases() if args.include_charged else {}
     if args.include_chocl:
         charged.update(chocl_validation_cases())
