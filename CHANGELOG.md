@@ -1,5 +1,35 @@
 # Changelog
 
+## 0.10.0
+
+Add Ti/O/H parameter sets and Monti2012 water-on-anatase validation, and
+reduce retained validation data to input structures and concise summaries.
+
+- Bundle unchanged numerical parameters from Monti2012, Kim2013 and
+  Ganeshan2020 with publisher provenance and separate CC BY-NC 4.0 terms.
+- Add 1/2/4/8-water minimisations on a 192-atom anatase (101) slab; use
+  Monti2012 by default and retain extended XYZ inputs with `.xyz` filenames.
+  All four tested coverages retain intact Ti-bound water and pass numerical
+  LAMMPS checks; no dissociation-barrier or DFT-accuracy claim is made.
+- Defer invalid bond-order mixing checks until an active correction uses
+  the value. Keep explicit errors for invalid active bonds, including short
+  Ti-H contacts with Ganeshan2020. Match LAMMPS's mixed-vdW selection and
+  near-collinear angular force regularisation for fixed-charge forces.
+- Keep only input structures and short READMEs under validation, reducing
+  retained validation size from 5.28 MiB to 0.18 MiB. Historical detailed
+  outputs remain in Git history; fresh runs go to ignored validation/runs.
+- Move supported-cluster builders/runners to examples and Pd/Ce/O provenance
+  to data. Preserve unresolved-potential and failed-reference qualifications.
+- Accept an XYZ starting path in the SN2 NEB runner, direct report outputs
+  to scratch directories, and replace archived-baseline test dependencies
+  with the existing fresh LAMMPS reference checks.
+- Package the minimal XYZ inputs in the source distribution and include
+  all three Ti/O/H files in installed-wheel smoke checks.
+
+Validation: all 246 tests pass locally, including LAMMPS references. Fresh
+shared-system checks, moved Ag/ZnO calculations, and XYZ NEB/report smoke
+checks pass. Formatting, documentation and distribution checks pass.
+
 ## 0.9.0
 
 Add lossless numerical force-field export and a reproducible Ag4/ZnO smoke test.

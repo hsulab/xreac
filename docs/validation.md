@@ -56,7 +56,7 @@ python -m pytest -q -m reference
 
 ## Results by system
 
-[Validation](../validation/README.md) retains only extended XYZ input files
+{download}`Validation <../validation/README.md>` retains only extended XYZ input files
 with `.xyz` extensions and brief READMEs for water, Zn/O, C/H/O, CuO,
 Ag/ZnO, anatase and the pending Pd/oxide examples. Parameter provenance stays
 in `data/`; calculation outputs are not retained in these system folders.

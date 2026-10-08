@@ -57,7 +57,7 @@ assert full.force_convention == "charge_response"
 The two arrays can differ because the LAMMPS conventions use `14.4` in QEq,
 `332.06371` for Coulomb energy, and `23.02` for QEq self-energy conversion.
 Since `14.4 * 23.02 != 332.06371`, the QEq solution is not exactly stationary
-for the reported energy. The retained [QEq audit](validation.md#qeq-audit)
+for the reported energy. The retained [QEq audit](validation.md#qeq-and-charged-system-checks)
 checks this using fresh LAMMPS single-point calculations.
 
 Relaxation always uses fixed-charge forces; see [optimizers](ase-relaxation.md).
